@@ -15,7 +15,8 @@ uiManager.addUI(
         defaultBody = undefined,
         defaultScriptevent = undefined,
         error = undefined,
-        id = undefined
+        id = undefined,
+        folder = undefined
     ) => {
         if (id == 1719775088275) return;
         let modalForm = new ModalForm();
@@ -92,6 +93,11 @@ uiManager.addUI(
                 : translation.getTranslation(player, "uibuilder.createui")
         );
         modalForm.show(player, false, (player, response) => {
+            if(response.canceled) {
+                if(folder) return uiManager.open(player, config.uiNames.UIBuilderFolder, folder);
+                if(id) return uiManager.open(player, config.uiNames.UIBuilderEdit, id)
+                return uiManager.open(player, config.uiNames.UIBuilderRoot)
+            }
             if (!response.formValues[0])
                 return uiManager.open(
                     player,
@@ -126,7 +132,7 @@ uiManager.addUI(
                 ui.data.layout = response.formValues[4];
                 // ui.data.simplify = response.formValues[5];
                 uiBuilder.db.overwriteDataByID(id, ui.data);
-                uiManager.open(player, config.uiNames.UIBuilderRoot);
+                uiManager.open(player, config.uiNames.UIBuilderEdit, id);
                 return;
             }
             uiBuilder.createUI(
@@ -137,9 +143,11 @@ uiManager.addUI(
                 response.formValues[4],
                 {
                     cancel: response.formValues[3],
+                    folder: folder ? folder : null
                     // simplify: response.formValues[5]
                 }
             );
+            if(folder) return uiManager.open(player, config.uiNames.UIBuilderFolder, folder);
             uiManager.open(player, config.uiNames.UIBuilderRoot);
         });
     }

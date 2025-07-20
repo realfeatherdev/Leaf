@@ -30,6 +30,12 @@ import { formatStr } from "./azaleaFormatting";
 import { EventSerializer } from "./eventSerializerLeaf";
 import scripting from "./scripting";
 import { array, bool, boolean, number, object, string } from "../lib/yup.esm";
+import configAPI from "./config/configAPI";
+import zones from "./zones";
+
+configAPI.registerProperty("MaxRootCustomizerCreations", configAPI.Types.Number, 32);
+configAPI.registerProperty("CustomizerMaxCreationsHardLimit", configAPI.Types.Number, 4096);
+configAPI.registerProperty("CustomizerPlugins", configAPI.Types.Boolean, true);
 
 class UIBuilder {
     constructor() {
@@ -41,6 +47,15 @@ class UIBuilder {
             config.tableNames.uis + "~new",
             SegmentedStoragePrismarine
         );
+        this.altdb = prismarineDb.customStorage(
+            "CUSTOMIZEREXTRAS",
+            SegmentedStoragePrismarine
+        );
+        this.actionFormToggles = [
+            ["Sell Button: Force Allow Sell All", "t1"],
+            ["Legacy Toggle: Disable Buy+Sell Hybrid Buttons", "lt1"],
+            ["Enable Template Mode", "t2"]
+        ];
         this.initializeInvites();
         this.initializeDatabases();
         // this.initializeStates();
@@ -125,6 +140,7 @@ class UIBuilder {
             this.fixBtnIds();
             this.initializePluginSystem();
             this.initializeScripts();
+            this.transitionZones();
         });
         this.schemas = new Map();
         this.ui_type_meta = new Map();
@@ -176,7 +192,7 @@ class UIBuilder {
             name: "Action Form",
             handleWarnings: (data) => {
                 let logs = [];
-                if (this.db.findFirst({ scriptevent: data.scriptevent })) {
+                if (this.db.findFirst({ type: 0, scriptevent: data.scriptevent })) {
                     logs.push(
                         `§eClashing Action Form scriptevent§7: §f${data.scriptevent}`
                     );
@@ -187,6 +203,25 @@ class UIBuilder {
     }
     registerMeta(type, meta) {
         this.ui_type_meta.set(type, meta);
+    }
+    createIsland(uniqueID) {
+        if(this.db.findFirst({type: 15, uniqueID})) return;
+        this.db.insertDocument({
+            type: 15,
+            uniqueID
+        })
+    }
+    transitionZones() {
+        zones.zonesDB.waitLoad().then(()=>{
+            let zonesList = zones.zonesDB.findDocuments({type: "ZONE"});
+            for(const zone of zonesList) {
+                if(zone.data.transitioned || this.db.findFirst({type: 14, name: zone.data.name})) continue;
+                zone.data.transitioned = true;
+                zones.zonesDB.overwriteDataByID(zone.id, zone.data)
+                this.db.data.push({...zone, data: {...zone.data, type: 14}})
+            }
+            this.db.save();
+        })
     }
     initializeScripts() {
         for (const doc of this.db.findDocuments({ type: 8 })) {
@@ -204,6 +239,9 @@ class UIBuilder {
         // system.runInterval(()=>{
         //     event.send("key2", {message: "MEOW MRRP"})
         // }, 20)
+    }
+    pluginCall() {
+        if(!configAPI.getProperty("CustomizerPlugins")) return {error: true, errorCode: "PLUGINS_DISABLED_ERROR"};
     }
     registerSchema(type, schema) {
         this.schemas.set(type, schema);
@@ -438,6 +476,7 @@ class UIBuilder {
 
         return output;
     }
+    
     createWarp(name, loc, rot, dimension) {
         this.db.insertDocument({
             type: 12,
@@ -849,7 +888,7 @@ class UIBuilder {
                     : this.db.findFirst({
                           scriptevent: e.message.replace(/\[.*?\]/g, "").trim(),
                       });
-                if (ui && ui.data.locked) return;
+                // if (ui && ui.data.locked) return;
                 let args = [];
                 let argsRaw = [...e.message.matchAll(/\[(.*?)\]/g)].map(
                     (_) => _[1]
@@ -862,7 +901,8 @@ class UIBuilder {
         });
 
         system.runInterval(() => {
-            for (const ui of this.db.data) {
+            return;
+            for (const ui of this.db.findDocuments({type: 0})) {
                 if (!ui.data.scriptevent) continue;
                 if (!ui.data.useTagOpener) continue;
                 for (const player of world.getPlayers()) {
@@ -1166,7 +1206,8 @@ class UIBuilder {
     }
     open(doc, player, ...args) {
         if (doc && (doc.data.type === 0 || doc.data.type === 1)) {
-            normalForm.open(player, doc.data, ...args);
+            // world.sendMessage("A")
+            normalForm.open(player, doc.data.manualDeploy && doc.data.copies && doc.data.copies.pub && !prismarineDb.permissions.hasPermission(player, "uibuilder.actionform.viewundeployedcopies") ? doc.data.copies.pub : doc.data, ...args);
         }
         if (doc && doc.data.type == 3) {
             modalForm.open(player, doc, ...args);
@@ -1299,11 +1340,20 @@ class UIBuilder {
         }
         return uis;
     }
-
+    createContentStorageDump(label, uniqueID, requiredTag = "", disabled = false) {
+        this.db.insertDocument({
+            type: 13,
+            label,
+            uniqueID,
+            requiredTag,
+            disabled,
+            definitions: [],
+        })
+    }
     getAllUIs() {
         let uis = [];
         for (const ui of this.db.data) {
-            if ([0, 3, 4, 6, 7, 8, 9, 10, 11, 12].includes(ui.data.type))
+            if ([0, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].includes(ui.data.type))
                 uis.push(ui);
         }
         return uis;
@@ -1395,7 +1445,7 @@ class UIBuilder {
                     internalID: versionData.versionInfo.versionInternalID,
                 })
             )
-                return console.warn("?????????");
+                return;
             let doc2 = this.db.findFirst({
                 scriptevent: doc.scriptevent,
                 internal: true,
@@ -1417,7 +1467,7 @@ class UIBuilder {
                     this.db.overwriteDataByID(doc2.id, data);
             } else {
                 console.warn(data.scriptevent)
-                console.warn("INSERTING")
+                // console.warn("INSERTING")
                 this.db.insertDocument(data);
             }
     
@@ -1874,24 +1924,30 @@ class UIBuilder {
         });
     }
 
-    createFolder(name) {
-        let doc = this.db.findFirst({ name, type: 2 });
+    createFolder(name, folder = null) {
+        let doc = this.db.data.find(_=>{
+            if(_.data.type != 2) return false;
+            let folder2 = _.data.folder ? this.db.getByID(_.data.folder) ? _.data.folder : null : null;
+            if(folder == folder2 && _.data.name == name) return true;
+            return false;
+        });
         if (doc) return doc.id;
         return this.db.insertDocument({
             type: 2,
             name,
             isBox: false,
             color: "",
+            folder: this.db.getByID(folder) ? folder : null
         });
     }
 }
 
-export let scriptEnvTypes = [
-    "ChestUI",
-    "ActionUI",
-    "ActionUI/Button",
-    "ModalUI",
-    "ModalUI/Control",
-];
+// export let scriptEnvTypes = [
+//     "ChestUI",
+//     "ActionUI",
+//     "ActionUI/Button",
+//     "ModalUI",
+//     "ModalUI/Control",
+// ];
 
 export default new UIBuilder();

@@ -24,16 +24,16 @@ commandManager.addSubcommand(
     "s",
     { description: "become survival" },
     ({ msg }) => {
-        if (
-            !prismarineDb.permissions.hasPermission(
-                msg.sender,
-                "gamemodes.survival"
-            )
-        )
-            return msg.sender.error(
-                "Unkown Command, check if you have perms to use it."
-            );
-        msg.sender.setGameMode(GameMode.survival);
+        // if (
+        //     !prismarineDb.permissions.hasPermission(
+        //         msg.sender,
+        //         "gamemodes.survival"
+        //     )
+        // )
+        //     return msg.sender.error(
+        //         "Unkown Command, check if you have perms to use it."
+        //     );
+        msg.sender.setGameMode(GameMode.Survival);
         return msg.sender.info(`§bGamemode changed to §aSurvival`);
     }
 );
@@ -42,16 +42,16 @@ commandManager.addSubcommand(
     "c",
     { description: "become creative" },
     ({ msg }) => {
-        if (
-            !prismarineDb.permissions.hasPermission(
-                msg.sender,
-                "gamemodes.creative"
-            )
-        )
-            return msg.sender.error(
-                "Unkown Command, check if you have perms to use it."
-            );
-        msg.sender.setGameMode(GameMode.creative);
+        // if (
+        //     !prismarineDb.permissions.hasPermission(
+        //         msg.sender,
+        //         "gamemodes.creative"
+        //     )
+        // )
+        //     return msg.sender.error(
+        //         "Unkown Command, check if you have perms to use it."
+        //     );
+        msg.sender.setGameMode(GameMode.Creative);
         return msg.sender.info(`§bGamemode changed to §aCreative`);
     }
 );
@@ -60,16 +60,16 @@ commandManager.addSubcommand(
     "sp",
     { description: "become spectator" },
     ({ msg }) => {
-        if (
-            !prismarineDb.permissions.hasPermission(
-                msg.sender,
-                "gamemodes.spectator"
-            )
-        )
-            return msg.sender.error(
-                "Unkown Command, check if you have perms to use it."
-            );
-        msg.sender.setGameMode(GameMode.spectator);
+        // if (
+        //     !prismarineDb.permissions.hasPermission(
+        //         msg.sender,
+        //         "gamemodes.spectator"
+        //     )
+        // )
+        //     return msg.sender.error(
+        //         "Unkown Command, check if you have perms to use it."
+        //     );
+        msg.sender.setGameMode(GameMode.Spectator);
         return msg.sender.info(`§bGamemode changed to §aSpectator`);
     }
 );
@@ -87,7 +87,7 @@ commandManager.addSubcommand(
             return msg.sender.error(
                 "Unkown Command, check if you have perms to use it."
             );
-        msg.sender.setGameMode(GameMode.adventure);
+        msg.sender.setGameMode(GameMode.Adventure);
         return msg.sender.info(`§bGamemode changed to §aAdventure`);
     }
 );

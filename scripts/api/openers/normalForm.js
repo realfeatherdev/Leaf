@@ -25,6 +25,80 @@ import uiBuilder from "../uiBuilder";
 import scripting from "../scripting";
 import homes from "../homes";
 import emojis from "../emojis";
+import { chunk } from "../iconViewer/underscore";
+import { worldTags } from "../../worldTags";
+import { handleActions } from "../../uis/CustomCommandsV2/handler";
+
+function replacePlaceholders(obj, i) {
+    if (typeof obj === "string") {
+        return obj.replace(/<#>/g, i); // ✨ Replace all!
+    } else if (Array.isArray(obj)) {
+        return obj.map((item) => replacePlaceholders(item, i)); // 🌟 Recurse in arrays!
+    } else if (obj && typeof obj === "object") {
+        const newObj = {};
+        for (const key in obj) {
+            newObj[key] = replacePlaceholders(obj[key], i); // 💫 Recurse in objects!
+        }
+        return newObj;
+    } else {
+        return obj; // 💤 Leave other types alone~
+    }
+}
+function smartChunkWithPagination({
+    items,
+    isCountedItem, // item => boolean (whether it counts toward chunk size)
+    chunkSize,
+    startIndex = 0,
+    endIndex = items.length - 1,
+    includeOutside = "both", // "before" | "after" | "both" | "none"
+}) {
+    const chunks = [];
+
+    const before = items.slice(0, startIndex);
+    const range = items.slice(startIndex, endIndex + 1);
+    const after = items.slice(endIndex + 1);
+
+    let currentChunk = [];
+    let count = 0;
+
+    for (const item of range) {
+        if (isCountedItem(item)) {
+            if (count >= chunkSize) {
+                chunks.push(currentChunk);
+                currentChunk = [];
+                count = 0;
+            }
+            currentChunk.push(item);
+            count++;
+        } else {
+            currentChunk.push(item);
+        }
+    }
+
+    if (currentChunk.length > 0) {
+        chunks.push(currentChunk);
+    }
+
+    const result = [];
+
+    result.push(...chunks);
+
+    return {
+        chunks: result.map((_) => {
+            // let res = []
+            // if (includeOutside === "after" || includeOutside === "both") {
+            //     res.push(...after);
+            // }
+            // res.push(..._)
+            // if (includeOutside === "before" || includeOutside === "both") {
+            //     res.push(...before);
+            // }
+            return _;
+        }),
+        after,
+        before,
+    };
+}
 function isJuneOrEarlyJuly() {
     const now = new Date();
     const m = now.getMonth();
@@ -39,13 +113,25 @@ class MetaHandler {
 
     registerDefaultHandlers() {
         this.registerHandler("#INVITES", this.handleInvites.bind(this));
-        this.registerHandler("#CLAN_APPLICATIONS", this.clanApplicationsHandler.bind(this));
-        this.registerHandler("#ADV_PLAYER_LIST", this.handleAdvancedPlayerList.bind(this));
+        this.registerHandler(
+            "#CLAN_APPLICATIONS",
+            this.clanApplicationsHandler.bind(this)
+        );
+        this.registerHandler(
+            "#ADV_PLAYER_LIST",
+            this.handleAdvancedPlayerList.bind(this)
+        );
         // this.registerHandler("#", this.handleAdvancedPlayerList.bind(this));
         this.registerHandler("#WARP_GROUP", this.handleWarpGroup.bind(this));
         this.registerHandler("#PLAYER_LIST", this.handlePlayerList.bind(this));
-        this.registerHandler("#CLAN_MEMBERS", this.handleClanMembers.bind(this));
-        this.registerHandler("#PUBLIC_CLANS", this.handlePublicClans.bind(this));
+        this.registerHandler(
+            "#CLAN_MEMBERS",
+            this.handleClanMembers.bind(this)
+        );
+        this.registerHandler(
+            "#PUBLIC_CLANS",
+            this.handlePublicClans.bind(this)
+        );
         this.registerHandler(
             "#PDB_FIND_ALL:",
             this.handlePdbFindAll.bind(this)
@@ -72,18 +158,21 @@ class MetaHandler {
                     context.getIcon(button.iconID, button.iconOverrides, player)
                 ),
                 action(player) {
-                    for (const action of button.actions) {
-                        let actionNew = context.parseArgs(
-                            formatStr(action, player, {
-                                home_name: _.data.name,
-                                home_name_original: homes.get(_.id)?.data?.name,
-                                home_owner: homeOwner.name,
-                            }),
-                            ...args
-                        );
+                    handleActions(player, button.actions, false, {
+                        home_name: _.data.name,
+                        home_name_original: homes.get(_.id)?.data?.name,
+                        home_owner: homeOwner.name,
+                    }, {
+                        extraFn: ()=>context.parseArgs(...args)
+                    })
+                    // for (const action of button.actions) {
+                    //     let actionNew = context.parseArgs(
+                    //         // formatStr(action, player, ),
+                    //         ...args
+                    //     );
 
-                        actionParser.runAction(player, actionNew);
-                    }
+                    //     actionParser.runAction(player, actionNew);
+                    // }
                 },
             };
         });
@@ -172,12 +261,14 @@ class MetaHandler {
         const { player, button, data, args, currView, unprocessedButtonText } =
             context;
         let clan = OpenClanAPI.getClan(player);
-        if(!clan) return;
-        if(!clan.data.isPublic) return;
+        if (!clan) return;
+        if (!clan.data.isPublic) return;
         return OpenClanAPI.getApplications(clan.id).map((application) => ({
             text: context.parseArgs(
                 formatStr(unprocessedButtonText, player, {
-                    from: playerStorage.getPlayerByID(application.playerID) ? playerStorage.getPlayerByID(application.playerID).name : "Unknown Player"
+                    from: playerStorage.getPlayerByID(application.playerID)
+                        ? playerStorage.getPlayerByID(application.playerID).name
+                        : "Unknown Player",
                 }),
                 ...args
             ),
@@ -185,53 +276,92 @@ class MetaHandler {
             action: (player) => {
                 let actionForm = new ActionForm();
                 let text = [];
-                for(const answer of application.answers) {
-                    text.push(`§b${answer[0]} §r§7> §r§f${answer[1] ? answer[1] : "[ No Answer ]"}`)
+                for (const answer of application.answers) {
+                    text.push(
+                        `§b${answer[0]} §r§7> §r§f${
+                            answer[1] ? answer[1] : "[ No Answer ]"
+                        }`
+                    );
                 }
-                actionForm.body(text.join('\n§r'))
+                actionForm.body(text.join("\n§r"));
                 actionForm.divider();
-                actionForm.button(`§aAccept\n§7[ Click to Accept ]`, `textures/azalea_icons/accept`, (player)=>{
-                    OpenClanAPI.acceptApplication(clan.id, application.playerID)
-                    player.success("Accepted Application")
-                })
-                actionForm.button(`§cDeny\n§7[ Click to Deny ]`, `textures/azalea_icons/deny`, (player)=>{
-                    OpenClanAPI.denyApplication(clan.id, application.playerID)
-                    player.success("Accepted Application")
-                })
-                actionForm.show(player, false, ()=>{})
+                actionForm.button(
+                    `§aAccept\n§7[ Click to Accept ]`,
+                    `textures/azalea_icons/accept`,
+                    (player) => {
+                        OpenClanAPI.acceptApplication(
+                            clan.id,
+                            application.playerID
+                        );
+                        player.success("Accepted Application");
+                    }
+                );
+                actionForm.button(
+                    `§cDeny\n§7[ Click to Deny ]`,
+                    `textures/azalea_icons/deny`,
+                    (player) => {
+                        OpenClanAPI.denyApplication(
+                            clan.id,
+                            application.playerID
+                        );
+                        player.success("Accepted Application");
+                    }
+                );
+                actionForm.show(player, false, () => {});
             },
             currView,
         }));
     }
 
-
     handlePublicClans(meta, context) {
         //getPublicClans
         const { player, button, data, args, currView, unprocessedButtonText } =
-        context;
+            context;
         const clans = OpenClanAPI.getPublicClans();
         return clans.map((clan) => ({
             text: context.parseArgs(
                 formatStr(unprocessedButtonText, player, {
                     clan_name: clan.data.name,
-                    clan_owner: playerStorage.getPlayerByID(clan.data.owner) ? playerStorage.getPlayerByID(clan.data.owner).name : "Unknown Owner",
-                    clan_id: clan.id
+                    clan_owner: playerStorage.getPlayerByID(clan.data.owner)
+                        ? playerStorage.getPlayerByID(clan.data.owner).name
+                        : "Unknown Owner",
+                    clan_id: clan.id,
                 }),
                 ...args
             ),
             icon: clan.data.icon ? icons.resolve(clan.data.icon) : null,
             action: (player) => {
                 if (button.disabled) return;
-                for(const action of button.actions) {
-                    actionParser.runAction(player, context.parseArgs(
-                        formatStr(action, player, {
-                            clan_name: clan.data.name,
-                            clan_owner: playerStorage.getPlayerByID(clan.data.owner) ? playerStorage.getPlayerByID(clan.data.owner).name : "Unknown Owner",
-                            clan_id: clan.id
-                        }),
-                        ...args
-                    ))
-                }
+                handleActions(player, button.actions, false, {
+                    clan_name: clan.data.name,
+                                clan_owner: playerStorage.getPlayerByID(
+                                    clan.data.owner
+                                )
+                                    ? playerStorage.getPlayerByID(
+                                          clan.data.owner
+                                      ).name
+                                    : "Unknown Owner",
+                                clan_id: clan.id,
+                }, {extraFn: ()=>context.parseArgs(...args)})
+                // for (const action of button.actions) {
+                //     actionParser.runAction(
+                //         player,
+                //         context.parseArgs(
+                //             formatStr(action, player, {
+                //                 clan_name: clan.data.name,
+                //                 clan_owner: playerStorage.getPlayerByID(
+                //                     clan.data.owner
+                //                 )
+                //                     ? playerStorage.getPlayerByID(
+                //                           clan.data.owner
+                //                       ).name
+                //                     : "Unknown Owner",
+                //                 clan_id: clan.id,
+                //             }),
+                //             ...args
+                //         )
+                //     );
+                // }
             },
             currView,
         }));
@@ -247,7 +377,12 @@ class MetaHandler {
                     !button.requiredTag ||
                     context.playerIsAllowed(
                         player,
-                        formatStr(button.requiredTag, player2, {}, {player2: player})
+                        formatStr(
+                            button.requiredTag,
+                            player2,
+                            {},
+                            { player2: player }
+                        )
                     )
             )
             .map((player2) => ({
@@ -279,13 +414,13 @@ class MetaHandler {
         const { player, button, data, args, currView, unprocessedButtonText } =
             context;
         let clan = OpenClanAPI.getClanID(player);
-        if(!clan) return;
+        if (!clan) return;
         return OpenClanAPI.getClanMembers(clan)
-            .filter(_=>{
-                return playerStorage.getPlayerByID(_)
+            .filter((_) => {
+                return playerStorage.getPlayerByID(_);
             })
-            .map(player2=>{
-                return playerStorage.getPlayerByID(player2)
+            .map((player2) => {
+                return playerStorage.getPlayerByID(player2);
             })
             .map((player2) => ({
                 text: context.parseArgs(
@@ -315,22 +450,35 @@ class MetaHandler {
     async handleAdvancedPlayerList(meta, context) {
         let config = {};
         try {
-            config = JSON.parse(meta.split(' ').slice(1).join(' '))
+            config = JSON.parse(meta.split(" ").slice(1).join(" "));
         } catch {}
         const { player, button, data, args, currView, unprocessedButtonText } =
             context;
         return world
             .getPlayers()
-            .filter(player2=>{
-                if(config.playerFilter && !context.playerIsAllowed(player, formatStr(config.playerFilter, player2))) return false;
-                if(config.excludeSelf && player2.id == player.id) return false;
+            .filter((player2) => {
+                if (
+                    config.playerFilter &&
+                    !context.playerIsAllowed(
+                        player,
+                        formatStr(config.playerFilter, player2)
+                    )
+                )
+                    return false;
+                if (config.excludeSelf && player2.id == player.id) return false;
+                return true;
             })
             .filter(
                 (player2) =>
                     !button.requiredTag ||
                     context.playerIsAllowed(
                         player,
-                        formatStr(button.requiredTag, player2, {}, {player2: player})
+                        formatStr(
+                            button.requiredTag,
+                            player2,
+                            {},
+                            { player2: player }
+                        )
                     )
             )
             .map((player2) => ({
@@ -419,7 +567,13 @@ class MetaHandler {
 
         for (const [key, inv] of Object.entries(uiBuilder.invites)) {
             if (inv.invite_name != invite_nsp) continue;
-            if(!inv.sender || !inv.sender.isValid || !inv.receiver || !inv.receiver.isValid) continue;
+            if (
+                !inv.sender ||
+                !inv.sender.isValid ||
+                !inv.receiver ||
+                !inv.receiver.isValid
+            )
+                continue;
             if (inv.sender.id == player.id) outgoing.push([key, inv]);
             if (inv.receiver.id == player.id) incoming.push([key, inv]);
         }
@@ -507,48 +661,51 @@ class MetaHandler {
 
     handlePlayerListAction(player, player2, button, data, args) {
         if (button.disabled) return;
-        for (const action of button.actions) {
-            const action2 = action
-                .replaceAll("<playername>", player2.name)
-                .replaceAll("<this>", data.name);
+        handleActions(player2, button.actions, false, {}, {player2: player, swap: true})
+        // for (const action of button.actions) {
+        //     const action2 = action
+        //         .replaceAll("<playername>", player2.name)
+        //         .replaceAll("<this>", data.name);
 
-            for (let i = 0; i < args.length; i++) {
-                action2 = action2.replaceAll(`<$${i + 1}>`, args[i]);
-            }
+        //     for (let i = 0; i < args.length; i++) {
+        //         action2 = action2.replaceAll(`<$${i + 1}>`, args[i]);
+        //     }
 
-            const result = actionParser.runAction(
-                player,
-                formatStr(action2, player2, {}, {player2: player}).replaceAll(
-                    "<playerclicked>",
-                    player.name
-                )
-            );
-            if (!result && button.conditionalActions) break;
-        }
+        //     const result = actionParser.runAction(
+        //         player,
+        //         formatStr(action2, player2, {}, { player2: player }).replaceAll(
+        //             "<playerclicked>",
+        //             player.name
+        //         )
+        //     );
+        //     if (!result && button.conditionalActions) break;
+        // }
     }
 
     handleClanMemberAction(player, player2, button, data, args) {
         if (button.disabled) return;
-        for (const action of button.actions) {
-            const action2 = action
-                .replaceAll("<playername>", player2.name)
-                .replaceAll("<this>", data.name);
+        handleActions(player, button.actions, false, {}, {player2, swap: true, useOfflineMode: true})
+        // for (const action of button.actions) {
+        //     const action2 = action
+        //         .replaceAll("<playername>", player2.name)
+        //         .replaceAll("<this>", data.name);
 
-            for (let i = 0; i < args.length; i++) {
-                action2 = action2.replaceAll(`<$${i + 1}>`, args[i]);
-            }
+        //     for (let i = 0; i < args.length; i++) {
+        //         action2 = action2.replaceAll(`<$${i + 1}>`, args[i]);
+        //     }
 
-            const result = actionParser.runAction(
-                player,
-                formatStr(action2, player2, {}, {player2: player, useOfflineMode: true}).replaceAll(
-                    "<playerclicked>",
-                    player.name
-                )
-            );
-            if (!result && button.conditionalActions) break;
-        }
+        //     const result = actionParser.runAction(
+        //         player,
+        //         formatStr(
+        //             action2,
+        //             player2,
+        //             {},
+        //             { player2: player, useOfflineMode: true }
+        //         ).replaceAll("<playerclicked>", player.name)
+        //     );
+        //     if (!result && button.conditionalActions) break;
+        // }
     }
-
 
     handlePdbAction(player, button, data, args, extra) {
         if (button.disabled) return;
@@ -581,11 +738,20 @@ class ButtonProcessor {
 
     async processButton(button, context) {
         const { player, data, args, currView } = context;
-
+        if (button.type == "separator") return null;
+        if (button.type == "pagstart") return null;
+        if (button.type == "pagend") return null;
         if (
             !button.meta &&
             button.requiredTag &&
-            !context.playerIsAllowed(player, button.requiredTag, data)
+            !context.playerIsAllowed(
+                player,
+                formatStr(
+                    context.parseArgs(button.requiredTag, ...args),
+                    player
+                ),
+                data
+            )
         )
             return;
 
@@ -626,6 +792,87 @@ class ButtonProcessor {
                 ),
             });
             if (metaButtons) return metaButtons;
+        }
+
+        if (button.type == "poll") {
+            let pollData = uiBuilder.altdb.findFirst({
+                type: "PLAYER_VOTE_DATA",
+                player: playerStorage.getID(player),
+                pollID: button.pollID,
+            });
+            let pollText = [`Poll: ${button.title}`];
+            if (button.disabled) {
+                pollText[0] = `§c[ENDED] Poll: ${button.title}`;
+                for (let i = 0; i < button.options.length; i++) {
+                    let option = button.options[i];
+                    let votes = uiBuilder.altdb.findDocuments({
+                        type: "PLAYER_VOTE_DATA",
+                        option: i,
+                        pollID: button.pollID,
+                    });
+                    pollText.push(
+                        `§b${option} §7>> §r${votes.length} vote${
+                            votes.length != 1 ? "s" : ""
+                        }`
+                    );
+                }
+            }
+            let btns2 = [
+                {
+                    type: "label",
+                    text: pollText.join("\n§r"),
+                    currView,
+                },
+            ];
+            if (!button.disabled) {
+                if (pollData) {
+                    for (let i = 0; i < button.options.length; i++) {
+                        let option = button.options[i];
+                        let votes = uiBuilder.altdb.findDocuments({
+                            type: "PLAYER_VOTE_DATA",
+                            option: i,
+                            pollID: button.pollID,
+                        });
+                        btns2.push({
+                            type: "button",
+                            text: `§e${option}\n§r§7${votes.length} vote${
+                                votes.length != 1 ? "s" : ""
+                            }`,
+                            action() {
+                                player.error(
+                                    `You already voted for this poll!`
+                                );
+                                normalForm.open(player, data, ...args);
+                            },
+                            currView,
+                        });
+                    }
+                } else {
+                    for (let i = 0; i < button.options.length; i++) {
+                        let option = button.options[i];
+                        btns2.push({
+                            type: "button",
+                            text: `§b${option}${
+                                button.optionSubtext
+                                    ? `\n§r§7${button.optionSubtext}`
+                                    : ``
+                            }`,
+                            action() {
+                                player.success(`Voted!`);
+                                uiBuilder.altdb.insertDocument({
+                                    type: "PLAYER_VOTE_DATA",
+                                    player: playerStorage.getID(player),
+                                    option: i,
+                                    pollID: button.pollID,
+                                });
+                                normalForm.open(player, data, ...args);
+                            },
+                            currView,
+                        });
+                    }
+                }
+            }
+            return btns2;
         }
 
         // Handle regular buttons
@@ -872,6 +1119,37 @@ class ButtonProcessor {
     handleButtonAction(player, button, data, args) {
         if (button.disabled) return;
 
+        let disableBuySellHybrid =
+            data.toggles && data.toggles.lt1 ? true : false;
+        if (
+            button.buyButtonEnabled &&
+            button.sellButtonEnabled &&
+            !disableBuySellHybrid
+        ) {
+            let actionForm2 = new ActionForm();
+            actionForm2.title("Buy or Sell");
+            actionForm2.button(
+                `§6Sell\n§7Sell your items`,
+                `textures/azalea_icons/other/coins`,
+                (player) => {
+                    return this.handleSellButton(player, button, data, args);
+                }
+            );
+            actionForm2.button(
+                `§aBuy\n§7Buy some items`,
+                `textures/azalea_icons/other/coins`,
+                (player) => {
+                    return this.handleBuyButton(player, button, data, args);
+                }
+            );
+            actionForm2.show(player, false, (player, response) => {
+                if (response.canceled) {
+                    return normalForm.open(player, data, ...args);
+                }
+            });
+            return;
+        }
+
         if (button.buyButtonEnabled) {
             return this.handleBuyButton(player, button, data, args);
         }
@@ -884,17 +1162,18 @@ class ButtonProcessor {
             return actionParser.runAction(player, button.action);
         }
 
-        for (const action of button.actions) {
-            let action2 = action.replaceAll("<this>", data.name);
-            for (let i = 0; i < args.length; i++) {
-                action2 = action2.replaceAll(`<$${i + 1}>`, args[i]);
-            }
-            const result = actionParser.runAction(
-                player,
-                formatStr(action2, player)
-            );
-            if (!result && button.conditionalActions) break;
-        }
+        handleActions(player, button.actions, false)
+        // for (const action of button.actions) {
+        //     let action2 = action.replaceAll("<this>", data.name);
+        //     for (let i = 0; i < args.length; i++) {
+        //         action2 = action2.replaceAll(`<$${i + 1}>`, args[i]);
+        //     }
+        //     const result = actionParser.runAction(
+        //         player,
+        //         formatStr(action2, player)
+        //     );
+        //     if (!result && button.conditionalActions) break;
+        // }
     }
 
     handleBuyButton(player, button, data, args) {
@@ -929,6 +1208,7 @@ class ButtonProcessor {
             );
         } else {
             player.playSound("random.glass");
+            player.error(`You dont have enough to buy this`);
             normalForm.open(player, data, ...args);
         }
     }
@@ -940,6 +1220,12 @@ class ButtonProcessor {
             ? button.sellButtonItem
             : `minecraft:${button.sellButtonItem}`;
         const currItemCount = getItemCount(inventory, item);
+        const allowSellingFullInventory =
+            data.toggles && data.toggles.t1
+                ? true
+                : button.allowSellAll
+                ? true
+                : false;
 
         if (currItemCount >= itemCount) {
             this.showSellModal(
@@ -950,7 +1236,8 @@ class ButtonProcessor {
                 itemCount,
                 currItemCount,
                 inventory,
-                item
+                item,
+                allowSellingFullInventory
             );
         } else {
             player.playSound("random.glass");
@@ -967,7 +1254,8 @@ class ButtonProcessor {
         itemCount,
         currItemCount,
         inventory,
-        item
+        item,
+        sellAll = false
     ) {
         const modal = new ModalForm();
         let max = button.sellButtonItemCount;
@@ -980,7 +1268,7 @@ class ButtonProcessor {
             max += button.sellButtonItemCount;
             iter++;
         }
-
+        if (sellAll) max = currItemCount;
         modal.slider(
             `Sell Count`,
             button.sellButtonItemCount,
@@ -1064,17 +1352,18 @@ class ButtonProcessor {
                 const inventory = player.getComponent("inventory");
                 inventory.container.addItem(item);
             } else {
-                for (const action of button.actions) {
-                    const action2 = action.replaceAll("<this>", data.name);
-                    for (let i = 0; i < args.length; i++) {
-                        action2 = action2.replaceAll(`<$${i + 1}>`, args[i]);
-                    }
-                    const result = actionParser.runAction(
-                        player,
-                        formatStr(action2, player)
-                    );
-                    if (!result && button.conditionalActions) break;
-                }
+                handleActions(player, button.actions, false)
+                // for (const action of button.actions) {
+                //     const action2 = action.replaceAll("<this>", data.name);
+                //     for (let i = 0; i < args.length; i++) {
+                //         action2 = action2.replaceAll(`<$${i + 1}>`, args[i]);
+                //     }
+                //     const result = actionParser.runAction(
+                //         player,
+                //         formatStr(action2, player)
+                //     );
+                //     if (!result && button.conditionalActions) break;
+                // }
             }
         } catch (e) {
             // console.warn(e);
@@ -1099,41 +1388,56 @@ class NormalFormOpener {
     }
 
     async open(player, data2, ...args) {
-        let data = JSON.parse(JSON.stringify(data2))
-        if(isJuneOrEarlyJuly() && data.scriptevent && data.scriptevent.startsWith('nutui/') && data.scriptevent != "nutui/warps") {
-            data.name = `${emojis.pride_heart} ${data2.name.replace(/§[a-zA-Z0-9]/g, '')} ${emojis.pride_heart}`
-            // data.theme = 53
-        }
-        if (data.scriptDeps?.length) {
-            const missing = data.scriptDeps.filter(
-                (dep) => !scripting.getActiveScriptIDs().includes(dep)
-            );
-            if (missing.length) {
-                return player.error(
-                    `This UI is missing dependency(s)! §r§f${missing.join(
-                        "§r§7, §r§f"
-                    )}`
-                );
+        try {
+            let data = JSON.parse(JSON.stringify(data2));
+            if (
+                isJuneOrEarlyJuly() &&
+                data.scriptevent &&
+                data.scriptevent.startsWith("nutui/") &&
+                data.scriptevent != "nutui/warps"
+            ) {
+                data.name = `${emojis.pride_heart} ${data2.name.replace(
+                    /§[a-zA-Z0-9]/g,
+                    ""
+                )} ${emojis.pride_heart}`;
+                // data.theme = 53
             }
-        }
+            if (data.scriptDeps?.length) {
+                const missing = data.scriptDeps.filter(
+                    (dep) => !scripting.getActiveScriptIDs().includes(dep)
+                );
+                if (missing.length) {
+                    return player.error(
+                        `This UI is missing dependency(s)! §r§f${missing.join(
+                            "§r§7, §r§f"
+                        )}`
+                    );
+                }
+            }
 
-        if (
-            !data.clog_allow &&
-            combatMap.has(player.id) &&
-            configAPI.getProperty("CLog") &&
-            configAPI.getProperty("CLogDisableUIs") &&
-            !prismarineDb.permissions.hasPermission(player, "combatlog.bypass")
-        ) {
-            player.playSound("random.glass");
-            player.error("You can't use this UI in combat");
-            return;
-        }
+            if (
+                !data.clog_allow &&
+                combatMap.has(player.id) &&
+                configAPI.getProperty("CLog") &&
+                configAPI.getProperty("CLogDisableUIs") &&
+                !prismarineDb.permissions.hasPermission(
+                    player,
+                    "combatlog.bypass"
+                )
+            ) {
+                player.playSound("random.glass");
+                player.error("You can't use this UI in combat");
+                return;
+            }
 
-        if (data.layout == 5) {
-            return this.openModalForm(player, data, ...args);
-        }
+            if (data.layout == 5) {
+                return this.openModalForm(player, data, ...args);
+            }
 
-        return this.openActionForm(player, data, ...args);
+            return this.openActionForm(player, data, ...args);
+        } catch (e) {
+            player.error(`${e}`);
+        }
     }
 
     async openModalForm(player, data, ...args) {
@@ -1164,8 +1468,30 @@ class NormalFormOpener {
         });
     }
 
-    async openActionForm(player, data, ...args) {
+    async openActionForm(player, data2, ...args) {
         const form = new ActionForm();
+        let data = JSON.parse(JSON.stringify(data2));
+        data.buttons = data.buttons.flatMap((btn) => {
+            if (btn.type && btn.type != "button") return [btn];
+
+            if (!btn.template || !btn.template.on) return [btn];
+
+            try {
+                let { start, end } = btn.template;
+
+                const step = start < end ? 1 : -1;
+                let newBtns = [];
+                for (let i = start; step > 0 ? i <= end : i >= end; i += step) {
+                    let btn2 = JSON.parse(JSON.stringify(btn));
+                    newBtns.push(
+                        replacePlaceholders({ ...btn2, template: null }, i)
+                    );
+                }
+                return newBtns;
+            } catch {
+                return [btn];
+            }
+        });
         const pre = this.getFormPrefix(data);
         const themID = data.theme || 0;
         const themString =
@@ -1180,15 +1506,323 @@ class NormalFormOpener {
         );
         if (data.body)
             form.body(formatStr(this.parseArgs(data.body, ...args), player));
-
-        const buttons = await this.getButtons(player, data, ...args);
-        for (const button of buttons) {
+        // let items = data.buttons.filter(_=>_.type != "pagstart" && _.type != "pagend")
+        let items = data.buttons;
+        let endIndex = data.buttons.findIndex((_) => _.type == "pagend");
+        if (endIndex == -1) endIndex = items.length - 1;
+        let startIndex = Math.max(
+            0,
+            data.buttons.findIndex((_) => _.type == "pagstart")
+        );
+        if (startIndex == -1) startIndex = 0;
+        // console.warn(`${endIndex > startIndex ? endIndex : items.length - 1}`)
+        // world.sendMessage(`Start/End Index: ${startIndex}-${endIndex}`)
+        let includeLeft =
+            data.buttons.findIndex((_) => _.type == "pagstart") > -1
+                ? true
+                : false;
+        let includeRight =
+            data.buttons.findIndex((_) => _.type == "pagend") > -1
+                ? true
+                : false;
+        let pb3 = smartChunkWithPagination({
+            items: items,
+            chunkSize: data.pagLength ? data.pagLength : 1,
+            startIndex: endIndex > startIndex ? startIndex : 0,
+            endIndex: Math.max(
+                endIndex > startIndex && includeRight
+                    ? endIndex
+                    : items.length - 1,
+                0
+            ),
+            // includeOutside: includeLeft && includeRight ? "both" : includeLeft ? "before" : includeRight ? "after" : "none",
+            isCountedItem: (btn) => btn.type != "separator",
+        });
+        // pb3.chunks = pb3.chunks
+        pb3.after = pb3.after.filter(
+            (_) => _.type != "pagstart" && _.type != "pagend"
+        );
+        pb3.before = pb3.before.filter(
+            (_) => _.type != "pagstart" && _.type != "pagend"
+        );
+        const pb2 = pb3.chunks.filter(
+            (_) => _.type != "pagstart" && _.type != "pagend"
+        );
+        // console.warn(pb2)
+        console.warn(JSON.stringify(pb2.map((_) => Array.isArray(_))));
+        // if(data.pagpb) data.buttons =
+        let newChunk = [];
+        let skip = data.buttons.find((_) => _.type == "pagstart")
+            ? true
+            : false;
+        for (const chunk of data.buttons) {
+            if (chunk.type == "pagstart") skip = false;
+            if (chunk.type == "pagend") skip = true;
+            if (skip) continue;
+            if (["pagend", "pagstart"].includes(chunk.type)) continue;
+            newChunk.push(chunk);
+        }
+        let ctxargs = [
+            player,
+            {
+                ...data,
+                buttons2: data.pagpb
+                    ? pb2[data.pagN ? data.pagN : 0]
+                    : newChunk,
+            },
+            ...args,
+        ];
+        const buttons2 = await this.getButtons(...ctxargs);
+        const buttons3 =
+            data.pag && data.pagpb
+                ? buttons2
+                : chunk(buttons2, data.pagLength ? data.pagLength : 1);
+        let buttons = data.pag
+            ? data.pagpb
+                ? buttons3
+                : buttons3[
+                      Math.min(
+                          Math.max(data.pagN ? data.pagN : 0, 0),
+                          buttons3.length - 1
+                      )
+                  ]
+            : buttons2;
+        if (!buttons) buttons = [];
+        let after = [];
+        function add(button, fnoverride = null) {
             if (button.type === "header") {
                 form.header(formatStr(button.text, player));
-                continue;
+                return;
             }
             if (button.type === "label") {
                 form.label(formatStr(button.text, player));
+                return;
+            }
+            if (button.type === "divider") {
+                form.divider();
+                return;
+            }
+            // console.warn(JSON.stringify(button))
+            form.button(
+                button.text,
+                button.icon,
+                fnoverride && typeof fnoverride == "function"
+                    ? fnoverride
+                    : button.action
+            );
+        }
+
+        if (data.pag) {
+            for (const button of pb3.before && pb3.before.length
+                ? pb3.before
+                : []) {
+                if (button.type == "separator") continue;
+                let curr = await this.buttonProcessor.processButton(
+                    button,
+                    this.getContext2(...ctxargs)
+                );
+                if (Array.isArray(curr)) {
+                    for (const btn of curr) add(btn);
+                } else if (curr) {
+                    add(curr);
+                }
+            }
+        }
+        if (data.pag) {
+            let currPag = data.pagN ? data.pagN : 0;
+            form.label(
+                formatStr(
+                    data.pagFormat ? data.pagFormat : "Page <p>/<mp>",
+                    player,
+                    {
+                        p: (currPag + 1).toString(),
+                        mp: data.pagpb
+                            ? pb2.filter((_) => _.type != "separator").length
+                            : buttons3.length,
+                    }
+                )
+            );
+            form.divider();
+        }
+
+        for (const button of buttons) {
+            console.warn(JSON.stringify(button));
+            add(button);
+        }
+        function back(player) {
+            let currPag = data.pagN ? data.pagN : 0;
+
+            if (currPag == 0) {
+                actionParser.runAction(player, data.pagFBack);
+                return;
+            }
+
+            data.pagN = currPag - 1;
+            this.openActionForm(player, data, ...args);
+        }
+        function next(player) {
+            let currPag = data.pagN ? data.pagN : 0;
+
+            data.pagN = currPag + 1;
+            this.openActionForm(player, data, ...args);
+        }
+        function isBackButton(btn) {
+            let currPag = data.pagN ? data.pagN : 0;
+            try {
+                // if(btn.action && btn.action.replace('/', '') == 'back') return true;
+                if (
+                    btn.actions &&
+                    btn.actions.length &&
+                    btn.actions.find(
+                        (action) => action.replace("/", "") == "back"
+                    )
+                )
+                    return true;
+                return false;
+            } catch {
+                return false;
+            }
+        }
+        function isNextButton(btn) {
+            let currPag = data.pagN ? data.pagN : 0;
+            try {
+                // if(btn.action && btn.action.replace('/', '') == 'next') return true;
+                if (
+                    btn.actions &&
+                    btn.actions.length &&
+                    btn.actions.find(
+                        (action) => action.replace("/", "") == "next"
+                    )
+                )
+                    return true;
+                return false;
+            } catch {
+                return false;
+            }
+        }
+        if (data.pag) {
+            let currPag = data.pagN ? data.pagN : 0;
+            form.divider();
+            if (
+                currPag <
+                (data.pagpb
+                    ? pb2.filter((_) => _.type != "separator").length - 1
+                    : buttons3.length - 1)
+            ) {
+                let nextBtn =
+                    pb3.after && pb3.after.length
+                        ? pb3.after.find((_) => isNextButton(_))
+                        : null;
+                if (nextBtn) {
+                    let parsedBtn = await this.buttonProcessor.processButton(
+                        nextBtn,
+                        this.getContext2(...ctxargs)
+                    );
+                    if (parsedBtn && !Array.isArray(parsedBtn)) {
+                        add(parsedBtn, (player) => {
+                            next.bind(this, player)();
+                        });
+                    }
+                } else {
+                    form.button(
+                        `${data.pagNext1 ? data.pagNext1 : "§aNext"}${
+                            data.pagNext2 ? `\n§r§7${data.pagNext2}` : ``
+                        }`,
+                        data.pagIcons
+                            ? `textures/azalea_icons/other/arrow_blue_right`
+                            : null,
+                        (player) => {
+                            next.bind(this, player)();
+                        }
+                    );
+                }
+            }
+            if (currPag > 0 || data.pagFBack) {
+                let backBtn =
+                    pb3.after && pb3.after.length
+                        ? pb3.after.find((_) => isBackButton(_))
+                        : null;
+                if (backBtn) {
+                    let parsedBtn = await this.buttonProcessor.processButton(
+                        backBtn,
+                        this.getContext2(...ctxargs)
+                    );
+                    if (parsedBtn && !Array.isArray(parsedBtn)) {
+                        add(parsedBtn, (player) => {
+                            back.bind(this, player)();
+                        });
+                    }
+                } else {
+                    form.button(
+                        `${data.pagPrev1 ? data.pagPrev1 : "§cBack"}${
+                            data.pagPrev2 ? `\n§r§7${data.pagPrev2}` : ``
+                        }`,
+                        data.pagIcons
+                            ? `textures/azalea_icons/other/arrow_blue_left`
+                            : null,
+                        (player) => {
+                            back.bind(this, player)();
+                        }
+                    );
+                }
+            }
+        }
+        // console.warn(`${pb3.after && pb3.after.length ? pb3.after.length : 0}`)
+        if (data.pag) {
+            for (const button of pb3.after && pb3.after.length
+                ? pb3.after
+                : []) {
+                if (
+                    button.type == "separator" ||
+                    isBackButton(button) ||
+                    isNextButton(button)
+                )
+                    continue;
+                console.warn(button);
+                let curr = await this.buttonProcessor.processButton(
+                    button,
+                    this.getContext2(...ctxargs)
+                );
+                if (Array.isArray(curr)) {
+                    for (const btn of curr) add(btn);
+                } else if (curr) {
+                    add(curr);
+                }
+            }
+        }
+        form.show(player, false, (player, response) => {
+            if (response.canceled && data.cancel) {
+                actionParser.runAction(player, data.cancel);
+            }
+        });
+    }
+
+    async openActionForm2(player, render_as, data, ...args) {
+        console.warn("AAA");
+        const form = new ActionForm();
+        const pre = this.getFormPrefix(data);
+        const themID = data.theme || 0;
+        const themString =
+            themID > 0 ? `${NUT_UI_THEMED}${themes[themID]?.[0] || ""}` : ``;
+        const nutUIAlt =
+            themID > 0
+                ? `${NUT_UI_ALT}${themes[themID]?.[0] || ""}`
+                : `${NUT_UI_ALT}`;
+
+        form.title(
+            `${pre}${formatStr(this.parseArgs(data.name, ...args), render_as)}`
+        );
+        if (data.body)
+            form.body(formatStr(this.parseArgs(data.body, ...args), render_as));
+
+        const buttons = await this.getButtons(render_as, data, ...args);
+        for (const button of buttons) {
+            if (button.type === "header") {
+                form.header(formatStr(button.text, render_as));
+                continue;
+            }
+            if (button.type === "label") {
+                form.label(formatStr(button.text, render_as));
                 continue;
             }
             if (button.type === "divider") {
@@ -1223,14 +1857,18 @@ class NormalFormOpener {
     }
 
     async getButtons(player, data, ...args) {
-        if(args.length && args[0] == "$$$DBG_VIEW") {
+        if (args.length && args[0] == "$$$DBG_VIEW") {
             let btns = [];
-            for(const button of data.buttons) {
-                if(button.type) continue;
+            for (const button of data.buttons) {
+                if (button.type) continue;
                 btns.push({
-                    type: 'label',
-                    text: `§r${button.requiredTag ? button.requiredTag : "No Required condition"}`
-                })
+                    type: "label",
+                    text: `§r${
+                        button.requiredTag
+                            ? button.requiredTag
+                            : "No Required condition"
+                    }`,
+                });
             }
             return btns;
         }
@@ -1241,7 +1879,7 @@ class NormalFormOpener {
         let currView = -1;
         let canView = true;
 
-        for (const button of data2.buttons) {
+        for (const button of data2.buttons2 ? data2.buttons2 : data2.buttons) {
             if (button.type === "separator") {
                 canView = this.playerIsAllowed(player, button.condition, data2);
                 currView = button.id;
@@ -1258,9 +1896,14 @@ class NormalFormOpener {
                 }
                 continue;
             }
-
+            if (["pagstart", "pagend"].includes(button.type)) continue;
+            // buttons.push({
+            // type: "label",
+            // text: JSON.stringify(button, null, 4)
+            // })
             if (!canView) continue;
-            if (button.disabled && data2.layout != 4) continue;
+            if (button.disabled && data2.layout != 4 && button.type != "poll")
+                continue;
 
             const processedButtons = await this.buttonProcessor.processButton(
                 button,
@@ -1289,7 +1932,26 @@ class NormalFormOpener {
 
         return buttons;
     }
-
+    getContext2(player, data, ...args) {
+        let data2 = JSON.parse(JSON.stringify(data));
+        let buttons = [];
+        let currView = -1;
+        let canView = true;
+        return {
+            player,
+            data: data2,
+            args,
+            currView: -1,
+            buttons,
+            playerIsAllowed: this.playerIsAllowed.bind(this),
+            parseArgs: this.parseArgs.bind(this),
+            getIcon: this.getIcon.bind(this),
+            getDisplayOverride: this.getDisplayOverride.bind(this),
+            convertJSONIntoFormattingExtraVars:
+                this.convertJSONIntoFormattingExtraVars.bind(this),
+            open: this.open.bind(this),
+        };
+    }
     getScore(player, objective) {
         let score = 0;
         try {
@@ -1318,12 +1980,16 @@ class NormalFormOpener {
         if (tag == "$CLAN_HAS_QUESTIONS") {
             const clan = OpenClanAPI.getClan(player);
             // const playerID = playerStorage.getID(player);
-            return clan && clan.data.applicationQuestions && clan.data.applicationQuestions.length;
+            return (
+                clan &&
+                clan.data.applicationQuestions &&
+                clan.data.applicationQuestions.length
+            );
         }
-        if(tag == "$HAS_CLAN_BASE") {
+        if (tag == "$HAS_CLAN_BASE") {
             try {
                 const clan = OpenClanAPI.getClan(player);
-                return clan && clan.data.settings.clanBase;    
+                return clan && clan.data.settings.clanBase;
             } catch {
                 return false;
             }
@@ -1332,7 +1998,10 @@ class NormalFormOpener {
         if (tag == "false") return false;
         if (tag == "in_combat") return combatMap.has(player.id);
         if (tag == "true") return true;
-        if (tag == "admin") return player.hasTag("admin") || player.isOp();
+        if (tag == "admin") return player.hasTag("admin");
+        if (tag.startsWith("$wtag/")) {
+            return worldTags.hasTag(tag.substring(6));
+        }
         if (tag.startsWith("$entideq/")) {
             return player.id.toString() == tag.substring("$entideq/".length);
         }
@@ -1372,13 +2041,23 @@ class NormalFormOpener {
         }
 
         try {
+            if (tag.startsWith(">=")) {
+                const [objective, value] = tag.substring(2).split(" ");
+                return this.getScore(player, objective) >= parseInt(value);
+            }
+
+            if (tag.startsWith("<=")) {
+                const [objective, value] = tag.substring(2).split(" ");
+                return this.getScore(player, objective) <= parseInt(value);
+            }
+
             if (tag.startsWith(">")) {
                 const [objective, value] = tag.substring(1).split(" ");
                 return this.getScore(player, objective) > parseInt(value);
             }
             if (tag.startsWith("<")) {
                 const [objective, value] = tag.substring(1).split(" ");
-                return this.getScore(player, objective) <= parseInt(value);
+                return this.getScore(player, objective) < parseInt(value);
             }
             if (tag.startsWith("==")) {
                 const [objective, value] = tag.substring(2).split(" ");

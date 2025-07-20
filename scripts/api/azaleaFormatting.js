@@ -17,6 +17,8 @@ import zones from "./zones.js";
 import playerUtils from "./playerUtils.js";
 import configAPI from "./config/configAPI.js";
 import versionData from "../versionData.js";
+import playerActivityTracking from "./PlayerActivityTracking/index.js";
+import { vec3ToChunkCoordinates } from "./PlayerActivityTracking/common.js";
 let db1 = prismarineDb.table("LegacyConfig");
 const configDb = await db1.keyval("LegacyConfig");
 const startingRank = configDb.get("StartingRank", "Member");
@@ -83,7 +85,7 @@ world.afterEvents.entityDie.subscribe((e) => {
         e.deadEntity,
         getScore("leaf:deaths", e.deadEntity) + 1
     );
-    setScore("leaf:kills_streak", deadEntity, 0);
+    setScore("leaf:kills_streak", e.deadEntity, 0);
     if (!damageSource || damageSource.typeId != "minecraft:player") return;
     setScore(
         "leaf:kills",
@@ -207,6 +209,15 @@ export function formatStr(
             vars.z = `${Math.floor(player.location.z)}`;
             vars.name = player.name;
             vars.username = player.name;
+            let curncs = [];
+            try {
+                for(const currency of prismarineDb.economy.getCurrencies()) {
+                    let amt = 0;
+                    try { amt = prismarineDb.economy.getMoney(player, abbreviateNumber(currency.scoreboard, 2))} catch {}
+                    curncs.push(`${currency.symbol} ${amt ? amt : 0}`)
+                }
+            } catch {}
+            vars.currencies = curncs.join(' ')
             newStr = newStr.replaceAll("[@username]", player.name);
             vars.name_tag = player.nameTag;
             try {
@@ -344,6 +355,7 @@ export function formatStr(
     }
     vars.tps = `${Math.floor(getTPS())}`;
     vars.online = `${world.getPlayers().length}`;
+    vars.public_clan_count = `${abbreviateNumber(OpenClanAPI.getPublicClans().length, 2)}`;
     vars.day = `${Math.floor(world.getDay())}`;
     vars.yr = `${new Date().getUTCFullYear()}`;
     vars.mo = `${new Date().getUTCMonth() + 1}`;
@@ -532,6 +544,10 @@ export function formatStr(
                 return clan.data.owner == player.id ? text : notText;
             }
             return notText
+        },
+        activityscore() {
+            let {x, z} = vec3ToChunkCoordinates(player.location)
+            return `${playerActivityTracking.getChunkScore(x, z)}`
         },
         clan(text, notText) {
             let clan2 = OpenClanAPI.getClan(player);

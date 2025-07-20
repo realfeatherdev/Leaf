@@ -58,7 +58,7 @@ world.beforeEvents.playerInteractWithEntity.subscribe((e) => {
     if (command) {
         e.cancel = true;
         system.run(() => {
-            actionParser.runAction(e.player, command);
+            actionParser.runAction(e.player, command.replaceAll('<player_clicked>', e.player.name));
         });
     }
 });

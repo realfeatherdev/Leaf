@@ -12,6 +12,9 @@ import {
 } from "../preset_browser/nutUIConsts";
 import { world } from "@minecraft/server";
 import { array_move } from "../../api/utils/array_move";
+import versionData from "../../versionData";
+
+let nonNormalTypes = ['pagstart', 'pagend']
 
 uiManager.addUI(
     config.uiNames.UIBuilderEditButton,
@@ -75,11 +78,22 @@ uiManager.addUI(
             );
         }
 
+        if(button.type == "poll") {
+            actionForm.button(
+                `§eEdit Poll\n§7Edit this poll`,
+                `textures/azalea_icons/other/clipboard`,
+                (player)=>{
+                    uiManager.open(player, config.uiNames.UIBuilderAddPoll, id, index)
+                }
+            )
+        }
+
         if (
             button.type != "header" &&
             button.type != "label" &&
             button.type != "divider" &&
-            button.type != "separator"
+            button.type != "separator" &&
+            button.type != "poll" && !nonNormalTypes.includes(button.type)
         ) {
             actionForm.button(
                 `§eEdit Properties\n§7Opens the edit menu`,
@@ -116,13 +130,26 @@ uiManager.addUI(
                 `§uEdit Actions\n§7Edit the actions`,
                 `textures/azalea_icons/other/script_edit`,
                 (player) => {
-                    uiManager.open(
-                        player,
-                        "edit_actions",
-                        id,
-                        index,
-                        buttonIndex
-                    );
+                    if(isGroupButton) {
+                        uiManager.open(
+                            player,
+                            "edit_actions",
+                            id,
+                            index,
+                            buttonIndex
+                        );
+                    } else {
+                        uiManager.open(
+                            player,
+                            versionData.uiNames.CustomCommandsV2.editActions,
+                            button.actions ? button.actions : [],
+                            (act)=>{
+                                ui.data.buttons[index].actions = button.actions;
+                                uiBuilder.db.overwriteDataByID(ui.id, ui.data);
+                                uiManager.open(player, versionData.uiNames.UIBuilderEditButton, id, index, buttonIndex)
+                            }
+                        )
+                    }
                 }
             );
 
@@ -249,13 +276,46 @@ uiManager.addUI(
                 });
             }
         );
+        if (
+            button.type != "header" &&
+            button.type != "label" &&
+            button.type != "divider" &&
+            button.type != "separator" &&
+            button.type != "poll" && !nonNormalTypes.includes(button.type)
+        ) {
+            if(!isGroupButton) {
+                actionForm.button(`§bTemplate\n§7Mass duplicate+edit this button`, `textures/azalea_icons/other/voxel`, (player)=>{
+                    let modal = new ModalForm();
+                    if(!button.template) button.template = {};
+                    modal.title("Edit Button Template")
+                    modal.label("Button will repeat a specific amount of times when displaying UI to the user.")
+                    modal.label("Use <#> anywhere in the button info to use the number")
+                    modal.toggle("Enable Template", button.template.on ? true : false)
+                    modal.textField("Starting Number", "1", typeof button.template.start === "number" ? button.template.start.toString() : "1")
+                    modal.textField("Ending Number", "10", typeof button.template.end === "number" ? button.template.end.toString() : "10")
+                    modal.show(player, false, (player, response)=>{
+                        if(response.canceled) return uiManager.open(player, versionData.uiNames.UIBuilderEditButton, id, index, buttonIndex)
+                        button.template.on = response.formValues[2]
+                        button.template.start = Math.max(0, parseInt(isNaN(response.formValues[3]) ? 0 : response.formValues[3]))
+                        button.template.end = Math.max(0, parseInt(isNaN(response.formValues[4]) ? 0 : response.formValues[4]))
+                        ui.data.buttons[index] = button;
+                        uiBuilder.db.overwriteDataByID(ui.id, ui.data);
+
+                        return uiManager.open(player, versionData.uiNames.UIBuilderEditButton, id, index, buttonIndex)
+                    })
+                })
+                if(button.template && button.template.on) {
+                    actionForm.label(`Button Template, From §a${button.template.start} §fto §a${button.template.end}`)
+                }
+            }
+        }
         if (button.type == "header" || button.type == "label") {
             actionForm.button(
                 `§eEdit Text\n§7Edit the ${button.type}`,
                 null,
                 (player) => {
                     let modal = new ModalForm();
-                    modal.title("Edit Text");
+                    modal.title("Code Editor");
                     modal.textField(
                         "Text",
                         "Sample Text",
@@ -335,7 +395,8 @@ uiManager.addUI(
             button.type != "header" &&
             button.type != "label" &&
             button.type != "divider" &&
-            button.type != "separator"
+            button.type != "separator" &&
+            button.type != "poll" && !nonNormalTypes.includes(button.type)
         ) {
             actionForm.button(
                 `§dEdit Meta (Advanced)\n§7More features`,

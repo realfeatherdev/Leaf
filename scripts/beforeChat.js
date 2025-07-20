@@ -11,7 +11,7 @@ import proximityChat from "./api/other/proximityChat";
 let chatOverrideClasses = [proximityChat];
 
 export default function (e) {
-    if (e.message.startsWith("!")) {
+    if (e.message.startsWith(configAPI.getProperty("Prefix"))) {
         e.cancel = true;
         commandManager.run(e);
         return;
@@ -37,7 +37,8 @@ export default function (e) {
             }
         }
         // createMessage(e.sender, e.message);
-        let msg = chatRankHandler.getMessageContent(e);
+        // let msg = chatRankHandler.getMessageContent(e);
+        let msg = createMessage(e.sender, e.message)
         for (const player of world.getPlayers()) {
             for (const chatOverrie of chatOverrideClasses) {
                 if (chatOverrie.canInit(e)) {

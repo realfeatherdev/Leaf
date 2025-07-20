@@ -22,13 +22,16 @@ export class TimeIntervals {
         return nextIntervalStart - now;
     }
 }
+let db = prismarineDb.customStorage(
+    "DailyRewards",
+    SegmentedStoragePrismarine
+);
+let keyval = await db.keyval("Rewards");
+
 class DailyRewardsAPI {
     constructor() {
-        this.db = prismarineDb.customStorage(
-            "DailyRewards",
-            SegmentedStoragePrismarine
-        );
-        this.keyval = this.db.keyval("Rewards");
+        this.db = db;
+        this.keyval = keyval;
         // for(const key of this.keyval.keys()) {
         //     if(key !== "REWARDS") this.keyval.set(key, {})
         // }

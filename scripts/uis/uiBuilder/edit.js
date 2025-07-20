@@ -22,6 +22,8 @@ import configAPI from "../../api/config/configAPI";
 import sidebarEditor from "../../api/sidebarEditor";
 import versionData from "../../versionData";
 import scripting from "../../api/scripting";
+import normalForm from "../../api/openers/normalForm";
+import commandManager from "../../api/commands/commandManager";
 uiManager.addUI(
     config.uiNames.UIBuilderEdit,
     "UI Builder Edit",
@@ -31,11 +33,13 @@ uiManager.addUI(
 
             if (id == 1719775088275) return;
             let doc = uiBuilder.db.getByID(id);
+            if(doc.data.type == 14) return uiManager.open(player, versionData.uiNames.Zones.Edit, id)
             if (!doc) return;
             if (doc.data.type == 5) {
                 return uiManager.open(player, config.uiNames.Config.Misc);
             }
             let actionForm = new ActionForm();
+            if(configAPI.getProperty("DevMode")) actionForm.label(`ID: ${id}`)
             let themID =
                 doc.data.type == 8
                     ? 52
@@ -50,31 +54,44 @@ uiManager.addUI(
                 themID > 0
                     ? `${NUT_UI_ALT}${themes[themID][0]}`
                     : `${NUT_UI_ALT}`;
-            if (doc.data.type != 10 && doc.data.type != 11) {
-                actionForm.title(
-                    `${
-                        doc.data.layout == 4 && doc.data.paperdoll
-                            ? NUT_UI_PAPERDOLL
-                            : ``
-                    }${NUT_UI_TAG}${themString}§rEditing "${(doc.data.type == 8
-                        ? doc.data.uniqueID
-                        : doc.data.type == 4
-                        ? doc.data.title
-                        : doc.data.name
-                    )
-                        .replace("§g§r§i§d§u§i", "")
-                        .replace("§c§h§e§s§t", "")
-                        .replace(/§./g, "")}§r"`
-                );
-            } else if (doc.data.type == 11) {
-                actionForm.title(`${NUT_UI_TAG}§rEditing Invite`);
-            } else {
-                actionForm.title(`${NUT_UI_TAG}§rEditing Event`);
+            try {
+                if (doc.data.type != 10 && doc.data.type != 11) {
+                    actionForm.title(
+                        `${
+                            doc.data.layout == 4 && doc.data.paperdoll
+                                ? NUT_UI_PAPERDOLL
+                                : ``
+                        }${NUT_UI_TAG}${themString}§rEditing "${(doc.data.label ? doc.data.label : doc.data.type == 8
+                            ? doc.data.uniqueID
+                            : doc.data.type == 4
+                            ? doc.data.title
+                            : doc.data.name
+                        )
+                            .replace("§g§r§i§d§u§i", "")
+                            .replace("§c§h§e§s§t", "")
+                            .replace(/§./g, "")}§r"`
+                    );
+                } else if (doc.data.type == 11) {
+                    actionForm.title(`${NUT_UI_TAG}§rEditing Invite`);
+                } else {
+                    actionForm.title(`${NUT_UI_TAG}§rEditing Event`);
+                }
+    
+            } catch {
+                actionForm.title(`${NUT_UI_TAG}§r§fUnknown`)
             }
             actionForm.button(
                 `${NUT_UI_HEADER_BUTTON}§6Back\n§7Go back`,
                 `textures/azalea_icons/2`,
                 (player) => {
+                    if(doc.data.internal) {
+                        uiManager.open(player, config.uiNames.UIBuilderLeaf);
+                        return;
+                    }
+                    if(doc.data.folder && uiBuilder.db.getByID(doc.data.folder)) {
+                        uiManager.open(player, config.uiNames.UIBuilderFolder, doc.data.folder);
+                        return;
+                    }
                     uiManager.open(player, config.uiNames.UIBuilderRoot);
                 }
             );
@@ -169,10 +186,15 @@ uiManager.addUI(
                 );
             }
             if (doc.data.type == 0) {
+                if(doc.data.manualDeploy) {
+                    if(!doc.data.deployedAt || doc.data.deployedAt < Math.floor(doc.updatedAt / 1000)) {
+                        actionForm.label("§cThis UI has undeployed changes!")
+                    }
+                }
                 actionForm.label("§eGeneral Options");
                 actionForm.button(
                     `§aEdit Contents\n§7Edit elements inside the form`,
-                    `textures/azalea_icons/other/properties_edit`,
+                    `textures/azalea_icons/other/properties`,
                     (player) => {
                         uiManager.open(
                             player,
@@ -183,7 +205,7 @@ uiManager.addUI(
                 );
                 actionForm.button(
                     `§dEdit General\n§7Edit form name, and more`,
-                    `textures/azalea_icons/other/page_edit`,
+                    `textures/azalea_icons/other/gear`,
                     (player) => {
                         uiManager.open(
                             player,
@@ -196,6 +218,78 @@ uiManager.addUI(
                         );
                     }
                 );
+                // actionForm.button(`§bpp balls`, null, ()=>{
+                //     let form = new ActionForm();
+                //     form.title("pp balls")
+                //     form.body(`pp balls`)
+                //     for(let i = 0;i < 20;i++) {
+                //         form.header(`pp balls`)
+                //         form.label(`pp balls`)
+                //         form.button(`pp balls`, `textures/ui/boykisser`, (player)=>{
+                //             world.sendMessage(`${player.name} loves pp balls`)
+                //         })
+                //     }
+                //     form.show(player, false, (player, response)=>{
+
+                //     })
+                // })
+                // actionForm.button(`§3`)
+                actionForm.button(
+                    `§6Edit Pagination\n§7Edit this UIs pagination settings`, `textures/azalea_icons/other/page_data`,
+                    (player)=>{
+                        let modal = new ModalForm();
+                        modal.title("Edit UI pagination")
+                        modal.toggle("Enable Pagination", doc.data.pag ? doc.data.pag : false, ()=>{}, "Will split the UI into multiple pages")
+                        modal.slider("Max pagination length", 1, 30, 1, doc.data.pagLength ? doc.data.pagLength : 1, ()=>{}, "The maximum amount of buttons on a singular page")
+
+                        modal.textField("Pagination Label Format", "Page <p>/<mp>", doc.data.pagFormat ? doc.data.pagFormat : "Page <p>/<mp>", ()=>{}, "<p> = Current Page, <mp> = Max Page")
+                        modal.toggle("Enable Pagination Icons", doc.data.pagIcons ? doc.data.pagIcons : false, ()=>{}, "Show icons on the pagination buttons")
+                        modal.textField("Pagination Next Btn Text", "", doc.data.pagNext1 ? doc.data.pagNext1 : "§aNext", ()=>{})
+                        modal.textField("Pagination Next Btn Subtext", "", doc.data.pagNext2 ? doc.data.pagNext2 : "Go to next page", ()=>{})
+                        modal.textField("Pagination Previous Btn Text", "", doc.data.pagPrev1 ? doc.data.pagPrev1 : "§cBack", ()=>{})
+                        modal.textField("Pagination Previous Btn Subtext", "", doc.data.pagPrev2 ? doc.data.pagPrev2 : "Go to previous page", ()=>{})
+                        modal.textField("Pagination Further Back Command", "", doc.data.pagFBack ? doc.data.pagFBack : "", ()=>{}, "Enable a back button on the first page that runs this command")
+                        modal.toggle("Per Component?", doc.data.pagIcons ? doc.data.pagpb : false, ()=>{}, "misc misc misc")
+                        modal.show(player, false, (player, response)=>{
+                            if(response.canceled) return uiManager.open(player, config.uiNames.UIBuilderEdit, id)
+                            
+                            doc.data.pag = response.formValues[0]
+                            doc.data.pagLength = response.formValues[1]
+                            doc.data.pagFormat = response.formValues[2]
+                            doc.data.pagIcons = response.formValues[3]
+                            doc.data.pagNext1 = response.formValues[4]
+                            doc.data.pagNext2 = response.formValues[5]
+                            doc.data.pagPrev1 = response.formValues[6]
+                            doc.data.pagPrev2 = response.formValues[7]
+                            doc.data.pagFBack = response.formValues[8]
+                            doc.data.pagpb = response.formValues[9]
+
+                            uiBuilder.db.overwriteDataByID(doc.id, doc.data)
+
+                            return uiManager.open(player, config.uiNames.UIBuilderEdit, id)
+                        })
+                    }
+                )
+                actionForm.button(`§eToggles\n§7Edit UI wide toggles`, `textures/azalea_icons/other/blip_orange`, (player)=>{
+                    let modalForm = new ModalForm();
+                    modalForm.title("Edit Toggles")
+                    for(const toggle of uiBuilder.actionFormToggles) {
+                        modalForm.toggle(`${toggle[0]} §7(ID: ${toggle[1]})`, doc.data.toggles && doc.data.toggles[toggle[1]] ? true : false)
+                    }
+                    modalForm.show(player, false, (player, response)=>{
+                        if(response.canceled) return uiManager.open(player, versionData.uiNames.UIBuilderEdit, doc.id);
+                        if(!doc.data.toggles) doc.data.toggles = {};
+                        for(let i = 0;i < uiBuilder.actionFormToggles.length;i++) {
+                            let tog = uiBuilder.actionFormToggles[i];
+                            doc.data.toggles[tog[1]] = response.formValues[i]
+                        }
+                        uiBuilder.db.overwriteDataByID(doc.id, doc.data);
+                        return uiManager.open(player, versionData.uiNames.UIBuilderEdit, doc.id)
+                    })
+                })
+                actionForm.button(`§bPreview\n§7Get a full preview of this UI`, `textures/azalea_icons/other/eye`, (player)=>{
+                    normalForm.open(player, {...JSON.parse(JSON.stringify(doc.data)), cancel: `/scriptevent leafgui:ui_builder_edit_ui ${doc.id}`, body: `You are in §bpreview mode (BETA)§f. Please §creport §fany issues to the §aleaf discord§f. §cClose this UI §fto go back to §eediting!`})
+                })
                 if (scripting.getActiveScriptIDs().length) {
                     actionForm.button(
                         `§vSet script dependencies${
@@ -416,6 +510,34 @@ uiManager.addUI(
                     }
                 );
             }
+            if(doc.data.type == 0) {
+                actionForm.label("§bDeployment options")
+                actionForm.button(`§dToggle Deployment Mode\n§r§7Current: ${doc.data.manualDeploy ? "Manual Deploy" : "Automatic Deploy"}`, `textures/azalea_icons/UIBUILDER3.1/auto_deploy`, (player)=>{
+                    doc.data.manualDeploy = !doc.data.manualDeploy;
+                    if(doc.data.manualDeploy) {
+                        doc.data.copies = {};
+                        let ui = {...doc.data, copies: null, original: null, deployedAt: null};
+                        doc.data.copies.pub = ui;
+                        doc.data.deployedAt = Math.floor(Date.now() / 1000)
+                    }
+                    uiBuilder.db.overwriteDataByID(doc.id, doc.data);
+                    uiManager.open(player, versionData.uiNames.UIBuilderEdit, doc.id)
+                })
+                if(doc.data.manualDeploy) {
+                    if(!doc.data.deployedAt || doc.data.deployedAt < Math.floor(doc.updatedAt / 1000)) {
+                        actionForm.button(`§bDeploy\n§r§7Deploy your changes to the public`, `textures/azalea_icons/UIBUILDER3.1/deploy`, (player)=>{
+                            if(!doc.data.copies) doc.data.copies = {};
+                            let ui = {...doc.data, copies: null, original: null, deployedAt: null};
+                            doc.data.copies.pub = ui;
+                            doc.data.deployedAt = Math.floor(Date.now() / 1000)
+                            uiBuilder.db.overwriteDataByID(doc.id, doc.data);
+                            uiManager.open(player, versionData.uiNames.UIBuilderEdit, doc.id)
+                        })
+                    } else {
+                        actionForm.label("§bNothing to deploy! All changes are public.")
+                    }
+                }
+            }
             if (doc.data.layout == 4) {
                 actionForm.label("§dCherryUI Options");
                 actionForm.button(
@@ -620,6 +742,17 @@ uiManager.addUI(
                     return uiManager.open(player, config.uiNames.UIBuilderRoot);
                 }
             );
+            actionForm.button(`§eEdit Label\n§7Edit the name that appears in the editor`, `textures/items/name_tag`, (player)=>{
+                let modalForm = new ModalForm();
+                modalForm.title("Edit Label")
+                modalForm.textField("New label", "Type a label here...", doc.data.label ? doc.data.label : "")
+                modalForm.show(player, false, (player, response)=>{
+                    if(response.canceled) return uiManager.open(player, config.uiNames.UIBuilderEdit, doc.id)
+                    doc.data.label = response.formValues[0]
+                    uiBuilder.db.overwriteDataByID(doc.id, doc.data)
+                    return uiManager.open(player, config.uiNames.UIBuilderEdit, doc.id)
+                })
+            })
             actionForm.label("§cDangerous Options");
             if (doc.data.folder && uiBuilder.db.getByID(doc.data.folder)) {
                 actionForm.button(
@@ -632,6 +765,7 @@ uiManager.addUI(
                     }
                 );
             }
+
             if (http.player) {
                 actionForm.label("Leaf Network");
                 let published = doc.data.accessToken ? true : false;
@@ -789,6 +923,9 @@ uiManager.addUI(
                         config.uiNames.Basic.Confirmation,
                         "Are you sure you want to delete this GUI?",
                         () => {
+                            if(doc.data.type == 9) {
+                                commandManager.removeCmd(doc.data.command)
+                            }
                             uiBuilder.db.trashDocumentByID(doc.id);
                             return uiManager.open(
                                 player,

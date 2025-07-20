@@ -23,6 +23,10 @@ export default {
         ["Enable Moderation Features", "config.moderationhub"],
         ["Edit Zones", "config.zones"],
         ["Edit Land Claims", "config.landclaims"],
+        ["Bypass Zones", "zone.bypass"],
+        ["Bypass Land Claims", "claim.bypass"],
+        ["Bypass Generator Owner Requirements", "generator.manage"],
+        ["View undeployed copies in action forms by default", "uibuilder.actionform.viewundeployedcopies"]
     ],
     defaultPermissions: [
         "permissions.testing",
@@ -42,6 +46,7 @@ export default {
         "commands.pay",
         "commands.redeem",
         "commands.ah",
-        "commands.clan"
+        "commands.clan",
+        "commands.spawn"
     ]
 }

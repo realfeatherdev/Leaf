@@ -330,7 +330,7 @@ class NormalFormOpener {
         if (tag == "false") return false;
         if (tag == "in_combat") return combatMap.has(player.id);
         if (tag == "true") return true;
-        if (tag == "admin") return player.hasTag("admin") || player.isOp();
+        if (tag == "admin") return player.hasTag("admin");
         if (tag.startsWith("$entideq/")) {
             if (player.id.toString() == tag.substring("$entideq/".length)) {
                 return true;

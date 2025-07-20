@@ -29,6 +29,9 @@ commandManager.addCommand(
         msg.sender.success(`Successfully teleported to ${targetPlayer.name}!`);
     }
 );
+commandManager.addCommand("center", {category: "Misc", description: "Center yourself on the block"}, ({msg,args})=>{
+    msg.sender.teleport(msg.sender.dimension.getBlock(msg.sender.location).center())
+})
 // i fixed it for u
 // im gonna go to bed
 // i wont sleep for a while but i will leave my pc on overnight so u can fuck around with my shit

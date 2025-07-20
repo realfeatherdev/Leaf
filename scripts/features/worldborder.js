@@ -3,6 +3,15 @@ import { dynamicToast } from "../lib/chatNotifs";
 import configAPI from "../api/config/configAPI";
 configAPI.registerProperty("WorldBorder", configAPI.Types.Boolean, false);
 configAPI.registerProperty("WorldBorderSize", configAPI.Types.Number, 10000);
+configAPI.registerProperty("WorldBorderSubtext", configAPI.Types.String, "You cant go here")
+configAPI.registerProperty("WorldBorderTitle", configAPI.Types.String, "Error")
+configAPI.registerProperty("WorldBorderSound", configAPI.Types.String, "random.glass")
+configAPI.registerProperty("WorldBorderDamage", configAPI.Types.Number, 1)
+configAPI.registerProperty("WorldBorderKnockbackCooldown", configAPI.Types.Number, 4)
+configAPI.registerProperty("WorldBorderDamageThreshold", configAPI.Types.Number, 10)
+configAPI.registerProperty("WorldBorderTpFallbackThreshold", configAPI.Types.Number, 42)
+configAPI.registerProperty("WorldBorderKnockbackVerticalIntensity", configAPI.Types.Number, 1)
+configAPI.registerProperty("WorldBorderKnockbackHorizontalIntensity", configAPI.Types.Number, 1)
 let playerLocs = {};
 function getWorldBorderSize() {
     return configAPI.getProperty("WorldBorderSize");
@@ -29,17 +38,19 @@ system.runInterval(() => {
                 tick >= playerCooldown[player.id]
             ) {
                 player.sendMessage(
-                    dynamicToast("", "§l§cError\n§r§7You cant go here")
+                    dynamicToast("", `§l§c${configAPI.getProperty("WorldBorderTitle")}\n§r§7${configAPI.getProperty("WorldBorderSubtext")}`)
                 );
-                player.playSound("random.glass");
+                player.playSound(configAPI.getProperty("WorldBorderSound"));
                 let tp = false;
+                let threshold = configAPI.getProperty("WorldBorderTpFallbackThreshold")
+                let threshold2 = configAPI.getProperty("WorldBorderDamageThreshold")
                 if (
                     player.location.x >= size + threshold2 ||
                     player.location.x < -size - threshold2 ||
                     player.location.z >= size + threshold2 ||
                     player.location.z < -size - threshold2
                 ) {
-                    player.applyDamage(1);
+                    player.applyDamage(configAPI.getProperty("WorldBorderDamage"));
                 }
                 if (
                     player.location.x >= size + threshold ||
@@ -51,17 +62,21 @@ system.runInterval(() => {
                 if (tp) {
                     player.teleport(newLoc);
                 } else {
-                    player.applyKnockback(
-                        {
-                            x: -1,
-                            z: -1,
-                        },
-                        1
-                    );
+                    const dx = -player.location.x;
+                    const dz = -player.location.z;
+                    const length = Math.sqrt(dx * dx + dz * dz);
+                    
+                    // Prevent divide by zero just in case
+                    const knockback = length === 0
+                        ? { x: 0, z: 0 }
+                        : { x: (dx / length) * configAPI.getProperty("WorldBorderKnockbackHorizontalIntensity"), z: (dz / length) * configAPI.getProperty("WorldBorderKnockbackHorizontalIntensity") };
+                    
+                    player.applyKnockback(knockback, configAPI.getProperty("WorldBorderKnockbackVerticalIntensity"));
+                    
                 }
-                playerCooldown[player.id] = tick + 15;
+                playerCooldown[player.id] = tick + configAPI.getProperty("WorldBorderKnockbackCooldown");
             } else if (!playerCooldown[player.id]) {
-                playerCooldown[player.id] = tick + 15;
+                playerCooldown[player.id] = tick + configAPI.getProperty("WorldBorderKnockbackCooldown");
             }
         }
     }

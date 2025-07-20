@@ -2,7 +2,7 @@ import { MessageFormData } from "@minecraft/server-ui";
 import configAPI from "./api/config/configAPI";
 import { combatMap } from "./features/clog";
 import versionData from "./versionData";
-import { NUT_UI_TAG, NUT_UI_THEMED } from "./startup";
+import { NUT_UI_TAG, NUT_UI_THEMED } from "./uis/preset_browser/nutUIConsts";
 import { themes } from "./uis/uiBuilder/cherryThemes";
 import { world } from "@minecraft/server";
 import { ActionForm } from "./lib/form_func";

@@ -8,7 +8,7 @@
 　| (￣ヽ＿_ヽ__) _)
 　＼二つ
 
-i call him plant kitty
+i call him plant kitty (Update 6/17/2025: im naming him fern now :D)
 
 leaf mascot real?
 
@@ -26,6 +26,7 @@ import {
     Player,
     Block,
 } from "@minecraft/server";
+
 import './uis/floating_text_editor/index.js'
 import * as mc from "@minecraft/server";
 import './uis/wands/index.js'
@@ -36,13 +37,11 @@ import "./uis/chatranks/index.js";
 import "./uis/nametagplus/ui.js";
 import "./lib/ermwhatthesigma.js";
 import "./uis/zones/index.js";
-import "./uis/landclaims/index.js";
 import "./uis/basic/playerSelector.js";
 import "./features/clog.js";
 import "./uis/warps/index.js";
 import "./commands/broadcast.js";
 import './uis/emoji_selector/root.js'
-import "./uis/CustomCommandsV2/index.js";
 import "./uis/importer.js";
 import uiManager from "./uiManager.js";
 import "./uis/softcoded/root.js";
@@ -89,9 +88,11 @@ import "./commands/help";
 import "./commands/uisList";
 import "./commands/warp.js";
 import "./commands/speakas.js";
+import './commands/lore'
 import "./uis/chests/add";
 import "./uis/chests/edit";
 import "./uis/chests/editItems";
+import './features/hivekb.js'
 import "./uis/chests/addItem";
 import "./uis/chests/editItem";
 import "./uis/sidebar/root";
@@ -211,7 +212,17 @@ import auctionhouse from "./api/AH/auctionhouse.js";
 import "./bcd.js";
 import scripting from "./api/scripting.js";
 import { rpgiabIconPack } from "./icon_packs/rpgiab.js";
+import "./uis/CustomCommandsV2/index.js";
+import "./uis/landclaims/index.js";
 import proximityChat from "./api/other/proximityChat.js";
+import { initiallyLoadCommands } from "./uis/CustomCommandsV2/handler.js";
+import './api/PlayerActivityTracking/index.js'
+import './uis/confapi.js'
+import './versionUtils.js'
+uiBuilder.db.waitLoad().then(()=>{
+    initiallyLoadCommands();
+    // uiBuilder.createContentStorageDump("TestingStorageDump", "TestingStorageDump", "", false)
+})
 // uiBuilder.importUI()
 // world.sendMessage("AAAAAAAAAAAAA")
 
@@ -5307,6 +5318,33 @@ let blockTests = [
         },
     },
 ];
+let entityTests = [
+    {
+        name: "Get variant",
+        use(entity, player) {
+            if(!(entity instanceof mc.Entity)) return;
+            player.sendMessage(`${entity.getComponent('npc').skinIndex}`);
+        }
+    }
+]
+world.beforeEvents.playerInteractWithEntity.subscribe((e) => {
+    // if (!e.isFirstEvent) return;
+    if (!e.itemStack || e.itemStack.typeId != "leaf:entity_devtool") return;
+    if (!e.player.hasTag("dev")) return e.player.error("You must have dev tag");
+    e.cancel = true;
+    // if (!e.isFirstEvent) return;
+    system.run(() => {
+        let form = new ActionForm();
+        form.title("Entity Dev Tool");
+        for (const test of entityTests) {
+            form.button(test.name, null, (player) => {
+                test.use(e.target, player);
+            });
+        }
+        form.show(e.player, false, () => {});
+    });
+});
+
 world.beforeEvents.playerInteractWithBlock.subscribe((e) => {
     if (!e.isFirstEvent) return;
     if (!e.itemStack || e.itemStack.typeId != "leaf:block_devtool") return;
@@ -5511,7 +5549,19 @@ leafFormatter.addFunction("ranks", (callVars, sessionData) => {
 //         return '§7'
 //     }
 // })
+// commandManager.addCommand("a", {description: "bv"}, ({msg})=>{
+//     let { x, y, z } = msg.sender.location;
+//     let loc = {x, y: y - 10, z};
+//     let dim = msg.sender.dimension;
+//     let item = new mc.ItemStack("minecraft:diamond");
+//     system.runInterval(()=>{
+//         // if(!(dim instanceof mc.Dimension)) return;
+//         for(let i = 0;i < 50;i++) {
+//             dim.spawnItem(item, loc)
 
+//         }
+//     })
+// })
 commandManager.addCommand("ah", { aliases: ["auctionhouse"] }, ({ msg }) => {
     let player = msg.sender;
     let loc = {

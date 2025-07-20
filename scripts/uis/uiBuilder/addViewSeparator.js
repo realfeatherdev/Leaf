@@ -2,7 +2,7 @@ import uiBuilder from "../../api/uiBuilder";
 import { ActionForm, ModalForm } from "../../lib/form_func";
 import uiManager from "../../uiManager";
 import versionData from "../../versionData";
-import { NUT_UI_TAG, NUT_UI_THEMED } from "../preset_browser/nutUIConsts";
+import { NUT_UI_HEADER_BUTTON, NUT_UI_TAG, NUT_UI_THEMED } from "../preset_browser/nutUIConsts";
 import { themes } from "./cherryThemes";
 
 uiManager.addUI(
@@ -26,8 +26,11 @@ uiManager.addUI(
         form.title(
             `${NUT_UI_TAG}${themString}§r${
                 index >= 0 ? "Edit" : "Add"
-            } Separator`
+            } View Separator`
         );
+        form.button(`${NUT_UI_HEADER_BUTTON}§r§cBack\n§7Click to go back`, `textures/azalea_icons/2`, player=>{
+            uiManager.open(player, index == -1 ? versionData.uiNames.UIBuilderEditButtons : versionData.uiNames.UIBuilderEditButton, id, index == -1 ? null : index)
+        })
         form.button(
             `§eSet Properties§c*\n§7Sets the label & condition`,
             null,
@@ -152,6 +155,17 @@ uiManager.addUI(
                 }
             );
         }
+        form.divider();
+        form.label("§6HOW TO USE:")
+        form.label("§dView separators §fwill apply §epermissions §fto §aall §fcomponents below it until the next §dview separator")
+        form.label("§dView separators §fcan also §cclear §fthings. This will only clear when showing the UI, only affecting the player who opened the UI, and wont affect your UI configuration.")
+        form.label([
+            "§cClear Modes:",
+            "§c- §fNONE: §7Do not clear anything. Purely just apply permissions.",
+            "§c- §fALL: §7Clear everything above this view separator that may be visible to the player. Will not affect things under it.",
+            "§c- §fVIEW: §7Choose which views to clear, assuming they are visible to the player in the first place",
+            "§c- §fNOTDEFAULT: §7Clear all views other than the default view (the view above all view separators)"
+        ].join('\n§r'))
 
         form.show(player, false, () => {});
     }

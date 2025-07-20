@@ -61,6 +61,8 @@ uiManager.addUI(
         modalForm.dropdown("Name Color", dropdownOpts, nameColorIndex);
         modalForm.dropdown("Bracket Color", dropdownOpts, bracketColorIndex);
         modalForm.dropdown("Message Color", dropdownOpts, messageColorIndex);
+        modalForm.textField("Hide with Tags (optional)", "...", rank && rank.hideWithTags ? rank.hideWithTags.join(', ') : "", ()=>{}, "Hide this rank when any of these tags are on the player")
+        modalForm.toggle("Hide rank in chat?", rank && rank.hideInChat ? rank.hideInChat : false, ()=>{}, "The absolute most useless toggle!")
         modalForm.show(player, false, (player, response) => {
             if (!response.formValues[0] && tag) {
                 ranks.deleteRank(tag);
@@ -76,7 +78,9 @@ uiManager.addUI(
                 opts[response.formValues[3]].colorCode,
                 opts[response.formValues[4]].colorCode,
                 opts[response.formValues[5]].colorCode,
-                response.formValues[2]
+                response.formValues[2],
+                response.formValues[6].split(',').map(_=>_.trim()).filter(_=>_.length > 0),
+                response.formValues[7]
             );
             uiManager.open(player, versionData.uiNames.ChatRanks.Ranks.Edit);
         });

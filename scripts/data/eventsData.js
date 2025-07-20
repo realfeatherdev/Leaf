@@ -1,5 +1,6 @@
 import { EntityDamageCause, system, world } from "@minecraft/server";
 import actionParser from "../api/actionParser";
+import { formatStr } from "../api/azaleaFormatting";
 
 let eventsRan = {};
 
@@ -25,7 +26,7 @@ export default [
         },
         setup: (run) => {
             world.afterEvents.entityDie.subscribe((e) => {
-                if (e.deadEntity == "minecraft:player") {
+                if (e.deadEntity.typeId == "minecraft:player") {
                     run({ player1: e.deadEntity });
                 }
             });
@@ -252,4 +253,49 @@ export default [
         ],
         runWhen: (opts) => !opts.disabled,
     },
+    {
+        name: "Global Player Interact",
+        type: 1,
+        icon: "textures/azalea_icons/other/gear",
+        setup(run) {
+            world.beforeEvents.playerInteractWithEntity.subscribe(e=>{
+                if(e.target.typeId !== "minecraft:player" || e.player.typeId !== "minecraft:player") return;
+                run({player1: e.player, player2: e.target});
+            })
+        },
+        run(opts, actions, {player1, player2}) {
+            // world.sendMessage("hi")
+            // if (eventsRan[event.updatedAt]) return;
+            system.run(()=>{
+                for (const action of actions) {
+                    if (action.type == 0) {
+                        // world.sendMessage(formatStr(action.value, player1, {}, {player2}))
+                        try {
+                            let res = actionParser.runAction(player1, formatStr(action.value, player1, {}, {player2}));
+                            // world.sendMessage(`${res}`)
+                        } catch(e) {
+                            // world.sendMessage(`${e}`)
+                        }
+                    }
+                }
+            })
+            // eventsRan[event.updatedAt] = true;
+        },
+        actionTypes: [
+            {
+                type: 0,
+                name: "Command",
+                inputMethod: "string",
+            },
+        ],
+        initOptions: [
+            {
+                name: "playerFilter",
+                display: "Player Filter",
+                type: "condition",
+                player: "player1",
+            },
+        ],
+        runWhen: (opts) => opts.playerFilter == true,
+    }
 ];

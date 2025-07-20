@@ -166,7 +166,7 @@ uiManager.addUI("edit_actions", "a", (player, id, index, buttonIndex) => {
         `${NUT_UI_HEADER_BUTTON}§r§6Back\n§7Click to go back`,
         `textures/azalea_icons/2`,
         (player) => {
-            uiManager.open(player, config.uiNames.UIBuilderEditButtons, id);
+            uiManager.open(player, config.uiNames.UIBuilderEditButton, id, index);
         }
     );
 

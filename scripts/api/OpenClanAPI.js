@@ -46,6 +46,8 @@ configAPI.registerProperty(
     configAPI.Types.Boolean,
     true
 );
+configAPI.registerProperty("ClansNameLengthLimitMax", configAPI.Types.Number, 15)
+configAPI.registerProperty("ClansNameLengthLimitMin", configAPI.Types.Number, 2)
 class OpenClanAPI {
     constructor() {
         this.name = "OpenClanAPI";
@@ -76,9 +78,9 @@ class OpenClanAPI {
     createClan(owner, name) {
         if (!(owner instanceof Player))
             throw new Error("Owner must be a player");
-        if (name.length > 15)
+        if (name.length > configAPI.getProperty("ClansNameLengthLimitMax"))
             throw new Error("Name must be 15 characters or under");
-        if (name.length < 2)
+        if (name.length < configAPI.getProperty("ClansNameLengthLimitMin"))
             throw new Error("Name must be 2 characters or over");
         if (this.db.findFirst({ name: name }))
             throw new Error("Name is already taken");

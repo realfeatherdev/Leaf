@@ -4,6 +4,7 @@ import { SegmentedStoragePrismarine } from "../../prismarineDbStorages/segmented
 import configAPI from "../config/configAPI";
 import playerStorage from "../playerStorage";
 import zones from "../zones";
+import { handleActions } from "../../uis/CustomCommandsV2/handler";
 
 function isPointInCube(px, py, pz, x1, y1, z1, x2, y2, z2) {
     // Ensure the coordinates are ordered correctly (min and max)
@@ -62,7 +63,7 @@ class LandClaims {
     }
     initSystem() {
         system.runInterval(() => {
-            if (!configAPI.getProperty("LandClaims")) return null;
+            // if (!configAPI.getProperty("LandClaims")) return null;
             for (const player of world.getPlayers()) {
                 // // console.warn(player.name)
                 if (!playerMap.has(player.id)) {
@@ -75,10 +76,21 @@ class LandClaims {
                 let currZone = playerMap.get(player.id);
                 // // console.warn(`Zone: ${zone ? zone.id : "null"}, Old Zone: ${currZone ? currZone : "null"}`)
                 if ((zone ? zone.id : null) != currZone) {
+                    if(configAPI.getProperty("LandClaims")) {
+                        player.onScreenDisplay.setActionBar(
+                            `${zone ? zone.data.name : "Wilderness"}`
+                        );
+                    }
+                    if(!zone || zone.data.type != "CLAIM") {
+                        let zone2 = zones.zonesDB.getByID(currZone);
+                        if(zone && zone.data.enter && Array.isArray(zone.data.enter)) {
+                            handleActions(player, zone.data.enter)
+                        }
+                        if(zone2 && zone2.data.exit && Array.isArray(zone2.data.exit)) {
+                            handleActions(player, zone2.data.exit)
+                        }
+                    }
                     playerMap.set(player.id, zone ? zone.id : null);
-                    player.onScreenDisplay.setActionBar(
-                        `${zone ? zone.data.name : "Wilderness"}`
-                    );
                 }
             }
         }, 20);
@@ -147,7 +159,7 @@ class LandClaims {
                               : 0
                       ))
         );
-
+        if(isNaN(price)) price = 0;
         let currency = configAPI.getProperty("LandClaimsCurrency");
         let currencyData = prismarineDb.economy.getCurrency(currency);
         let playerBalance = prismarineDb.economy.getMoney(
@@ -212,7 +224,7 @@ class LandClaims {
                       ))
         );
 
-        return price;
+        return isNaN(price) ? 0 : price;
     }
     async unclaim(id) {
         if (!configAPI.getProperty("LandClaims")) return 1;

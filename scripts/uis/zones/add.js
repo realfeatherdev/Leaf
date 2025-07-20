@@ -1,3 +1,4 @@
+import uiBuilder from "../../api/uiBuilder";
 import zones from "../../api/zones";
 import { ModalForm } from "../../lib/form_func";
 import uiManager from "../../uiManager";
@@ -24,7 +25,7 @@ uiManager.addUI(
         let z2 = 0;
         let doc;
         if (id > -1) {
-            doc = zones.zonesDB.getByID(id);
+            doc = uiBuilder.db.getByID(id);
             name = doc.data.name;
             priority = doc.data.priority;
             x1 = doc.data.x1;
@@ -52,7 +53,7 @@ uiManager.addUI(
             if (id > -1) {
                 priority = response.formValues[1];
                 if (
-                    zones.zonesDB.findFirst({ name: response.formValues[0] }) &&
+                    uiBuilder.db.findFirst({ type: 14, name: response.formValues[0] }) &&
                     response.formValues[0] != name
                 )
                     return;
@@ -65,7 +66,7 @@ uiManager.addUI(
                 doc.data.y2 = y2;
                 doc.data.z1 = z1;
                 doc.data.z2 = z2;
-                zones.zonesDB.overwriteDataByID(doc.id, doc.data);
+                uiBuilder.db.overwriteDataByID(doc.id, doc.data);
             } else {
                 zones.addZone(
                     response.formValues[0],
@@ -79,7 +80,11 @@ uiManager.addUI(
                     []
                 );
             }
-            uiManager.open(player, versionData.uiNames.Zones.Root);
+            if(id > -1) {
+                uiManager.open(player, versionData.uiNames.Zones.Edit, id);
+            } else {
+                uiManager.open(player, versionData.uiNames.UIBuilderRoot)
+            }
         });
     }
 );

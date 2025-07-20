@@ -12,11 +12,11 @@ uiManager.addUI(
     (player, id) => {
         let lb = leaderboardHandler.db.getByID(id);
         let formSquared = new ActionForm();
-        formSquared.title(`${NUT_UI_TAG}Drinkin' "tittyy milk" rn meow`);
+        formSquared.title(`${NUT_UI_TAG}§rEditing Leaderboard`);
         formSquared.button(`${NUT_UI_HEADER_BUTTON}§r§cGo Back\n§7AAAAAAAAAAAAAAAAAAAAA`, `textures/azalea_icons/2`, (player)=>{
             uiManager.open(player, versionData.uiNames.Leaderboards.Root)
         })
-        formSquared.button(`edit settings lol uwu meow`, null, (player) => {
+        formSquared.button(`§aEdit leaderboard\n§7Edit the leaderboard settings`, null, (player) => {
             let form = new ModalForm();
             form.title(`${NUT_UI_MODAL}§r§fEdit Leaderboard`)
             form.toggle("Show Offline Players", lb.data.showOffline);
@@ -49,7 +49,9 @@ uiManager.addUI(
             form.toggle("Disable Ranks", lb.data.disableRanks ? true : false);
             form.toggle("Abbreviate", lb.data.abbreviate ? true : false);
             form.textField("Title Format", "Override the title", lb.data.tf ? lb.data.tf : "", ()=>{})
-            form.textField("List Format", "Override the player list", lb.data.lf ? lb.data.lf : "", ()=>{})
+            form.textField("List Format", "Override the player list", lb.data.lf ? lb.data.lf : "", ()=>{}, "Uses leafs formatting system.\n\n<num> = num, <score> = score")
+            form.textField("Rank Whitelist (Numbers only, comma separated)", "Example: 1, 2, 3", lb.data.nums && lb.data.nums.length ? lb.data.nums.map(_=>_.toString()).join(', ') : "", ()=>{}, "Only show specific rankings. Example: 1, 2, 3 will only show the top 3 players\nLeave empty to disable")
+            form.toggle("Hide Title", lb.data.hideTitle ? true : false, ()=>{}, "Hide the title on the leaderoadwd")
             form.show(player, false, (player, response) => {
                 if (response.canceled)
                     return uiManager.open(
@@ -65,13 +67,15 @@ uiManager.addUI(
                 lb.data.abbreviate = response.formValues[6];
                 lb.data.tf = response.formValues[7];
                 lb.data.lf = response.formValues[8];
+                lb.data.nums = response.formValues[9].split(',').map(_=>_.trim()).map(_=>parseInt(_)).filter(_=>!isNaN(_));
+                lb.data.hideTitle = response.formValues[10]
                 leaderboardHandler.db.overwriteDataByID(lb.id, lb.data);
                 uiManager.open(player, config.uiNames.Leaderboards.Root);
 
                 return;
             });
         });
-        formSquared.button("delete", `textures/azalea_icons/Delete`, (player) => {
+        formSquared.button("§cDelete\n§7Delete this leaderboard", `textures/azalea_icons/Delete`, (player) => {
             uiManager.open(
                 player,
                 versionData.uiNames.Basic.Confirmation,
@@ -96,7 +100,7 @@ uiManager.addUI(
             );
 
         })
-        formSquared.button("move n shake that asss uwu", null, (player) => {
+        formSquared.button("§bMove Leaderboard\n§7Move this leaderboard", null, (player) => {
             uiManager.open(
                 player,
                 versionData.uiNames.Basic.Confirmation,

@@ -20,6 +20,7 @@ configAPI.registerProperty(
 );
 uiManager.addUI(config.uiNames.SuperMisc, "Super Misc", (player) => {
     let form = new ModalForm();
+    form.title("Super Misc Toggles")
     form.toggle(
         "Disable Entity Property Editor on Player Bugfix (Legacy Toggle)",
         configAPI.getProperty("disable_entity_property_editor_on_player_bugfix")

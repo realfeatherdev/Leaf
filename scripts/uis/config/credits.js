@@ -64,6 +64,11 @@ let creditsList = [
         // message: `i like femboys, but IM NOT GAY I SWEAR ON MY LIFE >_<`
         message: `helped somewhat but kinda useless now ngl`,
     },
+
+    {
+        type: "label",
+        text: "Other Credits"
+    },
     {
         name: `§vFeRaSs1429`,
         role: `Dark Mode Pack`,
@@ -73,6 +78,14 @@ let creditsList = [
         message: `sample text`,
         icon: `textures/minidevs/FeRaSs1429`,
     },
+    {
+        name: `bakedpotato4747`,
+        role: `Toast System`,
+        socials: {
+            discord: `bakedpotato4747`
+        },
+        message: `...`
+    }
 ];
 
 uiManager.addUI(
@@ -80,7 +93,7 @@ uiManager.addUI(
     "Credits",
     (player, index = -1) => {
         let form = new ActionForm();
-        form.title(NUT_UI_TAG+NUT_UI_THEMED+themes[53][0]+"§r§0Credits");
+        form.title(NUT_UI_TAG+NUT_UI_THEMED+themes[25][0]+"§r§fCredits");
         if (useNewCreditsUI) {
             if (index == -1) {
                 let form = new ActionForm();
@@ -94,6 +107,10 @@ uiManager.addUI(
                 );
                 for (let i = 0; i < creditsList.length; i++) {
                     let entry = creditsList[i];
+                    if(creditsList[i].type == "label") {
+                        form.label(creditsList[i].text);
+                        continue;
+                    }
                     form.button(
                         `${entry.name}\n§r§7${entry.role}`,
                         entry.icon,

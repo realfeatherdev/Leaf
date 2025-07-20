@@ -1,4 +1,6 @@
+import { system } from "@minecraft/server";
 import { prismarineDb } from "../../lib/prismarinedb";
+import { SegmentedStoragePrismarine } from "../../prismarineDbStorages/segmented";
 
 class ConfigAPI {
     constructor() {
@@ -9,14 +11,48 @@ class ConfigAPI {
             Boolean: 3,
         };
         this.propertiesRegistered = {};
-        this.db = prismarineDb.table("BLOSSOM_MODULES");
-        this.db.load();
+        this.db1 = prismarineDb.table("BLOSSOM_MODULES"); // old db
+        // this.db1.load();
+        this.db = prismarineDb.customStorage("LEAF_MODULES", SegmentedStoragePrismarine);
+        this.uiManager = null;
+        import("../../uiManager").then(mod=>{
+            this.uiManager = mod.default
+        })
+        this.ready = Promise.all([
+            this.db1.waitLoad(),
+            this.db.waitLoad()
+        ]).then(() => {
+            if (this.db1.data.length && !this.db.findFirst({ type: "__DBTRANSITIONFIX" })) {
+                this.db.data = this.db1.data;
+                this.db.save();
+                this.db.insertDocument({ type: "__DBTRANSITIONFIX" });
+            }
+        });
+        this.onChanges = [];
+        this.initializeScriptevents();
     }
-    registerProperty(name, type, defaultValue = null) {
+    registerProperty(name, type, defaultValue = null, extracfg = {}) {
         this.propertiesRegistered[name] = {
             type,
             defaultValue,
+            ...extracfg
         };
+    }
+    initializeScriptevents() {
+        system.afterEvents.scriptEventReceive.subscribe(e=>{
+            if(e.id == "leafconf:open_editor" && e.sourceEntity && e.sourceEntity.typeId === "minecraft:player") {
+                this.openEditor(e.sourceEntity, e.message)
+            }
+            if(e.id == "leafconf:reset") {
+                this.resetProperty(e.message)
+            }
+        })
+    }
+    openEditor(player, property) {
+        let editor = this.propertiesRegistered[property].editor
+        if(editor && typeof editor === "string" && editor.startsWith('leafgui/')) {
+            this.uiManager.open(player, editor.substring('leafgui/'.length), property)
+        }
     }
     #getPropertyStorageID() {
         let doc = this.db.findFirst({ type: "__CFG" });
@@ -34,7 +70,9 @@ class ConfigAPI {
         this.db.save();
         return id;
     }
-
+    onChangeProperty(fn) {
+        this.onChanges.push(fn)
+    }
     setProperty(property, value) {
         if (!this.propertiesRegistered[property]) return;
         let id = this.#getPropertyStorageID();
@@ -61,9 +99,13 @@ class ConfigAPI {
             !Array.isArray(value)
         )
             throw new Error("Property is not list");
+
         data[property] = value;
         doc.data.data = data;
         this.db.overwriteDataByID(doc.id, doc.data);
+        for(const onChange of this.onChanges) {
+            onChange(property, value)
+        }
         this.db.save();
     }
     resetProperty(property) {

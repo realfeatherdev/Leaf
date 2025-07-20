@@ -12,7 +12,7 @@ export default {
         chatformat: `{{has_tag clan-chat "<nc>:small_diamond: " "<bl>"}}{{is_afk "§7AFK "}}{{clan "<bc>[§r§7<nc>[@CLAN]§r<bc>] "}}{{has_tag staffchat "<bc>[<nc> StaffChat §r<bc>] " "<bl>"}}§r<bc>[ <rc>{{rank_joiner "<drj>"}}§r<bc> ] §r<nc><name> §r§l<bc><dra> §r<mc><msg>`,
     },
     versionInfo: {
-        versionName: "3.0",
+        versionName: "3.1",
         versionInternalID: 10, // 1 starts with october 2024 update
         versionData: new Map([
             [
@@ -148,6 +148,11 @@ export default {
         ImportUI: "ui_import | Leaf/Import/UI",
         Lock: "lock | Leaf/ChestLocking/Lock",
         UIBuilderRoot: "ui_builder_main_page",
+        UIBuilderTodo: {
+            Root: "ui_builder_todo_root | Leaf/UIBuilder/ToDo/Root",
+            Add: "ui_builder_todo_add | Leaf/UIBuilder/ToDo/Root/Add/Stop/Using/This/Fucking/Format",
+            Edit: "ui_builder_todo_edit | Leaf/UIBuilder/ToDo/Edit"
+        },
         CustomizerSettings: "customizer_settings | Leaf/Customizer/Settings",
         UIBuilderTrash: "ui_builder_trash | Leaf/UIBuilder/Trash",
         UIBuilderAddSeparator:
@@ -159,6 +164,7 @@ export default {
         UIBuilderEdit: "ui_builder_edit_ui | Leaf/UIBuilder/Edit",
         UIBuilderEditButtons:
             "ui_builder_edit_buttons | Leaf/UIBuilder/EditButtons",
+        UIBuilderAddPoll: "ui_builder_add_poll | Leaf/UIBuilder/AddPoll",
         UIBuilderAddButton: "ui_builder_add_button | Leaf/UIBuilder/AddButton",
         UIBuilderEditButton:
             "ui_builder_edit_button | Leaf/UIBuilder/EditButton",
@@ -185,6 +191,8 @@ export default {
         },
         CustomCommandsV2: {
             create: "create_custom_command | Leaf/CustomCommands/Create",
+            edit: "edit_commands | Leaf/CustomCommands/Edit",
+            editActions: "edit_command_actions | Leaf/CustomCommands/Actions"
         },
         // what the FUCK fruitkitty
         // what is this!?
@@ -394,6 +402,12 @@ export default {
                 Manual: "warps_wizard_manual | Leaf/Warps/Wizard/Manual",
             },
         },
+        ConfAPI: "confapi_edit | Leaf/ConfEdit",
+        ConfAPIRoot: "confapi_root | Leaf/ConfRoot",
+        ConfAPIPresets: "confapi_preset | Leaf/ConfEdit/Presets",
+        ConfigAPIEditors: {
+            GenericStringListEditor: "generic_string_list_editor"
+        },
         Homes: {
             Root: "homes | Leaf/Homes/Root",
             Create: "homes_create | Leaf/Homes/Create",
@@ -419,7 +433,7 @@ export default {
             "https://i.ibb.co/Sx1cF3h/c9268706406510b05e280005280a86ef.png",
         Username: "Leaf Essentials",
     },
-    HTTPEnabled: true,
+    HTTPEnabled: false,
     Endpoint: "https://mcbetools.com/api/leaf",
     items: {
         LeafConfig: "leaf:config_ui",

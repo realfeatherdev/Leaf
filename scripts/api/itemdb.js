@@ -19,6 +19,7 @@ import {
     ScriptEventSource,
     ItemStack,
     BlockVolume,
+    EntityEquippableComponent,
 } from "@minecraft/server";
 // import { playerStorage } from "./apis/PlayerStorage";
 import { prismarineDb } from "../lib/prismarinedb";
@@ -44,6 +45,8 @@ export async function saveInventory(player, invName) {
     for (let i = 0; i < 36; i++) {
         invStash.setItem(i, inv.getItem(i));
     }
+    // if(!(equipment instanceof EntityEquippableComponent)) return;
+    // equipment.
     for (let i = 0; i < 5; i++) {
         invStash.setItem(i + 36, equipment.getEquipment(equipmentSlots[i]));
     }

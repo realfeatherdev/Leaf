@@ -46,6 +46,7 @@ uiManager.addUI(
         form.title(
             `${NUT_UI_TAG}${NUT_UI_THEMED}${themes[4][0]}§rPreset Browser`
         );
+        form.label(`textures/leaf_dyn_images/wip.png`)
         // form.body("No presets are here yet. Go to the leaf essentials discord server and submit your UIs! (also if you want, you can send a minecraft skin from namemc and a name to have your own profile here)")
         form.button(
             `${NUT_UI_HEADER_BUTTON}§r§c§lGo Back\n§r§7Click this button to go back to main settings`,

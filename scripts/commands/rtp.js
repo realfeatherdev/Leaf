@@ -9,11 +9,13 @@ import {
 import commandManager from "../api/commands/commandManager";
 import configAPI from "../api/config/configAPI";
 import { prismarineDb } from "../lib/prismarinedb";
+import { XZToChunkCoordinates } from "../api/PlayerActivityTracking/common";
+import playerActivityTracking from "../api/PlayerActivityTracking/index";
 
 function randomNumber(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-
+configAPI.registerProperty("SmartRTP", configAPI.Types.Boolean, true)
 function generateRandomLocation() {
     let radius = configAPI.getProperty("RTPRadius");
     let x = randomNumber(-radius, radius);
@@ -42,7 +44,7 @@ function startRTP(player) {
         },
         fadeTime: {
             fadeInTime: 0.1,
-            holdTime: 10,
+            holdTime: 1.2,
             fadeOutTime: 0,
         },
     });
@@ -72,6 +74,23 @@ function startRTP(player) {
             let foundBlock = false;
             function reroll() {
                 let randomLocation = generateRandomLocation();
+                let running = configAPI.getProperty("ChunkTracking") && configAPI.getProperty("SmartRTP") ? true : false;
+                let iter = 0;
+                while(running) {
+                    iter++;
+                    randomLocation = generateRandomLocation()
+                    if(iter > 15) {
+                        running = false;
+                        break;
+                    }
+                    let a = XZToChunkCoordinates(randomLocation.x, randomLocation.z);
+                    let x2 = a.x;
+                    let z2 = a.z;
+                    if(playerActivityTracking.getChunkScore(x2, z2) >= 24.1334) {
+                        running = false;
+                        break;
+                    }
+                }
                 x = randomLocation.x;
                 z = randomLocation.z;
                 y = sender.dimension.heightRange.max;

@@ -5,11 +5,15 @@ import { parseCommand } from "./parseCommand";
 import configAPI from "../config/configAPI";
 import { combatMap } from "../../features/clog";
 
+configAPI.registerProperty("Prefix", configAPI.Types.String, "!")
+
 class CommandManager {
     constructor() {
-        this.prefix = "!";
         this.cmds = prismarineDb.nonPersistentTable("Commands");
         this.subcmds = prismarineDb.nonPersistentTable("SubCommands");
+    }
+    get prefix() {
+        return configAPI.getProperty("Prefix")
     }
     addCommand(name, data, callback) {
         this.cmds.waitLoad().then(() => {
@@ -45,7 +49,9 @@ class CommandManager {
         return permsList;
     }
     removeCmd(name) {
-        this.cmds.deleteFirstDocumentByQuery({ name });
+        let cmd = this.cmds.findFirst({ name });
+        if(!cmd) return;
+        this.cmds.deleteDocumentByID(cmd.id)
         for (const subcmd of this.subcmds.findDocuments({ parent: name })) {
             this.subcmds.deleteDocumentByID(subcmd.id);
         }

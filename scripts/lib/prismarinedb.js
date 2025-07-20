@@ -1724,6 +1724,9 @@ var Economy = class {
                         default: true,
                     })
                 ) {
+                    system.run(()=>{
+                        world3.scoreboard.addObjective("money");
+                    })
                     __privateGet(this, _table).insertDocument({
                         default: true,
                         symbol: "$",
@@ -1789,6 +1792,13 @@ var Economy = class {
                 displayName,
             });
         }
+        system.run(()=>{
+            try {
+                if(!world3.scoreboard.getObjective(scoreboard)) {
+                    world3.scoreboard.addObjective(scoreboard)
+                }
+            } catch {}
+        })
     }
     deleteCurrency(scoreboard) {
         let doc2 = __privateGet(this, _table).findFirst({
@@ -1856,11 +1866,15 @@ var Economy = class {
             let scoreboard = world3.scoreboard.getObjective(
                 currency.scoreboard
             );
-            if (!scoreboard)
-                scoreboard = world3.scoreboard.addObjective(
-                    currency.scoreboard,
-                    currency.scoreboard
-                );
+            if (!scoreboard) {
+                system.run(()=>{
+                    scoreboard = world3.scoreboard.addObjective(
+                        currency.scoreboard,
+                        currency.scoreboard
+                    );
+                })
+                return 0;
+            }
             let score = 0;
             try {
                 score = scoreboard.getScore(player);

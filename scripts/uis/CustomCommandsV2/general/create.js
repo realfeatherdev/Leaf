@@ -4,6 +4,7 @@ import { ModalForm } from "../../../lib/form_func";
 import uiManager from "../../../uiManager";
 import versionData from "../../../versionData";
 import { NUT_UI_MODAL } from "../../preset_browser/nutUIConsts";
+import { reRegisterCommands } from "../handler";
 
 function resetCommands() {
     commandManager;
@@ -43,11 +44,11 @@ uiManager.addUI(
             "Category for your command",
             command ? command.data.category : ""
         );
-        modalForm.textField(
-            "Required Condition (optional)",
-            "Required condition for your command",
-            command ? command.data.requiredTag : ""
-        );
+        // modalForm.textField(
+        //     "Required Condition (optional)",
+        //     "Required condition for your command",
+        //     command ? command.data.requiredTag : ""
+        // );
         modalForm.toggle(
             "Ensure chat is closed?",
             command ? command.data.ensureChatClosed : false,
@@ -61,17 +62,25 @@ uiManager.addUI(
                     response.formValues[1],
                     response.formValues[2],
                     response.formValues[3],
-                    response.formValues[4],
-                    response.formValues[5]
+                    // response.formValues[4],
+                    response.formValues[4]
                 );
+                reRegisterCommands()
+
             } else {
+                if(command.data.name != response.formValues[0]) {
+                    try {
+                        commandManager.removeCmd(command.data.name)
+                    } catch {}
+                }
                 command.data.name = response.formValues[0];
                 command.data.command = response.formValues[1];
                 command.data.description = response.formValues[2];
                 command.data.category = response.formValues[3];
-                command.data.requiredTag = response.formValues[4];
-                command.data.ensureChatClosed = response.formValues[5];
+                // command.data.requiredTag = response.formValues[4];
+                command.data.ensureChatClosed = response.formValues[4];
                 uiBuilder.db.overwriteDataByID(command.id, command.data);
+                reRegisterCommands()
             }
         });
     }

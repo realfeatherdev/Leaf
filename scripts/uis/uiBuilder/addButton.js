@@ -124,6 +124,8 @@ uiManager.addUI(
                 data.nutUIColorCondition = button.nutUIColorCondition
                     ? button.nutUIColorCondition
                     : "";
+                data.disabled = button.disabled ? true : false;
+                data.allowSellAll = button.allowSellAll ? true : false;
             } else {
                 // Load existing button data if editing
                 if (initial && index > -1) {
@@ -172,12 +174,15 @@ uiManager.addUI(
                     data.nutUIColorCondition = button.nutUIColorCondition
                         ? button.nutUIColorCondition
                         : "";
+                    data.disabled = button.disabled ? true : false;
+                    data.allowSellAll = button.allowSellAll ? true : false;
                 } else {
                     if (initial) {
                         data.sellButtonEnabled = false;
                         data.sellButtonPrice = 20;
                         data.sellButtonItem = "minecraft:coal";
                         data.sellButtonItemCount = 4;
+                        data.allowSellAll = false;
                         // Initialize buy button data
                         data.buyButtonEnabled = false;
                         data.buyButtonPrice = 20;
@@ -208,6 +213,10 @@ uiManager.addUI(
             NUT_UI_HEADER_BUTTON + "§r§cBack\n§7Go back",
             `textures/azalea_icons/2`,
             (player) => {
+                if(index > -1) {
+                    uiManager.open(player, config.uiNames.UIBuilderEditButton, id, index);
+                    return;
+                }
                 uiManager.open(player, config.uiNames.UIBuilderEditButtons, id);
             }
         );
@@ -375,6 +384,7 @@ uiManager.addUI(
                             ? data.sellButtonScoreboard
                             : "money"
                     );
+                    modal.toggle("Allow Sell All", data.allowSellAll ? true : false)
                     modal.show(player, false, (player, response) => {
                         data.sellButtonEnabled = response.formValues[0];
                         data.sellButtonItem = response.formValues[1];
@@ -383,6 +393,7 @@ uiManager.addUI(
                             ? parseInt(response.formValues[3])
                             : 0;
                         data.sellButtonScoreboard = response.formValues[4];
+                        data.allowSellAll = response.formValues[5];
                         uiManager.open(
                             player,
                             config.uiNames.UIBuilderAddButton,
@@ -628,7 +639,7 @@ uiManager.addUI(
                         );
                     }
                 );
-
+                if(!data.displayOverrides) data.displayOverrides = [];
                 // List existing overrides
                 for (let i = 0; i < data.displayOverrides.length; i++) {
                     const override = data.displayOverrides[i];
@@ -921,6 +932,7 @@ uiManager.addUI(
                             sellButtonItem: data.sellButtonItem,
                             sellButtonItemCount: data.sellButtonItemCount,
                             sellButtonPrice: data.sellButtonPrice,
+                            allowSellAll: data.allowSellAll ? true : false
                         };
                     }
 

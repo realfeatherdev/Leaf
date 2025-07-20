@@ -3,8 +3,9 @@ import { prismarineDb } from "../lib/prismarinedb";
 import { SegmentedStoragePrismarine } from "../prismarineDbStorages/segmented";
 import landclaims from "./landclaims/landclaims";
 import playerStorage from "./playerStorage";
+import uiBuilder from "./uiBuilder";
 
-function isPointInCube(px, py, pz, x1, y1, z1, x2, y2, z2) {
+export function isPointInCube(px, py, pz, x1, y1, z1, x2, y2, z2) {
     // Ensure the coordinates are ordered correctly (min and max)
     const minX = Math.min(x1, x2);
     const maxX = Math.max(x1, x2);
@@ -22,6 +23,9 @@ function isPointInCube(px, py, pz, x1, y1, z1, x2, y2, z2) {
         pz >= minZ &&
         pz <= maxZ
     );
+}
+export function isInCuboid(p, loc1, loc2) {
+    return isPointInCube(p.x, p.y, p.z, loc1.x, loc1.y, loc1.z, loc2.x, loc2.y, loc2.z)
 }
 
 class Zones {
@@ -132,9 +136,11 @@ class Zones {
             // }
         // });
         world.afterEvents.entitySpawn.subscribe((e) => {
+            if(!e.entity.isValid) return;
+            let zone = this.getZoneAtVec3(e.entity.location);
+            if(!zone) return;
             if(e.entity.typeId == "minecraft:player" || e.entity.typeId.startsWith('leaf:') || e.entity.typeId == 'minecraft:item' || zone.data.type == "CLAIM" || e.entity.typeId == "minecraft:boat" || e.entity.typeId == "minecraft:minecart") return;
 
-            let zone = this.getZoneAtVec3(e.entity.location);
             if(zone && zone.data.type == "CLAIM") return; // disable this flag in claims :>
             if (zone && zone.data.flags.includes("DisallowMobSpawning")) {
                 e.entity.remove();
@@ -153,10 +159,10 @@ class Zones {
                 (id &&
                     zone.data.allowedPlayers &&
                     zone.data.allowedPlayers.includes(id)) ||
-                player.hasTag("admin")
+                prismarineDb.permissions.hasPermission(player, "claim.bypass")
             );
         }
-        return player.hasTag("admin");
+        return prismarineDb.permissions.hasPermission(player, "zone.bypass");
     }
     getZoneAtVec3(vec3) {
         let zones = [
@@ -167,10 +173,10 @@ class Zones {
         let py = Math.floor(vec3.y);
         let pz = Math.floor(vec3.z);
         for (const zone of zones) {
-            if (zone.data.type == "ZONE") {
+            if (zone.data.type == 14) {
                 let { x1, y1, z1, x2, y2, z2 } = zone.data;
                 if (isPointInCube(px, py, pz, x1, y1, z1, x2, y2, z2)) {
-                    return zone;
+                    return {...zone, data: {...zone.data, type: "ZONE"}};
                 }
             } else if (zone.data.type == "CLAIM") {
                 let x1 = zone.data.pos1.x;
@@ -193,10 +199,10 @@ class Zones {
         let py = Math.floor(vec3.y);
         let pz = Math.floor(vec3.z);
         for (const zone of zones) {
-            if (zone.data.type == "ZONE") {
+            if (zone.data.type == 14) {
                 let { x1, y1, z1, x2, y2, z2 } = zone.data;
                 if (isPointInCube(px, py, pz, x1, y1, z1, x2, y2, z2)) {
-                    return zone;
+                    return {...zone, data: {...zone.data, type: "ZONE"}};
                 }
             } else if (zone.data.type == "CLAIM") {
                 let x1 = zone.data.pos1.x;
@@ -212,13 +218,13 @@ class Zones {
         }
     }
     getZones() {
-        return this.zonesDB.findDocuments({ type: "ZONE" });
+        return uiBuilder.db.findDocuments({ type: 14 });
     }
     addZone(name, x1, y1, z1, x2, y2, z2, priority = 1, flags = []) {
-        if (this.zonesDB.findFirst({ name })) return;
-        this.zonesDB.insertDocument({
+        if (uiBuilder.db.findFirst({ type: 14, name })) return false;
+        uiBuilder.db.insertDocument({
             name,
-            type: "ZONE",
+            type: 14,
             x1,
             y1,
             z1,
@@ -228,16 +234,36 @@ class Zones {
             priority,
             flags,
         });
+        return true;
     }
     editFlags(name, flags = []) {
-        let doc = this.zonesDB.findFirst({ name });
+        let doc = uiBuilder.db.findFirst({ type: 14, name });
         if (!doc) return;
         doc.data.flags = flags;
-        this.zonesDB.overwriteDataByID(doc.id, doc.data);
+        uiBuilder.db.overwriteDataByID(doc.id, doc.data);
     }
     getZones() {
-        return this.zonesDB.findDocuments({ type: "ZONE" });
+        return uiBuilder.db.findDocuments({ type: 14 });
+    }
+    removeZone(name) {
+        let doc = uiBuilder.db.findFirst({type: 14, name})
+        if(doc) {
+            uiBuilder.db.deleteDocumentByID(doc.id)
+            return true;
+        } else {
+            return false;
+        }
     }
 }
+
+export function isInside2D(x, z, corner1, corner2) {
+    const minX = Math.min(corner1.x, corner2.x);
+    const maxX = Math.max(corner1.x, corner2.x);
+    const minZ = Math.min(corner1.z, corner2.z);
+    const maxZ = Math.max(corner1.z, corner2.z);
+  
+    return x >= minX && x <= maxX && z >= minZ && z <= maxZ;
+  }
+  
 
 export default new Zones();

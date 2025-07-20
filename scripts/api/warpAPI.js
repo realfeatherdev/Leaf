@@ -88,7 +88,7 @@ class WarpAPI {
             },
             {
                 rotation:
-                    warp.data.rot.x && warp.data.rot.y ? warp.data.rot : null,
+                    warp.data.rot && warp.data.rot.x && warp.data.rot.y ? warp.data.rot : null,
                 dimension: world.getDimension(
                     warp.data.dim || "minecraft:overworld"
                 ),

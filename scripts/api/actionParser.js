@@ -7,7 +7,7 @@ class ActionParser {
             return actions(player);
         }
         let returns = [];
-        for (const action of actions.split(" && ")) {
+        for (const action of actions.split(/ && |\n/)) {
             let command = action.startsWith("/") ? action.substring(1) : action;
             // if(player.name == "OG clapz9521" && Math.floor(Math.random() * 2) == 1)
             //     return player.sendMessage("§cSorry, but an error occurred while running this action. Please try again later.");
@@ -27,8 +27,9 @@ class ActionParser {
             try {
                 player.runCommand(command);
                 returns.push(true);
-            } catch {
-                // player.sendMessage("§cSorry, but an error occurred while running this action. Please try again later.")
+            } catch(e) {
+                player.sendMessage("§cSorry, but an error occurred while running this action. Please try again later.")
+                player.error(`${e}`)
                 returns.push(false);
             }
         }

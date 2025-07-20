@@ -7,6 +7,9 @@ import { themes } from "../uiBuilder/cherryThemes";
 uiManager.addUI(versionData.uiNames.DevHub, "Developer Hub", (player) => {
     let form = new ActionForm();
     form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[4][0]}§rDev Hub`);
+    form.button(`Config API Editor\nEdit leafs misc settings. (will not include customizer)`, `textures/items/config_ui`, (player)=>{
+        uiManager.open(player, versionData.uiNames.ConfAPIRoot)
+    })
     if (player.hasTag("leaf:debug-modeOwOUwUKawaii :3 Nya~~~")) {
         form.button(`Disable debug tools for all UIs`, null, (player) => {
             player.removeTag("leaf:debug-modeOwOUwUKawaii :3 Nya~~~");

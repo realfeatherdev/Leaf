@@ -2,6 +2,8 @@ import commandManager from "../api/commands/commandManager";
 import playerStorage from "../api/playerStorage";
 import config from "../versionData";
 import { prismarineDb } from "../lib/prismarinedb";
+import { ItemStack, PotionLiquidType } from "@minecraft/server";
+import { MinecraftPotionEffectTypes, MinecraftPotionLiquidTypes, MinecraftPotionModifierTypes } from "../node_modules/@minecraft/vanilla-data/lib/index";
 
 commandManager.addCommand(
     "help",
@@ -103,6 +105,20 @@ commandManager.addSubcommand(
     { description: "Get your player ID" },
     ({ msg }) => {
         msg.sender.sendMessage(playerStorage.getID(msg.sender));
+    }
+);
+commandManager.addSubcommand(
+    "help",
+    "my-rotation",
+    { description: "Get your player rotation" },
+    ({ msg }) => {
+        msg.sender.sendMessage(`X: ${msg.sender.getRotation().x}, Y: ${msg.sender.getRotation().y}`);
+        // let potion = ItemStack.createPotion({
+        //     effect: MinecraftPotionEffectTypes.,
+        //     liquid: MinecraftPotionLiquidTypes.Regular,
+        //     modifier: MinecraftPotionModifierTypes.Normal
+        // })
+        // msg.sender.getComponent('inventory').container.addItem(potion)
     }
 );
 commandManager.addSubcommand(

@@ -1,8 +1,9 @@
-import { world } from "@minecraft/server";
+import { system, world } from "@minecraft/server";
 import { colors, prismarineDb } from "../lib/prismarinedb";
 import { SegmentedStoragePrismarine } from "../prismarineDbStorages/segmented";
 import configAPI from "./config/configAPI";
 
+// await system.waitTicks(0)
 configAPI.registerProperty("CreatedAdminRank", configAPI.Types.Boolean, false);
 configAPI.registerProperty("UseNewRanks", configAPI.Types.Boolean, true);
 configAPI.registerProperty("SingleRankMode", configAPI.Types.Boolean, false);
@@ -38,7 +39,7 @@ class Ranks {
     validColor(col) {
         return colors.isValidColorCode(col) || col == "default";
     }
-    createRank(tag, name, nameColor, bracketColor, messageColor, priority = 1) {
+    createRank(tag, name, nameColor, bracketColor, messageColor, priority = 1, hideWithTags = [], hideInChat = false) {
         if (tag == "" || typeof tag !== "string") return;
         let doc = {
             type: "RANK",
@@ -48,6 +49,8 @@ class Ranks {
             bracketColor,
             messageColor,
             priority,
+            hideWithTags,
+            hideInChat
         };
         if (!this.validColor(nameColor)) return;
         if (!this.validColor(bracketColor)) return;
@@ -60,6 +63,7 @@ class Ranks {
             this.ranksDb.insertDocument(doc);
         }
     }
+
     deleteRank(tag) {
         let doc = this.ranksDb.findFirst({ tag });
         if (doc) this.ranksDb.deleteDocumentByID(doc.id);

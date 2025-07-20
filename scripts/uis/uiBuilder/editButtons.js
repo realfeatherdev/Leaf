@@ -14,6 +14,7 @@ import {
 } from "../preset_browser/nutUIConsts";
 import { themes } from "./cherryThemes";
 import { ActionFormData } from "@minecraft/server-ui";
+import versionData from "../../versionData";
 
 uiManager.addUI(
     config.uiNames.UIBuilderEditButtons,
@@ -371,12 +372,39 @@ uiManager.addUI(
                             );
                         }
                         addMenu.button(
-                            "§dView Separator\n§7Invisible utility component",
+                            "§6Add View Separator\n§7Mass permissions",
                             "textures/azalea_icons/other/door",
                             (player) => {
                                 uiManager.open(
                                     player,
                                     config.uiNames.UIBuilderAddSeparator,
+                                    id
+                                );
+                            }
+                        );
+                        if(form.data.pag) {
+                            if(!form.data.buttons.find(_=>_.type == 'pagstart')) {
+                                addMenu.button(`§2Pagination Start\n§7Start pagination here`, `textures/azalea_icons/other/play`, (player)=>{
+                                    form.data.buttons.push({id: Date.now(), type:"pagstart"})
+                                    uiBuilder.db.overwriteDataByID(form.id, form.data)
+                                    uiManager.open(player, versionData.uiNames.UIBuilderEditButtons, id, multiselect, selectingButton, response)
+                                })
+                            }
+                            if(!form.data.buttons.find(_=>_.type == 'pagend')) {
+                                addMenu.button(`§nPagination End\n§7End pagination here`, `textures/azalea_icons/other/stop`, (player)=>{
+                                    form.data.buttons.push({id: Date.now(), type:"pagend"})
+                                    uiBuilder.db.overwriteDataByID(form.id, form.data)
+                                    uiManager.open(player, versionData.uiNames.UIBuilderEditButtons, id, multiselect, selectingButton, response)
+                                })
+                            }
+                        }
+                        addMenu.button(
+                            "§eAdd Poll\n§7Allow players to vote",
+                            "textures/azalea_icons/other/clipboard",
+                            (player) => {
+                                uiManager.open(
+                                    player,
+                                    config.uiNames.UIBuilderAddPoll,
                                     id
                                 );
                             }
@@ -507,6 +535,42 @@ uiManager.addUI(
             //     if(!button) continue;
             //     isSnippetBook = true;
             // }
+            if(button.type == "pagstart") {
+                let btnIndex = index;
+                actionForm.button(`§2Pagination Start\n§r§7Pagination starts here`, `textures/azalea_icons/other/play`, (player)=>{
+                    uiManager.open(
+                        player,
+                        config.uiNames.UIBuilderEditButton,
+                        id,
+                        btnIndex
+                    )
+                })
+                continue;
+            }
+            if(button.type == "pagend") {
+                let btnIndex = index;
+                actionForm.button(`§nPagination End\n§r§7Pagination ends here`, `textures/azalea_icons/other/stop`, (player)=>{
+                    uiManager.open(
+                        player,
+                        config.uiNames.UIBuilderEditButton,
+                        id,
+                        btnIndex
+                    )
+                })
+                continue;
+            }
+            if(button.type == "poll") {
+                let btnIndex = index;
+                actionForm.button(`§b[POLL] ${button.title ? button.title : "Unknown"}\n§r§7${button.options.join('§r§7, ')}`, null, (player)=>{
+                    uiManager.open(
+                        player,
+                        config.uiNames.UIBuilderEditButton,
+                        id,
+                        btnIndex
+                    )
+                })
+                continue;
+            }
             if (button.type == "separator") {
                 let clearModes = ["NONE", "ALL", "VIEW", "NOTDEFAULT"];
                 let btnIndex = index;

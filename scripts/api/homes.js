@@ -2,6 +2,7 @@ import { world } from "@minecraft/server";
 import { prismarineDb } from "../lib/prismarinedb";
 import playerStorage from "./playerStorage";
 import configAPI from "./config/configAPI";
+import { SegmentedStoragePrismarine } from "../prismarineDbStorages/segmented";
 /*>:3>:3>:3>:3>:3>:3>:3
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀>:3>:3>:3
 ⠀>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡤⠤⠤⠤⠴⠶⠶⠒⠚⠋⠉⠉⠉⠉⣷⢀⣀⡤⠤⠶⠶⠒⠛⢶⡄⠀⠀⠀
@@ -104,7 +105,16 @@ configAPI.registerProperty(
 configAPI.registerProperty("HomesLimit", configAPI.Types.Number, 5);
 class Homes {
     constructor() {
-        this.db = prismarineDb.table("homes");
+        this.db2 = prismarineDb.table("homes");
+        this.db = prismarineDb.customStorage("homosexual", SegmentedStoragePrismarine);
+        this.db.waitLoad().then(()=>{
+            this.db2.waitLoad().then(()=>{
+                if(this.db2.data.length && !this.db.data.length) {
+                    this.db.data = this.db2.data;
+                    this.db.save();
+                }
+            })
+        })
     }
     createHome(name, player) {
         let owner = playerStorage.getID(player);

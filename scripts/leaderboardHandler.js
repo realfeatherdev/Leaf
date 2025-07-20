@@ -4,6 +4,7 @@ import playerStorage from "./api/playerStorage";
 import playerUtils from "./api/playerUtils";
 import { formatStr } from "./api/azaleaFormatting";
 import scripting from "./api/scripting";
+import { SegmentedStoragePrismarine } from "./prismarineDbStorages/segmented";
 /*
   ∧,,,∧
 (  ̳• · • ̳)
@@ -28,7 +29,17 @@ const abbrNum = (number, decPlaces) => {
 };
 class LeaderboardHandler {
     constructor() {
-        this.db = prismarineDb.table("Leaderboards");
+        this.dbOld = prismarineDb.table("Leaderboards");
+        this.db = prismarineDb.customStorage("V2Leaderboards", SegmentedStoragePrismarine);
+        this.dbOld.waitLoad().then(()=>{
+            this.db.waitLoad().then(()=>{
+                if(this.dbOld.data.length && !this.db.data.length) {
+                    this.db.data = this.dbOld.data;
+                    this.db.save();
+                }
+        
+            })
+        })
         // this.db.clear();
         system.runInterval(() => {
             this.updateLeaderboards();
@@ -109,8 +120,18 @@ class LeaderboardHandler {
                 let dimension = world.getDimension(
                     lb.data.dimension ? lb.data.dimension : "overworld"
                 );
-                let entities = dimension.getEntitiesAtBlockLocation(lb.data.loc);
-                if(entities && entities.length) entities = entities.filter(_=>_.typeId == "leaf:floating_text")
+                try {
+                    if(!dimension.getBlock(lb.data.loc)) {
+                        continue;
+                    }
+                } catch {
+                    continue;
+                }
+                let entities = dimension.getEntities({
+                    type: "leaf:floating_text",
+                    tags: [`lbid:${lb.id}`]
+                })
+                // if(entities && entities.length) entities = entities.filter(_=>_.typeId == "leaf:floating_text")
                 //{
                 //     tags: [`lbid:${lb.id}`],
                 //     type: "leaf:floating_text",
@@ -144,9 +165,10 @@ class LeaderboardHandler {
                 scores = scores.sort((a, b) => b.score - a.score);
                 let num = 0;
                 let limit = lb.data.maxPlayers ? lb.data.maxPlayers : 10;
-                scores = scores.slice(0, limit);
+                scores = lb.data.nums && lb.data.nums.length ? scores : scores.slice(0, limit);
                 for (const score of scores) {
                     num++;
+                    if(lb.data.nums && lb.data.nums.length && !lb.data.nums.includes(num)) continue;
                     // lbText.push(`§e${num}§7. §a${score.playerData.name}§r§f: §7${abbrNum(score.score, 1)}`)
                     let playerText = `${this.themes[lb.data.theme].player}${
                         score.playerData.name
@@ -218,11 +240,10 @@ class LeaderboardHandler {
                 } §r${
                     this.themes[lb.data.theme].headerSurroundings
                 }${"-".repeat(newLength)}`;
+                if(lb.data.hideTitle) lbText.shift()
                 scripting.callHooks(null, "lbOverride", lbText, lb)
-                if(!dimension.getBlock(lb.data.loc)) {
-                    continue;
-                }
-                if (entities && entities.length) {
+
+                if (entities && entities.length && entities[0] && entities[0].isValid) {
                     // // console.warn('a')
                     entities[0].nameTag = lbText.join("\n§r");
                     // for(const entity of entities.slice(1)) {
@@ -230,6 +251,13 @@ class LeaderboardHandler {
                     // }
                 } else {
                     try {
+                        try {
+                            if(!dimension.getBlock(lb.data.loc)) {
+                                continue;
+                            }
+                        } catch {
+                            continue;
+                        }
                         // // console.warn("Entity not found. spawning now.")
                         let entity = dimension.spawnEntity(
                             "leaf:floating_text",

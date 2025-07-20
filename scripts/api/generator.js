@@ -12,6 +12,7 @@ import { ActionForm } from "../lib/form_func";
 import icons from "./icons";
 import playerStorage from "./playerStorage";
 import zones from "./zones";
+import configAPI from "./config/configAPI";
 function directionAndVec3(dir, vec3) {
     if (dir == Direction.Up) {
         return { x: vec3.x, y: vec3.y + 1, z: vec3.z };
@@ -35,12 +36,67 @@ system.runInterval(() => {
 }, 30);
 let db = prismarineDb.customStorage("Generator", SegmentedStoragePrismarine);
 let keyval = await db.keyval("Gens");
+let runningSessions = [];
 class GeneratorAPI {
     constructor() {
         this.db = db;
+        this.cache = prismarineDb.customStorage("GenCache", SegmentedStoragePrismarine)
+        this.cache.waitLoad().then(()=>{
+            // this.cache.clear();
+        })
         this.keyval = keyval;
         // this.db.clear();
         this.#initialize();
+        system.runInterval(()=>{
+            if(!configAPI.getProperty("Generators")) return;
+            for(const cacheDoc of this.cache.data) {
+                // console.warn(JSON.stringify(cacheDoc, null, 2))
+                let dim = world.getDimension('overworld');
+                let loaded = false;
+                try {
+                    let block = dim.getBlock(cacheDoc.data.blockloc);
+                    if(block) loaded = true;
+                } catch {}
+                // console.warn(`${!runningSessions.includes(cacheDoc.data.runningSession)}`)
+                if(loaded && !runningSessions.includes(cacheDoc.data.runningSession)) {
+                    let entities = dim.getEntities({
+                        type: "leaf:floating_text",
+                        tags: [`generator_text:${cacheDoc.data.genID}`],
+                    });
+                    // console.warn(`${entities.length}`)
+                    let entity = entities && entities.length ? entities[0] : null;
+                    if(Date.now() >= cacheDoc.data.endTime) {
+                        // console.warn(`Done...`)
+                        if(entity) {
+                            let doc = this.db.getByID(cacheDoc.data.genConfID);
+                            if(doc) {
+                                entity.nameTag = [
+                                    `§b${doc.data.name}`,
+                                    `Cooldown: §aReady`,
+                                    `Cooldown Level: §a1§7/§b${doc.data.upgrades.length + 1}`,
+                                ].join("\n§r");
+                            }
+                        }
+                        dim.setBlockType(cacheDoc.data.blockloc, cacheDoc.data.block);
+                        this.cache.deleteDocumentByID(cacheDoc.id)
+                    } else {
+                        // console.warn(`Watiting...`)
+                        if(entity) {
+                            // console.warn(`Editing`)
+                            let doc = this.db.getByID(cacheDoc.data.genConfID);
+                            // console.warn(`${doc ? `Exists` : `Not exists`}`)
+                            if(doc) {
+                                entity.nameTag = [
+                                    `§b${doc.data.name}`,
+                                    `Cooldown: §c${Math.floor((cacheDoc.data.endTime - Date.now()) / 1000)}s`,
+                                    `Cooldown Level: §a1§7/§b${doc.data.upgrades.length + 1}`,
+                                ].join("\n§r");
+                            }
+                        }
+                    }
+                }
+            }
+        },20)
         system.afterEvents.scriptEventReceive.subscribe((e) => {
             if (
                 e.id == "leaf:give_gen" &&
@@ -161,6 +217,8 @@ class GeneratorAPI {
                     return;
                 }
                 system.run(() => {
+                    let startTime = Date.now();
+                    let runningSession = (Date.now() * 1000) + Math.floor(Math.random() * 1000);
                     e.block.setType("minecraft:bedrock");
                     let tickDelay =
                         genData.level >= 0
@@ -204,6 +262,30 @@ class GeneratorAPI {
                                     doc.data.upgrades.length + 1
                                 }`,
                             ].join("\n§r");
+                            let doc3 = {
+                                type: "COOLINGDOWN",
+                                entity: entity.id,
+                                blockloc: e.block.location,
+                                genID: genData.uniqueID,
+                                block: doc.data.block,
+                                entityloc: entity.location,
+                                startTime,
+                                genConfID: doc.id,
+                                endTime: startTime + (Math.floor(
+                                    (tickDelay - ticks) / 20
+                                ) * 1000),
+                                runningSession
+                            }
+                            let doc2 = this.cache.findFirst({runningSession})
+                            if(doc2) {
+                                this.cache.overwriteDataByID(doc2.id, {...doc2.data, ...doc3});
+                            } else {
+                                this.cache.insertDocument(doc3)
+                            }
+                            runningSessions.push(runningSession)
+                        }
+                        if(!e.player.dimension.getBlock(e.block.location)) {
+                            return system.clearRun(run)
                         }
                         if (ticks % 20 == 0 && tickDelay - 15 >= ticks) {
                             e.player.dimension.spawnParticle(
@@ -223,7 +305,12 @@ class GeneratorAPI {
                                         genData.level + 2
                                     }§7/§b${doc.data.upgrades.length + 1}`,
                                 ].join("\n§r");
+                                // coolingDownEntities = coolingDownEntities.filter(_=>_.id != entity.id)
+                                // entity.removeTag('gen:cooling_down')
+                                let cacheDoc = this.cache.findFirst({genID: genData.uniqueID});
+                                if(cacheDoc) this.cache.deleteDocumentByID(cacheDoc.id)
                             }
+                            runningSessions = runningSessions.filter(_=>_ != runningSession)
                         }
                     }, 1);
                 });
@@ -388,7 +475,8 @@ class GeneratorAPI {
                 }
             });
         });
-        world.afterEvents.itemStopUseOn.subscribe(async (e) => {
+        world.beforeEvents.playerInteractWithBlock.subscribe(async (e) => {
+            if(!e.isFirstEvent) return;
             system.run(async () => {
                 // // console.warn("A")
                 if (e.itemStack && e.itemStack.typeId == "leaf:generator") {
@@ -401,31 +489,32 @@ class GeneratorAPI {
                     // // console.warn(JSON.stringify(zone))
                     if (
                         zone &&
-                        !zones.hasPerms(e.source) &&
+                        !zones.hasPerms(e.player) &&
                         (zone.data.flags.includes("DisallowBlockPlacing") ||
                             zone.data.flags.includes("DisallowGenPlacing"))
                     )
-                        return e.source.error(zones.msg);
+                        return e.player.error(zones.msg);
                     if (e.itemStack.getDynamicProperty(`GenID`)) {
-                        if (blockMap.has(e.source.id)) return;
-                        blockMap.set(e.source.id, true);
+                        if (blockMap.has(e.player.id)) return;
+                        blockMap.set(e.player.id, true);
                         let doc = this.db.getByID(
                             e.itemStack.getDynamicProperty(`GenID`)
                         );
-                        e.source.dimension
+                        e.player.dimension
                             .getBlock(newLoc)
                             .setType(doc.data.block);
                         this.placeGenerator(
-                            e.source,
+                            e.player,
                             doc.id,
                             newLoc,
                             e.itemStack.getDynamicProperty("GenLevel")
                                 ? e.itemStack.getDynamicProperty("GenLevel")
                                 : -1
                         );
-                        let inv = e.source.getComponent("inventory");
-                        inv.container.setItem(e.source.selectedSlotIndex);
+                        let inv = e.player.getComponent("inventory");
+                        inv.container.setItem(e.player.selectedSlotIndex);
                         let genEffect = doc.data.effect ? doc.data.effect : 0;
+                        e.source = e.player;
                         if (genEffect == 0) {
                             e.source.dimension.spawnParticle(
                                 "azalea:fallingchant1",

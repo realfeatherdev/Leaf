@@ -11,6 +11,8 @@ import actionParser from "./actionParser";
 import uiManager from "../uiManager";
 import playerStorage from "./playerStorage";
 import { SegmentedStoragePrismarine } from "../prismarineDbStorages/segmented";
+import landclaims from "./landclaims/landclaims";
+import configAPI from "./config/configAPI";
 
 class Scripting {
     constructor() {
@@ -135,7 +137,7 @@ class Scripting {
             );
         try {
             let fn = new Function(
-                `return function ({callScriptHook, SegmentedStoragePrismarine, setGlobal, getGlobal, deleteGlobal, playerStorage, uiManager, actionParser, prismarineDb, icons, uiBuilder, homes, OpenClanAPI, formatStr, unhook, hook, mc, ui, reload}){\n${script}\n}`
+                `return function ({configAPI, callScriptHook, SegmentedStoragePrismarine, setGlobal, getGlobal, deleteGlobal, playerStorage, uiManager, actionParser, prismarineDb, icons, uiBuilder, homes, OpenClanAPI, formatStr, unhook, hook, mc, ui, reload}){\n${script}\n}`
             )();
             fn({
                 mc,
@@ -144,8 +146,10 @@ class Scripting {
                 formatStr,
                 actionParser,
                 uiManager,
+                configAPI,
                 uiBuilder,
                 homes,
+                landclaims,
                 OpenClanAPI,
                 icons,
                 prismarineDb,
