@@ -60,7 +60,7 @@ uiManager.addUI(versionData.uiNames.CustomCommandsV2.editActions, "A", (player, 
                 form2.button(`§dEdit Action`, `textures/azalea_icons/other/blip_orange`, (player)=>{
                     let modalForm = new ModalForm();
                     modalForm.title("Code Editor")
-                    modalForm.textField("Add an action here...", "Add an action here...", action.action)
+                    modalForm.textField("Add an action here...", "Add an action here...", typeof action === "string" ? action : action.action)
                     modalForm.show(player, false, (player, response)=>{
                         if(response.canceled || !response.formValues[0]) return reopen()
                         if(isLegacyAction) {

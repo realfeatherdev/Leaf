@@ -15,11 +15,11 @@ import { themes } from "./cherryThemes";
 uiManager.addUI(
     "edit_cherry_theme",
     "Edits the cherry theme!",
-    (player, id) => {
+    (player, id, overrideShit = null, currTheme = 0, showNegative1Btn) => {
         try {
-            let doc = uiBuilder.db.getByID(id);
+            let doc = overrideShit ? null : uiBuilder.db.getByID(id);
             let form = new ActionForm();
-            let themeID = doc.data.theme ? doc.data.theme : 0;
+            let themeID = overrideShit ? currTheme : doc.data.theme ? doc.data.theme : 0;
             let yes =
                 themeID > 0 ? `${NUT_UI_THEMED}${themes[themeID][0]}` : ``;
             form.title(`${NUT_UI_TAG}${yes}§r§f§lThemes`);
@@ -27,13 +27,22 @@ uiManager.addUI(
                 `${NUT_UI_HEADER_BUTTON}§r§c§lGo Back\n§r§7Click to go back`,
                 `textures/azalea_icons/2`,
                 (player) => {
-                    uiManager.open(
-                        player,
-                        versionData.uiNames.UIBuilderEdit,
-                        id
-                    );
+                    if(overrideShit) {
+                        overrideShit(-2)
+                    } else {
+                        uiManager.open(
+                            player,
+                            versionData.uiNames.UIBuilderEdit,
+                            id
+                        );
+                    }
                 }
             );
+            if(showNegative1Btn && overrideShit) {
+                form.button(`${themeID == -1 ? "§o§1§r§f" : ""}Inherit`, null, (player)=>{
+                    overrideShit(-1)
+                })
+            }
             for (let i = 0; i < themes.length; i++) {
                 let theme = themes[i];
                 let themeIndex = i;
@@ -48,12 +57,16 @@ uiManager.addUI(
                                 ? ""
                                 : al2
                             : al2
-                    }${themeID == i ? "§o§1" : ""}§r§f${theme[1]} §7[${i}]`,
+                    }${themeID == i ? "§o§1" : ""}§r§f${theme[1]} §7[${i}]${theme.length > 3 && theme[3] ? `\n@${theme[3]}` : ``}`,
                     theme[2],
                     (player) => {
-                        doc.data.theme = themeIndex;
-                        uiBuilder.db.overwriteDataByID(doc.id, doc.data);
-                        uiManager.open(player, "edit_cherry_theme", id);
+                        if(!overrideShit) {
+                            doc.data.theme = themeIndex;
+                            uiBuilder.db.overwriteDataByID(doc.id, doc.data);    
+                            uiManager.open(player, "edit_cherry_theme", id, overrideShit, currTheme, showNegative1Btn);
+                        } else {
+                            overrideShit(themeIndex)
+                        }
                     }
                 );
             }

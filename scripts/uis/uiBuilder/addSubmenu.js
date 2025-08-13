@@ -65,6 +65,29 @@ uiManager.registerBuilder(config.uiNames.UIBuilderAddSubmenu, () => {
                     });
                 })
         )
+        .addButton(
+            new Button()
+                .setIcon("textures/coxes")
+                .setText("§3Carrot\n§7decherrifyied floder")
+                .setCallback((player) => {
+                    let modalForm = new ModalForm();
+                    modalForm.title(`${NUT_UI_MODAL}Create Box`);
+                    modalForm.textField("Name", "Name");
+                    modalForm.show(player, false, (player, response) => {
+                        if (response.canceled)
+                            return uiManager.open(
+                                player,
+                                config.uiNames.UIBuilderRoot
+                            );
+                        uiBuilder.createCox(response.formValues[0]);
+                        return uiManager.open(
+                            player,
+                            config.uiNames.UIBuilderRoot
+                        );
+                    });
+                })
+        )
+
         .addLabel("UIs")
         .addButton(
             new Button()
@@ -162,7 +185,7 @@ uiManager.registerBuilder(config.uiNames.UIBuilderAddSubmenu, () => {
         )
         .addButton(
             new Button()
-                .setText(`§eUser-Generated Content Storage\n§7erm... what the meow?`)
+                .setText(`${NUT_UI_DISBALE_BTN}§eUser-Generated Content Storage\n§7Delayed :<`)
                 .setIcon(`textures/azalea_icons/other/clipboard`)
                 .setCallback((player) => {
                     uiManager.open(player, config.uiNames.PlayerContentManager.Add);
@@ -209,9 +232,10 @@ uiManager.registerBuilder(config.uiNames.UIBuilderAddSubmenu, () => {
         )
         .addButton(
             new Button()
-                .setText(`§r§qIsland\n§7Delayed to v3.1`)
+                .setText(`${NUT_UI_DISBALE_BTN}§r§qIsland\n§7Delayed to v3.2`)
                 .setIcon(`textures/azalea_icons/other/terrain`)
                 .setCallback((player)=>{
+                    return;
                     let modalForm = new ModalForm();
                     modalForm.title("Create an Island")
                     modalForm.label("§bUnique ID §fis the unique id of the island you use to integrate this into custom UIs. §cThis island wont work until you fully configure it. §aCheck §ehttps://leaf.trashdev.org §afor guideds")

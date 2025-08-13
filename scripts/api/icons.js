@@ -12,6 +12,8 @@ class Icons {
     constructor() {
         this.icons = new Map([
             ["vanilla/iron_sword", "textures/items/gold_sword"], // FUCK YOU LOL
+            ["fishy!", "textures/custom_crates/fishy"],
+            ["i like kissing boys", "textures/ui/boykisser"]
         ]);
         this.iconData = new Map([
             [

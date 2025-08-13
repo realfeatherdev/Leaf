@@ -4,6 +4,17 @@ import { formatStr } from "./azaleaFormatting";
 import { system, world } from "@minecraft/server";
 import emojis from "./emojis";
 import uiBuilder from "./uiBuilder";
+
+let lc2 = {};
+function refresh(){
+    lc2 = {};
+    for(const sidebar of uiBuilder.db.findDocuments({type: 7})) {
+        lc2[sidebar.data.name] = sidebar;
+    }
+
+}
+
+
 const generateUUID = () => {
     let d = new Date().getTime(),
         d2 =
@@ -34,6 +45,15 @@ class SidebarEditor {
         this.db = prismarineDb.table("sidebars");
         this.lineTickSpeeds = {};
         this.lineCaches = {};
+        system.waitTicks(10).then(()=>{
+            uiBuilder.db.waitLoad().then(()=>{
+                refresh();
+                uiBuilder.db.onUpdate((id2, data)=>{
+                    refresh()
+                })
+            })
+    
+        })
     }
     createSidebar(name) {
         return uiBuilder.createSidebar(name);
@@ -58,7 +78,7 @@ class SidebarEditor {
     }
     getLines(name) {
         if (this.lineCaches[`!${name}`]) return this.lineCaches[`!${name}`];
-        let doc = uiBuilder.db.findFirst({
+        let doc = lc2[name] ? lc2[name] : uiBuilder.db.findFirst({
             type: 7,
             name: name,
         });

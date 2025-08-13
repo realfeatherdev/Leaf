@@ -291,16 +291,16 @@ function getFacingFromX(xRotation) {
     if (rot < 225)              return "South";   // 135‒225
     return "West";                                // 225‒315
 }
-system.runInterval(()=>{
-    if(!configAPI.getProperty("DevMode")) return;
-    for(const player of world.getPlayers()) {
-        if(!player.hasTag('debug-label')) continue;
-        player.onScreenDisplay.setActionBar([
-            `Rotation Y: ${Math.floor(player.getRotation().y)}°`,
-            `${Math.floor(player.getRotation().y)}° ➜ ${getFacingFromX(player.getRotation().y)}`
-        ].join('\n§r'))
-    }
-})
+// system.runInterval(()=>{
+//     if(!configAPI.getProperty("DevMode")) return;
+//     for(const player of world.getPlayers()) {
+//         if(!player.hasTag('debug-label')) continue;
+//         player.onScreenDisplay.setActionBar([
+//             `Rotation Y: ${Math.floor(player.getRotation().y)}°`,
+//             `${Math.floor(player.getRotation().y)}° ➜ ${getFacingFromX(player.getRotation().y)}`
+//         ].join('\n§r'))
+//     }
+// })
 
 uiBuilder.definitions.push({
     deftype: "ROOT",

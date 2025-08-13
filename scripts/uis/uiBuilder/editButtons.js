@@ -1029,7 +1029,7 @@ uiManager.addUI(
             let nutUIText = "";
             try {
                 nutUIText = `${button.disabled ? "§e(DISABLED) " : ""}${
-                    button.nutUIAlt ? nutUIAlt : ""
+                    button.nutUIAlt ? typeof button.altBtnColorOverride === "number" && button.altBtnColorOverride != -1 ? `${NUT_UI_ALT}${themes[button.altBtnColorOverride][0]}` : nutUIAlt : ""
                 }${
                     button.nutUIHalf == 2
                         ? "§p§1§2"

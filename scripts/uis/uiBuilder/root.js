@@ -221,6 +221,7 @@ function getIcon(ui) {
         : ui.data.type == 2
         ? ui.data.isBox
             ? `textures/azalea_icons/other/package`
+            : ui.data.isCocks ? `textures/coxes`
             : `textures/azalea_icons/other/folder`
         : ui.data.type == 12
         ? `textures/azalea_icons/other/location`
@@ -726,7 +727,7 @@ uiManager.addUI(
             chest.show(player).then(() => {});
             return;
         }
-        form.title(`${NUT_UI_TAG}§r${folderData.data.name}`);
+        form.title(`${!folderData.data.isCocks ? `${NUT_UI_TAG}§r` : ``}${folderData.data.name}`);
         form.button(
             `${NUT_UI_HEADER_BUTTON}§r§cGo back`,
             `textures/azalea_icons/2`,
@@ -1129,9 +1130,28 @@ uiManager.registerBuilder(config.uiNames.UIBuilderRoot, (player) => {
         );
     }
 
-    if (folders.filter((_) => !_.data.isBox).length) ui.addLabel("§6Folders:");
+    if (folders.filter((_) => _.data.isCocks).length) ui.addLabel("§6Car§erot§as");
+    for (const folder of folders) {
+        if (!folder.data.isCocks) continue;
+        ui.addButton(
+            new Button()
+                .setText(`§3${folder.data.name}\n§7Click to open carrot`)
+                .setIcon(getIcon(folder))
+                .setCallback((player) => {
+                    uiManager.open(
+                        player,
+                        config.uiNames.UIBuilderFolder,
+                        folder.id
+                    );
+                })
+        );
+    }
+
+
+    if (folders.filter((_) => !_.data.isBox && !_.data.isCocks).length) ui.addLabel("§6Folders:");
     for (const folder of folders) {
         if (folder.data.isBox) continue;
+        if (folder.data.isCocks) continue;
         if (folder.data.folder && uiBuilder.db.getByID(folder.data.folder)) continue;
         let itemCount = uiBuilder.db.findDocuments({folder: folder.id}).filter(_=>_.data.type != 2).length;
         let subfolderCount = uiBuilder.db.findDocuments({folder: folder.id, type: 2}).length;

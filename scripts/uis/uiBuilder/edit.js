@@ -440,6 +440,19 @@ uiManager.addUI(
                         );
                     }
                 );
+                actionForm.button(`Select Theme\nCurrent: ${uiBuilder.toasts[doc.data.theme ? doc.data.theme : 0][1]}`, uiBuilder.toasts[doc.data.theme ? doc.data.theme : 0][2], (player)=>{
+                    let form = new ActionForm();
+                    form.title("Select Toast Theme")
+                    for(const toast of uiBuilder.toasts) {
+                        form.button(`${toast[1]}`, toast[2], (player)=>{
+                            doc.data.theme = toast[0];
+                            uiBuilder.db.overwriteDataByID(doc.id, doc.data);
+                        })
+                    }
+                    form.show(player, false, (player, response)=>{
+                        return uiManager.open(player, versionData.uiNames.UIBuilderEdit, doc.id)
+                    })
+                })
                 actionForm.button(
                     `§6Set Body\n§7Set body text of this notification`,
                     `textures/azalea_icons/other/message`,

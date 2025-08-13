@@ -136,9 +136,22 @@ class MetaHandler {
             "#PDB_FIND_ALL:",
             this.handlePdbFindAll.bind(this)
         );
+        this.registerHandler("#INTERNAL_REGISTRY:", this.handleInternalRegistry.bind(this))
         this.registerHandler("#HOMES", this.handleHomes.bind(this));
     }
-
+    handleInternalRegistry(meta, context) {
+        const { player, button, data, args, currView, unprocessedButtonText } =
+            context;
+        return uiBuilder.reg1.filter(_=>_.t == 0 && _.cat == meta.substring("#INTERNAL_REGISTRY:".length)).map(_=>{
+            return {
+                text: _.text,
+                icon: icons.resolve(_.texture),
+                action() {
+                    actionParser.runAction(player, _.cmd)
+                }
+            }
+        })
+    }
     handleHomes(meta, context) {
         const { player, button, data, args, currView, unprocessedButtonText } =
             context;
@@ -758,7 +771,7 @@ class ButtonProcessor {
         // Handle special button types
         if (button.type === "header" || button.type === "label") {
             return {
-                type: button.type,
+                type: button.type == "label" && button.raw ? "label_raw" : button.type,
                 text: button.text,
                 currView,
             };
@@ -946,7 +959,7 @@ class ButtonProcessor {
                               data
                           )
                         : false)
-                        ? nutUIAlt
+                        ? typeof groupButton.altBtnColorOverride === "number" && groupButton.altBtnColorOverride != -1 ? `${NUT_UI_ALT}${themes[groupButton.altBtnColorOverride][0]}` : nutUIAlt
                         : ""
                 }`;
 
@@ -1064,7 +1077,7 @@ class ButtonProcessor {
                     : `${NUT_UI_ALT}`;
 
             nutUIText = `${button.disabled ? "§p§3§0" : ""}${
-                nutUIAltCondition ? nutUIAlt : ""
+                nutUIAltCondition ? typeof button.altBtnColorOverride === "number" && button.altBtnColorOverride != -1 ? `${NUT_UI_ALT}${themes[button.altBtnColorOverride][0]}` : nutUIAlt : ""
             }${
                 button.nutUIHalf == 2
                     ? "§p§1§2"
@@ -1591,11 +1604,15 @@ class NormalFormOpener {
         let after = [];
         function add(button, fnoverride = null) {
             if (button.type === "header") {
-                form.header(formatStr(button.text, player));
+                form.header(`§r§f${formatStr(button.text, player)}`);
                 return;
             }
             if (button.type === "label") {
-                form.label(formatStr(button.text, player));
+                form.label(`§r§f${formatStr(button.text, player)}`);
+                return;
+            }
+            if (button.type === "label_raw") {
+                form.label(`${button.text}`);
                 return;
             }
             if (button.type === "divider") {
@@ -1985,6 +2002,9 @@ class NormalFormOpener {
                 clan.data.applicationQuestions &&
                 clan.data.applicationQuestions.length
             );
+        }
+        if(tag.startsWith("$REG1_INC/")) {
+            return uiBuilder.reg1.find(_=>_.t == 0 && _.cat == tag.substring("$REG1_INC/".length));
         }
         if (tag == "$HAS_CLAN_BASE") {
             try {

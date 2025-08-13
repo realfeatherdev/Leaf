@@ -28,11 +28,33 @@
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣶⠀⠀⡀⠀⠀⠀⠀⠀⠀⠀⡈⠄⣁⣄⣰⡡⠴⠚⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠳⠤⣱⣄⣀⣀⣀⠤⠴⠞⠛⠋⠉⠉⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 */
-import { world, system } from "@minecraft/server";
+import { world, system, GameMode } from "@minecraft/server";
 import { ActionFormData } from "@minecraft/server-ui";
 import uiManager, { Button, UI } from "./uiManager";
 import uiBuilder from "./api/uiBuilder";
 import { ChestFormData } from "./lib/chestUI";
+// import { Router } from "./ipc";
+// import * as gt from '@minecraft/server-gametest';
+// import * as ed from '@minecraft/server-editor'
+// ed.registerEditorExtension()
+// gt.spawnSimulatedPlayer({
+//     dimension: world.getDimension('overworld'),
+//     x: -31,
+//     y: 88,
+//     z: -31
+// }, "Meow!", GameMode.Survival)
+// gt.getPlayerSkin()
+// system.afterEvents.scriptEventReceive.subscribe(e => {
+//     if (e.id == "leaf_ess_api:recv1") {
+//         system.sendScriptEvent("leaf:reg1", JSON.stringify({
+//             t: 0, // type 0 = admin panel/config ui
+//             text: "§cLifesteal Settings\n§7Leaf lifesteal settings",
+//             texture: "^textures/items/heart1",
+//             cat: "MAIN",
+//             cmd: "/scriptevent trashyls:config l"
+//         }))
+//     }
+// })
 uiManager.addUI("package_ui_test", "a", (player) => {
     let chest = new ChestFormData("meow");
     chest.title("§0Box :3");
@@ -136,13 +158,13 @@ world.beforeEvents.playerInteractWithEntity.subscribe((e) => {
         });
     }
 });
-function loop() {
-    for (const player of world.getPlayers()) {
-        if (player.hasTag("Spawn")) {
-            player.onScreenDisplay.setActionBar("§aSpawn");
-        }
-    }
-}
-system.runInterval(() => {
-    loop();
-}, 1);
+// function loop() {
+//     for (const player of world.getPlayers()) {
+//         if (player.hasTag("Spawn")) {
+//             player.onScreenDisplay.setActionBar("§aSpawn");
+//         }
+//     }
+// }
+// system.runInterval(() => {
+//     loop();
+// }, 1);

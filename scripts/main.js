@@ -39,6 +39,7 @@ import "./lib/ermwhatthesigma.js";
 import "./uis/zones/index.js";
 import "./uis/basic/playerSelector.js";
 import "./features/clog.js";
+import "./features/spawners.js";
 import "./uis/warps/index.js";
 import "./commands/broadcast.js";
 import './uis/emoji_selector/root.js'
@@ -102,7 +103,6 @@ import "./leaficon.js";
 import "./uis/sidebar/edit";
 import "./uis/sidebar/addLine";
 import "./uis/sidebar/editLine";
-import "./api/sidebarDisplay";
 import "./uis/uiBuilder/onlineGuis.js";
 import "./uis/sidebar/trash";
 import "./uis/pay.js";
@@ -219,6 +219,7 @@ import { initiallyLoadCommands } from "./uis/CustomCommandsV2/handler.js";
 import './api/PlayerActivityTracking/index.js'
 import './uis/confapi.js'
 import './versionUtils.js'
+import "./api/sidebarDisplay";
 uiBuilder.db.waitLoad().then(()=>{
     initiallyLoadCommands();
     // uiBuilder.createContentStorageDump("TestingStorageDump", "TestingStorageDump", "", false)
@@ -855,11 +856,10 @@ uiBuilder.addInternalUI({
         "actions": [
           "/scriptevent leafgui:leaderboards_root"
         ],
-        "iconID": "leaf/image-625",
+        "iconID": "Packs/Asteroid/winPING",
         "iconOverrides": [],
         "requiredTag": "$perm/config.leaderboards",
         "id": 11,
-        "disabled": false,
         "displayOverrides": [],
         "sellButtonEnabled": false,
         "buyButtonEnabled": false,
@@ -876,11 +876,10 @@ uiBuilder.addInternalUI({
         "actions": [
           "/scriptevent leafgui:clans_config"
         ],
-        "iconID": "leaf/image-1073",
+        "iconID": "leaf/image-613",
         "iconOverrides": [],
         "requiredTag": "$perm/config.clans",
         "id": 12,
-        "disabled": false,
         "displayOverrides": [],
         "sellButtonEnabled": false,
         "buyButtonEnabled": false,
@@ -897,10 +896,9 @@ uiBuilder.addInternalUI({
         "actions": [
           "/scriptevent leafgui:ah_settings"
         ],
-        "iconID": "leaf/image-0909",
+        "iconID": "leaf/image-1294",
         "iconOverrides": [],
         "requiredTag": "$perm/config.auctionhouse",
-        "disabled": false,
         "id": 29,
         "displayOverrides": [],
         "sellButtonEnabled": false,
@@ -945,10 +943,9 @@ uiBuilder.addInternalUI({
         "actions": [
           "/scriptevent leafgui:rtp_config"
         ],
-        "iconID": "leaf/image-480",
+        "iconID": "vanilla_items/ender_pearl",
         "iconOverrides": [],
         "requiredTag": "$perm/config.rtp",
-        "disabled": false,
         "id": 22,
         "displayOverrides": [],
         "sellButtonEnabled": false,
@@ -1041,11 +1038,10 @@ uiBuilder.addInternalUI({
         "actions": [
           "/scriptevent leafgui:homes_config"
         ],
-        "iconID": "leaf/image-1169",
+        "iconID": "leaf/image-820",
         "iconOverrides": [],
         "requiredTag": "$perm/config.homesconfig",
         "id": 17,
-        "disabled": false,
         "displayOverrides": [],
         "sellButtonEnabled": false,
         "buyButtonEnabled": false,
@@ -1218,10 +1214,9 @@ uiBuilder.addInternalUI({
         "actions": [
           "/scriptevent leafgui:platformsettings"
         ],
-        "iconID": "leaf/image-0873",
+        "iconID": "rpgiab/computer",
         "iconOverrides": [],
         "requiredTag": "$perm/config.platformsettings",
-        "disabled": false,
         "id": 24,
         "displayOverrides": [],
         "sellButtonEnabled": false,
@@ -1245,11 +1240,30 @@ uiBuilder.addInternalUI({
         "actions": [
           "/scriptevent leafgui:edit_gift_codes"
         ],
-        "iconID": "leaf/image-0965",
+        "iconID": "leaf/image-1303",
         "iconOverrides": [],
         "requiredTag": "$perm/config.gifts",
-        "disabled": false,
         "id": 30,
+        "displayOverrides": [],
+        "sellButtonEnabled": false,
+        "buyButtonEnabled": false,
+        "nutUIHalf": 0,
+        "nutUINoSizeKey": false,
+        "nutUIAlt": false,
+        "nutUIColorCondition": "",
+        "nutUIHeaderButton": false
+      },
+      {
+        "text": "§eRewards",
+        "subtext": "Configure daily/weekly/monthly rewards",
+        "action": "/scriptevent leafgui:edit_daily_rewards",
+        "actions": [
+          "/scriptevent leafgui:edit_daily_rewards"
+        ],
+        "iconID": "vanilla_items/banner_pattern",
+        "iconOverrides": [],
+        "requiredTag": "",
+        "id": 8634928729,
         "displayOverrides": [],
         "sellButtonEnabled": false,
         "buyButtonEnabled": false,
@@ -1348,10 +1362,10 @@ uiBuilder.addInternalUI({
     "pin": null,
     "pinSetBy": null,
     "paperdoll": true,
-    "accessToken": "f81f78ca-c286-44b7-aa03-84d8da759004                                                                                                                                                                               ",
+    "accessToken": "f81f78ca-c286-44b7-aa03-84d8da759004",
     "folder": 1741898363581751,
     "internal": true,
-    "internalID": 9
+    "internalID": 10
 });
 uiBuilder.addInternalUI({
     name: ":cookies: More Settings :cookies:",
@@ -1681,7 +1695,7 @@ uiBuilder.addInternalUI({
         "actions": [
           "scriptevent leafgui:sidebar_editor_root"
         ],
-        "iconID": "leaf/image-521",
+        "iconID": "rpgiab/anim_frame_edit",
         "iconOverrides": [],
         "requiredTag": "false",
         "id": 7,
@@ -1749,7 +1763,7 @@ uiBuilder.addInternalUI({
         "actions": [
           "/scriptevent leafgui:moderation_hub"
         ],
-        "iconID": "^textures/azalea_icons/other/swords",
+        "iconID": "leaf/image-107",
         "iconOverrides": [],
         "requiredTag": "$perm/config.moderationhub",
         "id": 15,
@@ -1760,8 +1774,7 @@ uiBuilder.addInternalUI({
         "nutUINoSizeKey": false,
         "nutUIAlt": false,
         "nutUIColorCondition": "",
-        "nutUIHeaderButton": false,
-        "disabled": false
+        "nutUIHeaderButton": false
       },
       {
         "text": "§aFeature Config",
@@ -2036,6 +2049,18 @@ uiBuilder.addInternalUI({
         "nutUIHeaderButton": false
       },
       {
+        "text": "§vExtra Features",
+        "subtext": "Configure other addons from leaf",
+        "action": "/",
+        "actions": [
+          "/"
+        ],
+        "iconOverrides": [],
+        "requiredTag": "$REG1_INC/MAIN",
+        "disabled": true,
+        "id": 11536502958
+      },
+      {
         "text": "pfffffff",
         "subtext": "",
         "action": "/kill",
@@ -2055,7 +2080,8 @@ uiBuilder.addInternalUI({
         "nutUINoSizeKey": false,
         "nutUIAlt": false,
         "nutUIColorCondition": "",
-        "nutUIHeaderButton": false
+        "nutUIHeaderButton": false,
+        "meta": "#INTERNAL_REGISTRY:MAIN"
       },
       {
         "text": " ",
@@ -2108,8 +2134,8 @@ uiBuilder.addInternalUI({
     "cancel": "",
     "folder": 1741898363581751,
     "internal": true,
-    "internalID": 9
-  });
+    "internalID": 10
+});
 uiBuilder.addInternalUI({
     name: "Config UI / Support & Info",
     body: "",

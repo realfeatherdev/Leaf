@@ -13,7 +13,7 @@ export default {
     },
     versionInfo: {
         versionName: "3.1",
-        versionInternalID: 10, // 1 starts with october 2024 update
+        versionInternalID: 11, // 1 starts with october 2024 update
         versionData: new Map([
             [
                 1,

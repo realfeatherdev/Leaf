@@ -14,6 +14,7 @@ import {
 } from "../preset_browser/nutUIConsts";
 import { themes } from "./cherryThemes";
 import { system } from "@minecraft/server";
+import versionData from "../../versionData";
 
 /*
 ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬛⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
@@ -126,6 +127,7 @@ uiManager.addUI(
                     : "";
                 data.disabled = button.disabled ? true : false;
                 data.allowSellAll = button.allowSellAll ? true : false;
+                data.altBtnColorOverride = button.altBtnColorOverride ? button.altBtnColorOverride : -1;
             } else {
                 // Load existing button data if editing
                 if (initial && index > -1) {
@@ -176,6 +178,7 @@ uiManager.addUI(
                         : "";
                     data.disabled = button.disabled ? true : false;
                     data.allowSellAll = button.allowSellAll ? true : false;
+                    data.altBtnColorOverride = button.altBtnColorOverride ? button.altBtnColorOverride : -1;
                 } else {
                     if (initial) {
                         data.sellButtonEnabled = false;
@@ -192,6 +195,7 @@ uiManager.addUI(
                         data.nutUINoSizeKey = false;
                         data.nutUIHalf = 0;
                         data.nutUIHeaderButton = false;
+                        data.altBtnColorOverride = -1;
                     }
                 }
             }
@@ -815,6 +819,23 @@ uiManager.addUI(
 
         // Add NUT UI Properties button
         if (ui.data.layout == 4) {
+            if(data.nutUIColorCondition || data.nutUIAlt) {
+                form.button(`§eSet Alt Color Override\n§7Current: ${typeof data.altBtnColorOverride === "number" && data.altBtnColorOverride != -1 ? themes[data.altBtnColorOverride][1] : "Inherit"}`, typeof data.altBtnColorOverride === "number" && data.altBtnColorOverride != -1 ? themes[data.altBtnColorOverride][2] : themes[ui.data.theme ? ui.data.theme : 0][2], (player)=>{
+                    uiManager.open(player, "edit_cherry_theme", -1, (v)=>{
+                        if(v != -2) {
+                            data.altBtnColorOverride = v;
+                        }
+                        uiManager.open(
+                            player,
+                            config.uiNames.UIBuilderAddButton,
+                            id,
+                            index,
+                            data,
+                            false
+                        );
+                    }, data.altBtnColorOverride ? data.altBtnColorOverride : -1, true)
+                })
+            }
             form.button(
                 `§cCherryUI Properties\n§7Configure UI layout`,
                 `textures/azalea_icons/DevSettingsClickyClick`,
@@ -909,6 +930,7 @@ uiManager.addUI(
                         iconID: data.iconID,
                         requiredTag: data.requiredTag,
                         displayOverrides: data.displayOverrides,
+                        altBtnColorOverride: data.altBtnColorOverride,
                         sellButtonEnabled: data.sellButtonEnabled,
                         buyButtonEnabled: data.buyButtonEnabled,
                         nutUIHalf: data.nutUIHalf,

@@ -596,6 +596,7 @@ export function formatStr(
     if (str.includes(":")) {
         let emojisUsed = str.match(/:([a-z0-9_-]+):/g) || [];
         for (const emoji of emojisUsed) {
+            // console.warn("A")
             if (emojis[emoji.substring(1).slice(0, -1)]) {
                 newStr = newStr.replaceAll(
                     emoji,

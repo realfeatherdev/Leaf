@@ -12,6 +12,7 @@ import config from "../versionData";
 import { ActionForm } from "../lib/form_func";
 import { colors, prismarineDb } from "../lib/prismarinedb";
 import actionParser from "./actionParser";
+import '../ext/pluginHandler'
 import normalForm from "./openers/normalForm";
 import { system, ScriptEventSource, world } from "@minecraft/server";
 import { array_move } from "./utils/array_move";
@@ -32,13 +33,15 @@ import scripting from "./scripting";
 import { array, bool, boolean, number, object, string } from "../lib/yup.esm";
 import configAPI from "./config/configAPI";
 import zones from "./zones";
+import { Router } from "../ipc/router";
 
 configAPI.registerProperty("MaxRootCustomizerCreations", configAPI.Types.Number, 32);
 configAPI.registerProperty("CustomizerMaxCreationsHardLimit", configAPI.Types.Number, 4096);
 configAPI.registerProperty("CustomizerPlugins", configAPI.Types.Boolean, true);
 
-class UIBuilder {
+class UIBuilder extends Router {
     constructor() {
+        super("leaf:ipc1");
         this.validRows = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         this.internalUIs = [];
         this.leafEpoch = 1741909421689;
@@ -68,6 +71,27 @@ class UIBuilder {
         this.migrateChestGUIs();
         this.createSnippetBook();
         this.initializeEvents();
+        this.toasts = [
+            [0, "Default", "textures/ui/greyBorder"],
+            [1, "1", "textures/toasts/box_1"],
+            [2, "2", "textures/toasts/box_2"],
+            [3, "3", "textures/toasts/box_3"],
+            [4, "4", "textures/toasts/box_4"],
+            [5, "5", "textures/toasts/box_5"],
+            [6, "6", "textures/toasts/box_6"],
+            [7, "7", "textures/toasts/box_7"],
+            [8, "8", "textures/toasts/box_8"],
+            [9, "9", "textures/toasts/box_9"],
+            [10, "10", "textures/toasts/box_10"],
+            [11, "Alec 1", "textures/example/alec/1"],
+            [12, "Alec 2", "textures/example/alec/2"],
+            [13, "Alec 3", "textures/example/alec/3"],
+            [14, "Alec 4", "textures/example/alec/4"],
+            [15, "Alec 5", "textures/example/alec/5"],
+            [16, "Alec 6", "textures/example/alec/6"],
+            [17, "Alec 7", "textures/example/alec/7"],
+            [18, "Alec 8", "textures/example/alec/8"],
+        ]
         this.patternIDs = [
             {
                 name: "NONE",
@@ -135,6 +159,7 @@ class UIBuilder {
                 texture: "textures/blocks/glass_purple",
             },
         ];
+        this.fuckThisShitBroLemmeJustShoveThisSomewhereLmao()
         this.db.waitLoad().then(() => {
             this.transitionSidebars();
             this.fixBtnIds();
@@ -142,6 +167,8 @@ class UIBuilder {
             this.initializeScripts();
             this.transitionZones();
         });
+
+        // everyn't many schemas
         this.schemas = new Map();
         this.ui_type_meta = new Map();
         this.registerSchema(
@@ -149,6 +176,7 @@ class UIBuilder {
             object({
                 type: number().required(),
                 name: string().required(),
+                copies: object().optional(),
                 buttons: array()
                     .of(
                         object({
@@ -189,6 +217,7 @@ class UIBuilder {
             })
         );
         this.registerMeta(0, {
+            // dog
             name: "Action Form",
             handleWarnings: (data) => {
                 let logs = [];
@@ -200,6 +229,26 @@ class UIBuilder {
                 return logs;
             },
         });
+    }
+    async fuckThisShitBroLemmeJustShoveThisSomewhereLmao() {
+        this.reg1 = [];
+        system.afterEvents.scriptEventReceive.subscribe(e=>{
+            if(e.id == "leaf:reg1") {
+                try {
+                    console.warn(`Loaded conf UI module: ${JSON.parse(e.message).text}`)
+                    this.reg1.push(JSON.parse(e.message))
+                } catch {}
+            }
+        })
+        await system.waitTicks(1)
+        configAPI.db.waitLoad().then(()=>{
+            system.sendScriptEvent("leaf_ess_api:recv1", ""); // LEAF IS LOADED! LEAF IS LOADED! LEAF IS LOADED! LEAF IS LOADED! LEAF IS LOADED! LEAF IS LOADED! LEAF IS LOADED! LEAF IS LOADED!
+            this.send({
+                event: "leaf:ipc_ready",
+                payload: JSON.stringify({t: Date.now()}),
+                force: true
+            })
+        })
     }
     registerMeta(type, meta) {
         this.ui_type_meta.set(type, meta);
@@ -1228,7 +1277,8 @@ class UIBuilder {
                         player,
                         extraVars
                     ),
-                    doc.data.icon ? icons.resolve(doc.data.icon) : null
+                    doc.data.icon ? icons.resolve(doc.data.icon) : null,
+                    this.toasts[doc.data.theme ? doc.data.theme : 0][2]
                 )
             );
         }
@@ -1923,6 +1973,19 @@ class UIBuilder {
             color: "",
         });
     }
+
+    createCox(name) {
+        // folders but 💦 freaky 👅
+        let doc = this.db.findFirst({ name, type: 2 });
+        if (doc) return doc.id;
+        return this.db.insertDocument({
+            type: 2,
+            name,
+            isCocks: true, // very freaky 💦🍆
+            color: "",
+        });
+    }
+
 
     createFolder(name, folder = null) {
         let doc = this.db.data.find(_=>{

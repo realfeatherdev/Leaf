@@ -189,11 +189,11 @@ export default [
         name: "Tick Event (Player Loop)",
         icon: "textures/azalea_icons/other/hourglass",
         setup: (run) => {
-            system.runInterval(() => {
-                for (const player of world.getPlayers()) {
-                    run({ player1: player });
-                }
-            });
+            // system.runInterval(() => {
+            //     for (const player of world.getPlayers()) {
+            //         run({ player1: player });
+            //     }
+            // });
         },
         runWhen: (opts) => opts.playerFilter == true,
         run(opts, actions, { player1 }) {

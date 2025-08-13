@@ -63,7 +63,8 @@ class LandClaims {
     }
     initSystem() {
         system.runInterval(() => {
-            // if (!configAPI.getProperty("LandClaims")) return null;
+            // return;
+            if (!configAPI.getProperty("LandClaims")) return null;
             for (const player of world.getPlayers()) {
                 // // console.warn(player.name)
                 if (!playerMap.has(player.id)) {

@@ -9,7 +9,11 @@ import {
     ModalFormResponse,
 } from "@minecraft/server-ui";
 import debug_buttons from "./debug_buttons";
-
+import { lightMode } from "../basicConfig";
+import { colors } from "./prismarinedb";
+import { NUT_UI_ALT, NUT_UI_DISBALE_BTN } from "../uis/preset_browser/nutUIConsts";
+import configAPI from "../api/config/configAPI";
+configAPI.registerProperty("LightModeCompatibilityLayer", configAPI.Types.Boolean, false)
 export const content = {
     warn(...messages) {
         // // console.warn(messages.map(message => JSON.stringify(message, (key, value) => (value instanceof Function) ? '<f>' : value)).join(' '));
@@ -211,7 +215,15 @@ export class ActionForm {
                 `callback at params[2] is defined and is not a Function!`
             );
         this.callbacks.push(callback);
-        this.form.button(text, iconPath);
+        let lightText = text;
+        lightText = !lightText.includes(NUT_UI_ALT) && !lightText.includes(NUT_UI_DISBALE_BTN) ? `§0${lightText.replace(/§[0-9a-juqnvmt]/gi, (a)=>{
+            let code = colors.getVariants(a)
+            if(code) {
+                return code.darker;
+            }
+            return a;
+        })}`.replaceAll('§r', '§r§0') : lightText;
+        this.form.button(configAPI.getProperty("LightModeCompatibilityLayer") ? lightText : text, iconPath);
         return this;
     }
     /**

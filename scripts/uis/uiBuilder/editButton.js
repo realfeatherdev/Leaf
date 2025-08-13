@@ -309,6 +309,16 @@ uiManager.addUI(
                 }
             }
         }
+        if(button.type == "label") {
+            actionForm.button(`${NUT_UI_HEADER_BUTTON}§r${button.raw ? "Set to normal mode" : "Set to raw mode"}`, `textures/azalea_icons/other/button_xbox_y`, player=>{
+                button.raw = !button.raw;
+                let form = uiBuilder.db.getByID(id);
+                form.data.buttons[index] = button;
+                uiBuilder.db.overwriteDataByID(form.id, form.data);
+                uiManager.open(player, config.uiNames.UIBuilderEditButton, id, index, buttonIndex)
+            })
+            if(button.raw) actionForm.label(`Raw Mode`)
+        }
         if (button.type == "header" || button.type == "label") {
             actionForm.button(
                 `§eEdit Text\n§7Edit the ${button.type}`,

@@ -4,10 +4,11 @@ import playerStorage from "../api/playerStorage";
 import { ModalForm } from "../lib/form_func";
 let accessMap = new Map();
 world.beforeEvents.playerInteractWithBlock.subscribe((e) => {
+    if(prismarineDb.permissions.hasPermission(e.player, "claim.bypass")) return;
     try {
         if (
             e.block.typeId === "minecraft:barrel" ||
-            e.block.typeId === "minecraft:chest"
+            e.block.typeId === "minecraft:chest" || e.block.typeId.includes('shulker')
         ) {
             let container = e.block.getComponent("inventory");
             let lockItem = null;
@@ -95,7 +96,7 @@ world.beforeEvents.playerBreakBlock.subscribe((e) => {
             }
             if (lockItem) break;
         }
-        if (lockItem) {
+        if (lockItem && !prismarineDb.permissions.hasPermission(e.player, "claim.bypass")) {
             e.player.error("You cant break locked chests.");
             e.cancel = true;
         }
@@ -118,7 +119,7 @@ world.beforeEvents.playerPlaceBlock.subscribe((e) => {
             }
             if (lockItem) break;
         }
-        if (lockItem) {
+        if (lockItem && !prismarineDb.permissions.hasPermission(e.player, "claim.bypass")) {
             e.player.error(
                 "You cant place blocks above or below locked chests."
             );

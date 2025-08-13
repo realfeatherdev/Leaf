@@ -62,7 +62,7 @@ export let themes = [
     ["§b§g§1", "Blue Green", "textures/example/headerbluegreen"],
     ["§p§b§1", "Pink Blue", "textures/example/headerpinkblue"],
     ["§p§r§2", "Purple 2", "textures/example/headerpurple2"],
-    ["§a§l§1", "Alec's Theme :3", "textures/example/headeralec"],
+    ["§a§l§1", "Alec's Theme :3", "textures/example/headeralec", "alec.kwke"],
     ["§l§l§o§1", "Lemon Lime", "textures/example/headerlemonlime"],
     ["§u§w§u§2", "UwU #2", "textures/example/headeruwu2"],
     ["§l§f§3§0", "Leaf Essentials V3.0", "textures/example/leafess3"],
@@ -95,6 +95,14 @@ export let themes = [
     ["§b§s§0§1", "Basic", "textures/example/button"],
     ["§g§a§1", "Pride", "textures/example/headerpride"],
     ["§g§a§2", "Pride - Trans", "textures/example/headerpride2"],
+    ["§a§l§0§2",":V","textures/example/alec/1", "alec.kwke"],
+    ["§a§l§0§3",":B","textures/example/alec/2", "alec.kwke"],
+    ["§a§l§0§4",":3","textures/example/alec/3", "alec.kwke"],
+    ["§a§l§0§5","OwO","textures/example/alec/4", "alec.kwke"],
+    ["§a§l§0§6","^-^","textures/example/alec/5", "alec.kwke"],
+    ["§a§l§0§7",":/","textures/example/alec/6", "alec.kwke"],
+    ["§a§l§0§8","UwO","textures/example/alec/7", "alec.kwke"],
+    ["§a§l§0§9","OwU","textures/example/alec/8", "alec.kwke"]
 ];
 
 export let leafThemeCurr = 25;

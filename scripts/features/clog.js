@@ -36,6 +36,11 @@ export let combatMap = new Map();
 
 system.runInterval(() => {
     if (!configAPI.getProperty("CLog")) return;
+    for(const player of world.getPlayers()) {
+        if(combatMap.has(player.id) && !player.hasTag("in_combat")) player.addTag("in_combat")
+        if(!combatMap.has(player.id) && player.hasTag("in_combat")) player.removeTag("in_combat")
+        
+    }
     for (const key of combatMap.keys()) {
         let exp = combatMap.get(key);
         if (Date.now() >= exp) {

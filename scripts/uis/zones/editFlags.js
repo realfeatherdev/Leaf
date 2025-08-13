@@ -1,3 +1,4 @@
+import uiBuilder from "../../api/uiBuilder";
 import zones from "../../api/zones";
 import { ModalForm } from "../../lib/form_func";
 import uiManager from "../../uiManager";
@@ -9,7 +10,7 @@ uiManager.addUI(
     versionData.uiNames.Zones.EditFlags,
     "Edit Flags",
     (player, id) => {
-        let zone = zones.zonesDB.getByID(id);
+        let zone =uiBuilder.db.getByID(id);
         let modal = new ModalForm();
         modal.title(`Editing Flags: ${zone.data.name}`);
         for (const flag of zones.flags) {

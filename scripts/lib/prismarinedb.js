@@ -2320,6 +2320,11 @@ var PrismarineDBTable = class {
         this.data[docIndex2].data = data;
         this.data[docIndex2].updatedAt = Date.now();
         this.save();
+        try {
+            for(const event of this.updateEvents) {
+                event(id2, data)
+            }
+        } catch {}
         return data;
     }
     matchesQuery(query, data) {
@@ -3329,8 +3334,8 @@ var ColorAPI = class {
                 [
                     "\xA77",
                     {
-                        darker: "\xA77",
-                        lighter: "\xA7f",
+                        darker: "\xA78",
+                        lighter: "\xA77",
                     },
                 ],
                 [
