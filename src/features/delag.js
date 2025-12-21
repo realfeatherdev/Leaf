@@ -1,0 +1,3 @@
+import { world } from "@minecraft/server";
+
+///////////// idk what the fuck to do here!!!!! welcome to empty file hell....
