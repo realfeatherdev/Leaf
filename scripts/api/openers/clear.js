@@ -1,0 +1,62 @@
+import { world } from "@minecraft/server";
+
+export function prependMinecraftID(id) {
+    return id.split(':').length > 1 ? id : `minecraft:${id}`
+}
+
+export function clear(inventory, itemToClear2, amount) {
+    let itemToClear = prependMinecraftID(itemToClear2);
+    // world.sendMessage(itemToClear)
+    let container = inventory.container;
+    let total = 0;
+    for (let i = 0; i < container.size; i++) {
+        let item = container.getItem(i);
+        if (!item) continue;
+        if (item.typeId == itemToClear) {
+            total += item.amount;
+        }
+    }
+    let cleared = 0;
+    if (total >= amount) {
+        for (let i = 0; i < container.size; i++) {
+            let item = container.getItem(i);
+            if (!item) continue;
+            if (item.amount <= 0) return;
+            // world.sendMessage(`${amount}, ${item.amount}`);
+            if (item.typeId == itemToClear) {
+                if (amount == item.amount) {
+                    container.setItem(i);
+                    amount = 0;
+                    cleared = amount;
+                } else if (amount > item.amount) {
+                    container.setItem(i);
+                    amount -= item.amount;
+                    cleared += item.amount;
+                } else if (amount < item.amount) {
+                    cleared = amount;
+                    item.amount -= amount;
+                    amount = 0;
+
+                    container.setItem(i, item);
+                }
+            }
+        }
+        return [false, 0];
+    } else {
+        return [true, 1];
+    }
+    // world.sendMessage(`Cleared ${cleared}`)
+}
+
+export function getItemCount(inventory, itemID2) {
+    let itemID = prependMinecraftID(itemID2);
+    let container = inventory.container;
+    let amount = 0;
+    for (let i = 0; i < container.size; i++) {
+        let item = container.getItem(i);
+        if (item && item.typeId == itemID) {
+            amount += item.amount;
+        }
+    }
+    return amount;
+}

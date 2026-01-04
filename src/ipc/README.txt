@@ -1,1 +1,0 @@
-https://github.com/Fluffyalien1422/mcbe-addon-ipc
