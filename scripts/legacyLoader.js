@@ -18,7 +18,7 @@ leaf mascot real?
 - TrashyKitty; June 2025
 */
 // import * as bindings from '@minecraft/server-editor-bindings';
-
+import './api/sqlwrapper.js'
 import {
     world,
     system,
@@ -229,6 +229,7 @@ import './uis/confapi.js'
 import './versionUtils.js'
 import "./api/sidebarDisplay.js";
 import versionData from "./versionData.js";
+import zones from './api/zones.js';
 uiBuilder.db.waitLoad().then(()=>{
     initiallyLoadCommands();
     // uiBuilder.createContentStorageDump("TestingStorageDump", "TestingStorageDump", "", false)
@@ -471,6 +472,9 @@ let tprSystem = {
     ],
 };
 let a = world.getDynamicProperty("AOP_1x");
+let b = world.getDynamicProperty("AOP_4x");
+let c = world.getDynamicProperty("AOP_8x");
+let d = world.getDynamicProperty("AOP_10x");
 if (!a) {
     let folderID = uiBuilder.createFolder("Leaf");
     for (const ui of [...tprSystem.dependencies, tprSystem.data]) {
@@ -480,6 +484,205 @@ if (!a) {
         });
     }
     world.setDynamicProperty("AOP_1x", true);
+}
+if(!b) {
+    let folderID = uiBuilder.createFolder("Leaf")
+    uiBuilder.db.insertDocument({
+        "type": 9,
+        "name": "TPA Command",
+        "command": "tpa",
+        "description": "Send teleport requests",
+        "category": "Players",
+        "requiredTag": false,
+        "ensureChatClosed": false,
+    "actions": [{
+      "type": 0,
+      "action": "/leaf:invitemgr send \"TPA|TPAHERE\" \"<name>\" \"<name2>\""
+    }
+  ],
+  "subcommands": [
+    {
+      "name": "accept",
+      "actions": [
+        {
+          "type": 0,
+          "action": "/leaf:invitemgr accept \"TPA|TPAHERE\" \"<name2>\" \"<name>\""
+        }
+      ],
+      "ensureChatClosed": false,
+      "description": "Accept a TPA request",
+      "execother": true,
+      "noself": true
+    },
+    {
+      "name": "deny",
+      "actions": [
+        {
+          "type": 0,
+          "action": "/leaf:invitemgr deny \"TPA|TPAHERE\" \"<name2>\" \"<name>\""
+        }
+      ],
+      "ensureChatClosed": false,
+      "description": "Deny a teleport request",
+      "execother": true,
+      "noself": true
+    },
+    {
+      "name": "cancel",
+      "actions": [
+        {
+          "type": 0,
+          "action": "/leaf:invitemgr cancel \"TPA|TPAHERE\" \"<name>\" \"<name2>\""
+        }
+      ],
+      "ensureChatClosed": false,
+      "description": "Cancel a teleport request",
+      "execother": true,
+      "noself": true
+    },
+    {
+      "name": "here",
+      "actions": [
+        {
+          "type": 0,
+          "action": "/leaf:invitemgr send \"TPAHERE|TPA\" \"<name>\" \"<name2>\""
+        }
+      ],
+      "ensureChatClosed": false,
+      "description": "Give a teleport here request",
+      "execother": true,
+      "noself": true
+    }
+  ],
+  "execother": true,
+  "noself": true,
+  "folder": folderID
+})
+    world.setDynamicProperty("AOP_4x", true)
+}
+if(!c) {
+    uiBuilder.db.waitLoad().then(()=>{
+        let folderID = uiBuilder.createFolder("Leaf")
+        // uiBuilder.createChatChannel("main", "General", "<bc>[§r<cc><cn>§r<bc>]", false, "§c");
+        uiBuilder.db.insertDocument({
+            "type": 18,
+            "uniqueID": "general",
+            "name": "General",
+            "prefixFMT": "§8[§r<cc>#<cn>§r§8]",
+            "showPrefix": false,
+            "color": "§b",
+            "showToOtherChannels": {
+                "all": false,
+                "others": [],
+                "roleDependent": [
+                    {
+                        "role": "admin",
+                        "all": true,
+                        "others": []
+                    }
+                ],
+                "channelDependent": []
+            },
+            "joinable": ["default"],
+            "folder": folderID
+        })
+        uiBuilder.db.insertDocument({
+            "type": 18,
+            "uniqueID": "broadcast",
+            "name": "Broadcast",
+            "prefixFMT": "§8[§r<cc><cn>§r§8]",
+            "showPrefix": true,
+            "color": "§c",
+            "showToOtherChannels": {
+                "all": true,
+                "others": [],
+                "roleDependent": [
+                    {
+                        "role": "admin",
+                        "all": true,
+                        "others": []
+                    }
+                ],
+                "channelDependent": []
+            },
+            "joinable": [],
+            "folder": folderID
+        })
+        uiBuilder.db.insertDocument({
+            "type": 18,
+            "uniqueID": "staffchat",
+            "name": "Staff",
+            "prefixFMT": "§8[§r<cc>#<cn>§r§8]",
+            "showPrefix": true,
+            "color": "§6",
+            "showToOtherChannels": {
+                "all": false,
+                "others": [],
+                "roleDependent": [],
+                "channelDependent": []
+            },
+            "joinable": [],
+            "folder": folderID
+        })
+        world.setDynamicProperty("AOP_8x", true)
+    })
+}
+if(!d) {
+    uiBuilder.db.waitLoad().then(()=>{
+        let folderID = uiBuilder.createFolder("Leaf")
+        // uiBuilder.createChatChannel("main", "General", "<bc>[§r<cc><cn>§r<bc>]", false, "§c");
+        uiBuilder.db.insertDocument({
+            "type": 18,
+            "uniqueID": "party",
+            "name": "Party",
+            "prefixFMT": "§8[§r<cc>#<cn>§r§8]",
+            "showPrefix": true,
+            "color": "§d",
+            "party": {
+                "required": true,
+                "instanced": true
+            },
+            "showToOtherChannels": {
+                "all": false,
+                "others": [],
+                "roleDependent": [
+                    {
+                        "role": "admin",
+                        "all": true,
+                        "others": []
+                    }
+                ],
+                "channelDependent": []
+            },
+            "joinable": [],
+            "folder": folderID
+        })
+
+        uiBuilder.db.insertDocument({
+            "type": 18,
+            "uniqueID": "player:$private",
+            "name": "Private Messaging",
+            "editorcomment": "This is a template for the fake channels used for leafs private messaging system",
+            "prefixFMT": "§8[§r<cc><name2> §8§-> §r<cc><name>§r§8]",
+            "showPrefix": true,
+            "color": "§n",
+            "showToOtherChannels": {
+                "all": false,
+                "others": [],
+                "roleDependent": [
+                    {
+                        "role": "admin",
+                        "all": true,
+                        "others": []
+                    }
+                ],
+                "channelDependent": []
+            },
+            "joinable": [],
+            "folder": folderID
+        })
+        world.setDynamicProperty("AOP_10x", true)
+    })
 }
 uiBuilder.addInternalUI({
     name: "Navigator",
@@ -5956,6 +6159,7 @@ try {
     })
     
 } catch {}
+// world.afterEvents.playerButtonInput
 world.afterEvents.itemUse.subscribe((e) => {
   if(
     e.source.typeId == "minecraft:player" &&
@@ -5968,6 +6172,24 @@ world.afterEvents.itemUse.subscribe((e) => {
     } else {
       e.source.addTag("chunk-borders")
       e.source.success("Turned ON chunk borders")
+    }
+  }
+if(
+    e.source.typeId == "minecraft:player" &&
+    e.itemStack.typeId == "leaf:zone_border"
+  ) {
+    let zone = zones.getZoneAtVec3ExcludeLandClaims(e.source.location, e.source.dimension)
+    if(e.source.inputInfo.getButtonState(mc.InputButton.Sneak) == mc.ButtonState.Pressed && zone) {
+        uiManager.open(e.source, config.uiNames.UIBuilderEdit, zone.id)
+        return;
+    }
+    if(e.source.hasTag("zone-borders")) {
+      e.source.removeTag("zone-borders")
+      e.source.success("Turned OFF zone borders")
+
+    } else {
+      e.source.addTag("zone-borders")
+      e.source.success("Turned ON zone borders")
     }
   }
   if (

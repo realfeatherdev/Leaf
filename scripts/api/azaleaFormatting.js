@@ -1,4 +1,4 @@
-import { Player, system, world, MoonPhase } from "@minecraft/server";
+import { Player, system, world, MoonPhase, InputButton } from "@minecraft/server";
 import { getClaimText } from "../landClaims.js";
 import OpenClanAPI from "./OpenClanAPI.js";
 import {
@@ -28,6 +28,16 @@ let playersClicks = new Map();
 // function parseQuotedString(s) {
 configAPI.registerProperty("ChatGreenText", configAPI.Types.Boolean, true)
 configAPI.registerProperty("AzaleaFormattingMaxInnerFunctionCheckingIterations", configAPI.Types.Number, 132.9)
+let dimensionIDs = [
+    "minecraft:overworld",
+    "minecraft:nether",
+    "minecraft:the_end",
+]
+let dimensionNames = [
+    "Overworld",
+    "The Nether",
+    "The End"
+]
     function parseQuotedString2(s) {
   const args = [];
   let i = 0;
@@ -229,6 +239,9 @@ export function formatStr(
             vars.x = player.location.x
             vars.y = player.location.y
             vars.z = player.location.z
+            // vars.chunkX = Math.floor(player.location.x / 16)
+            // vars.chunkY = Math.floor(player.location.y / 16) // there is no chunk y in mc but adding this because why tf not
+            // vars.chunkZ = Math.floor(player.location.z / 16)
             vars.rank = playerUtils.getRanks(fakeFuckingPlayer)[0]
             vars.name = player.name;
         } else {
@@ -239,6 +252,15 @@ export function formatStr(
             vars.x = `${Math.floor(player.location.x)}`;
             vars.y = `${Math.floor(player.location.y)}`;
             vars.z = `${Math.floor(player.location.z)}`;
+            vars.netherX = `${player.dimension.id == "minecraft:nether" ? player.location.x : Math.floor(player.location.x / 8)}`;
+            vars.netherZ = `${player.dimension.id == "minecraft:nether" ? player.location.z : Math.floor(player.location.z / 8)}`;
+            vars.overworldX = `${player.dimension.id == "minecraft:overworld" ? player.location.x :  Math.floor(player.location.x * 8)}`;
+            vars.overworldZ = `${player.dimension.id == "minecraft:overworld" ? player.location.z : Math.floor(player.location.z * 8)}`;
+            vars.chunkX = `${Math.floor(player.location.x / 16)}`
+            vars.chunkInX = `${Math.floor(player.location.x - (Math.floor(player.location.x / 16) * 16))}`
+            vars.chunkZ = `${Math.floor(player.location.x / 16)}`
+            vars.chunkInZ = `${Math.floor(player.location.z - (Math.floor(player.location.z / 16) * 16))}`
+            vars.dimension = dimensionNames[dimensionIDs.indexOf(player.dimension.id)]
             vars.name = player.name;
             vars.username = player.name;
             let curncs = [];
@@ -336,6 +358,9 @@ export function formatStr(
         vars.z2 = `${Math.floor(player.location.z)}`;
         vars.name2 = player.name;
         vars.username2 = player.name;
+        vars.chunkX2 = `${Math.floor(player.location.x / 16)}`
+        vars.chunkY2 = `${Math.floor(player.location.x / 16)}` // there is no chunk y in mc but adding this because why tf not
+        vars.chunkZ2 = `${Math.floor(player.location.x / 16)}`
         newStr = newStr.replaceAll("[@username]", player.name);
         vars.name_tag2 = player.nameTag;
         try {

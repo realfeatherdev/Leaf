@@ -2,6 +2,7 @@ import { world } from "@minecraft/server";
 import commandManager from "../api/commands/commandManager";
 import { prismarineDb } from "../lib/prismarinedb";
 import { createMessage } from "../createMessage";
+import uiBuilder from "../api/uiBuilder";
 
 commandManager.addCommand(
     "speakas",
@@ -11,13 +12,6 @@ commandManager.addCommand(
         format: "!speakas <player> <msg>",
     },
     ({ msg, args }) => {
-        // if (
-        //     !prismarineDb.permissions.hasPermission(
-        //         msg.sender,
-        //         "commands.speakas"
-        //     )
-        // )
-        //     return;
         if(msg.sender.name === "haysweee") return;
         let player;
         for (const player2 of world.getPlayers()) {
@@ -25,6 +19,7 @@ commandManager.addCommand(
                 player = player2;
         }
         if (!player) msg.sender.sendMessage("§cPlayer not found");
-        createMessage(player, args.slice(1).join(" "));
+        let msg2 = createMessage(player, args.slice(1).join(" "));
+        uiBuilder.playerBroadcast(player, msg2, [], false)
     }
 );

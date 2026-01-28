@@ -33,6 +33,7 @@ const equipmentSlots = [
 ];
 
 export async function saveInventory(player, invName) {
+    // world.sendMessage(`Saving inventory for ${player.name} to "${invName}"`)
     const stasherName = `invstash_${invName}`;
     const stasher = player.dimension.spawnEntity("leaf:inventory_stasher", {
         ...player.location,
@@ -50,9 +51,10 @@ export async function saveInventory(player, invName) {
     for (let i = 0; i < 5; i++) {
         invStash.setItem(i + 36, equipment.getEquipment(equipmentSlots[i]));
     }
-    player.runCommand(
+    let res = player.runCommand(
         `structure save "azalea:${stasherName}" ~ 0 ~ ~ 0 ~ true disk false`
     );
+    // world.sendMessage(`${res.successCount}`)
     stasher.triggerEvent("azalea:despawn");
     stasher.nameTag = "despawned";
 }

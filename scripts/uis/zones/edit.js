@@ -36,6 +36,24 @@ uiManager.addUI(versionData.uiNames.Zones.Edit, "A", (player, id) => {
             uiManager.open(player, versionData.uiNames.Zones.Add, id);
         }
     );
+    form.button(
+        `${zone.data.isRef ? "§cDisable Reference Mode" : "§aEnable Reference Mode"}\n§7Use this zone to mark an area for other leaf features`,
+        `textures/azalea_icons/other/voxel`,
+        (player) => {
+            zone.data.isRef = !zone.data.isRef
+            uiBuilder.db.overwriteDataByID(zone.id, zone.data)
+            uiManager.open(player, versionData.uiNames.Zones.Edit, id);
+        }
+    );
+    form.button(
+        `${zone.data.disabled ? "§aEnable Zone" : "§cDisable Zone"}\n§7Make leaf ignore this zone entirely`,
+        `textures/blocks/barrier`,
+        (player) => {
+            zone.data.disabled = !zone.data.disabled
+            uiBuilder.db.overwriteDataByID(zone.id, zone.data)
+            uiManager.open(player, versionData.uiNames.Zones.Edit, id);
+        }
+    );
     form.button(`§dEdit Flags\n§7Edit this zones flags`, `textures/azalea_icons/5`, (player) => {
         uiManager.open(player, versionData.uiNames.Zones.EditFlags, id);
     });

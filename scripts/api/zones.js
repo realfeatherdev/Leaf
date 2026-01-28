@@ -191,8 +191,9 @@ class Zones {
         let pz = Math.floor(vec3.z);
         for (const zone of zones) {
             try {
-                if(dimension && dimension.id != (world.getDimension(zone.data.dimension ? zone.data.dimension : "minecraft:overworld").id)) continue;
-
+                if(dimension && dimension.id != (world.getDimension(zone.data.dimension && typeof zone.data.dimension == "string" ? zone.data.dimension : "minecraft:overworld").id)) continue;
+                if(zone.data.isRef) continue;
+                if(zone.data.disabled) continue;
             } catch {}
             if (zone.data.type == 14) {
                 let { x1, y1, z1, x2, y2, z2 } = zone.data;
@@ -220,7 +221,7 @@ class Zones {
         let py = Math.floor(vec3.y);
         let pz = Math.floor(vec3.z);
         for (const zone of zones) {
-            if(dimension && dimension.id != (zone.data.dimension ? zone.data.dimension : "minecraft:overworld")) continue;
+            if(dimension && dimension.id != (world.getDimension(zone.data.dimension && typeof zone.data.dimension == "string" ? zone.data.dimension : "minecraft:overworld").id)) continue;
             if (zone.data.type == 14) {
                 let { x1, y1, z1, x2, y2, z2 } = zone.data;
                 if (isPointInCube(px, py, pz, x1, y1, z1, x2, y2, z2)) {
@@ -239,15 +240,17 @@ class Zones {
             }
         }
     }
-    getZones() {
-        return uiBuilder.db.findDocuments({ type: 14 });
+    getZones(all = false) {
+        return uiBuilder.db.findDocuments({ type: 14 }).sort((a,b)=>{
+            return b.data.priority - a.data.priority;
+        })
     }
     addZone(name, x1, y1, z1, x2, y2, z2, priority = 1, flags = [], dimension) {
         if (uiBuilder.db.findFirst({ type: 14, name })) return false;
         uiBuilder.db.insertDocument({
             name,
             type: 14,
-            dimension: dimension ? dimension.id : world.getDimension('overworld'),
+            dimension: dimension ? dimension.id : world.getDimension('overworld').id,
             x1,
             y1,
             z1,
@@ -279,8 +282,23 @@ class Zones {
         doc.data.flags = flags;
         uiBuilder.db.overwriteDataByID(doc.id, doc.data);
     }
-    getZones() {
-        return uiBuilder.db.findDocuments({ type: 14 });
+    disableZone(name) {
+        let doc = uiBuilder.db.findFirst({type: 14, name})
+        if(doc) {
+            doc.data.disabled = true;
+            uiBuilder.db.overwriteDataByID(doc.id, doc.data)
+            return true;
+        }
+        return false;
+    }
+    enableZone(name) {
+        let doc = uiBuilder.db.findFirst({type: 14, name})
+        if(doc) {
+            doc.data.disabled = false;
+            uiBuilder.db.overwriteDataByID(doc.id, doc.data)
+            return true;
+        }
+        return false;
     }
     removeZone(name) {
         let doc = uiBuilder.db.findFirst({type: 14, name})

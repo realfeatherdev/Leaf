@@ -5,6 +5,7 @@ import { ModalForm } from "../lib/form_func";
 import uiManager from "../uiManager";
 import actionParser from "../api/actionParser";
 import { prismarineDb } from "../lib/prismarinedb";
+import zones, { isInCuboid } from "../api/zones";
 let inUI = new Map();
 uiManager.addUI(config.uiNames.BlockEditor, "Block editor", (player, vec3) => {
     let modalForm = new ModalForm();
@@ -27,68 +28,94 @@ uiManager.addUI(config.uiNames.BlockEditor, "Block editor", (player, vec3) => {
             inUI.delete(player.id);
         });
 });
+function spawnParticle(player, particle, loc) {
+    try {
+        player.spawnParticle(particle, loc)
+    } catch {}
+}
 let usingBlockEditor = new Map();
+let iter = 0;
+function pointWithinDistanceOfCuboid(p, pos1, pos2, maxDist) {
+  const min = {
+    x: Math.min(pos1.x, pos2.x),
+    y: Math.min(pos1.y, pos2.y),
+    z: Math.min(pos1.z, pos2.z),
+  };
+  const max = {
+    x: Math.max(pos1.x, pos2.x),
+    y: Math.max(pos1.y, pos2.y),
+    z: Math.max(pos1.z, pos2.z),
+  };
+
+  const cx = Math.max(min.x, Math.min(p.x, max.x));
+  const cy = Math.max(min.y, Math.min(p.y, max.y));
+  const cz = Math.max(min.z, Math.min(p.z, max.z));
+
+  const dx = p.x - cx;
+  const dy = p.y - cy;
+  const dz = p.z - cz;
+
+  return (dx*dx + dy*dy + dz*dz) <= maxDist * maxDist;
+}
 system.runInterval(() => {
+    iter += 5;
+    if(iter >= 20) iter = 0;
     for (const player of world.getPlayers()) {
-        continue;
-        if (player.hasTag("chunk-borders")) {
+        if (player.hasTag("chunk-borders") && iter % 20 == 0) {
             let chunkX = Math.floor(player.location.x / 16) * 16;
             let chunkZ = Math.floor(player.location.z / 16) * 16;
-            for (
-                let i = player.dimension.heightRange.min;
-                i < player.dimension.heightRange.max + 1;
-                i++
-            ) {
-                player.spawnParticle(`leaf:border`, {
-                    x: chunkX,
-                    y: i,
-                    z: chunkZ,
-                });
-                player.spawnParticle(`leaf:border`, {
-                    x: chunkX,
-                    y: i,
-                    z: chunkZ + 16,
-                });
-                player.spawnParticle(`leaf:border`, {
-                    x: chunkX + 16,
-                    y: i,
-                    z: chunkZ,
-                });
-                player.spawnParticle(`leaf:border`, {
-                    x: chunkX + 16,
-                    y: i,
-                    z: chunkZ + 16,
-                });
-                if (
-                    i % 16 == 0 ||
-                    i == player.dimension.heightRange.max - 1 ||
-                    i == player.dimension.heightRange.min
-                ) {
-                    for (let i2 = 0; i2 < 16; i2++) {
-                        player.spawnParticle(`leaf:border`, {
-                            x: chunkX + i2,
-                            y: i,
-                            z: chunkZ,
-                        });
-                        player.spawnParticle(`leaf:border`, {
-                            x: chunkX,
-                            y: i,
-                            z: chunkZ + i2,
-                        });
-                        player.spawnParticle(`leaf:border`, {
-                            x: chunkX + 16,
-                            y: i,
-                            z: chunkZ + i2,
-                        });
-                        player.spawnParticle(`leaf:border`, {
-                            x: chunkX + i2,
-                            y: i,
-                            z: chunkZ + 16,
-                        });
-                    }
+            chunkX += 16;
+            chunkZ += 16;
+            player.spawnParticle("leaf:chunkborder", {x: chunkX, y: player.dimension.heightRange.min + 192, z: chunkZ - 8})
+            player.spawnParticle("leaf:chunkborder", {x: chunkX - 16, y: player.dimension.heightRange.min + 192, z: chunkZ - 8})
+            player.spawnParticle("leaf:chunkborder_ew", {x: chunkX - 8, y: player.dimension.heightRange.min + 192, z: chunkZ})
+            player.spawnParticle("leaf:chunkborder_ew", {x: chunkX - 8, y: player.dimension.heightRange.min + 192, z: chunkZ - 16})
+            // player.spawnParticle("leaf:chunkborder", {x: chunkX + 16, y: player.dimension.heightRange.min, z: chunkZ + 8})
+
+        }
+        if(player.hasTag("zone-borders") && iter % 20 == 0) {
+            let zones2 = zones.getZones()
+            let foundActive = false;
+            for(const zone of zones2) {
+                let dim = zone.data.dimension && typeof zone.data.dimension === "string" ? zone.data.dimension : "minecraft:overworld";
+                if(player.dimension.id != (dim.split(':').length > 1 ? dim : `minecraft:${dim}`)) continue;
+                let x1 = Math.min(zone.data.x1, zone.data.x2)
+                let y1 = Math.min(zone.data.y1, zone.data.y2)
+                let z1 = Math.min(zone.data.z1, zone.data.z2)
+                let x2 = Math.max(zone.data.x1, zone.data.x2) + 1
+                let y2 = Math.max(zone.data.y1, zone.data.y2) + 1
+                let z2 = Math.max(zone.data.z1, zone.data.z2) + 1
+                let pos1 = {x: x1, y: y1, z: z1}
+                let pos2 = {x: x2 - 1, y: y2 - 1, z: z2 - 1}
+                if(!pointWithinDistanceOfCuboid(player.location, pos1, pos2, 67)) continue;
+                // world.sendMessage(JSON.stringify(pos1))
+                // world.sendMessage(JSON.stringify(pos2))
+                let isInZone = isInCuboid(player.location, pos1, pos2)
+                let p = `${zone.data.disabled ? "leaf:border_disabled" : zone.data.isRef ? "leaf:border_ref" : "leaf:border"}${isInZone && !foundActive ? "_active" : ""}`
+                if(isInZone && !foundActive) foundActive = true;
+                for(let i = z1;i < z2 + 1;i++) {
+                    spawnParticle(player, p, {x: x1, y: y1, z: i})
+                    spawnParticle(player, p, {x: x1, y: y2, z: i})
+                    spawnParticle(player, p, {x: x2, y: y1, z: i})
+                    spawnParticle(player, p, {x: x2, y: y2, z: i})
+                }
+                for(let i = y1;i < y2 + 1;i++) {
+                    if(i == y1 || i == y2) continue;
+                    spawnParticle(player, p, {x: x1, y: i, z: z2})
+                    spawnParticle(player, p, {x: x2, y: i, z: z1})
+                    spawnParticle(player, p, {x: x1, y: i, z: z1})
+                    spawnParticle(player, p, {x: x2, y: i, z: z2})
+                }
+                for(let i = x1;i < x2 + 1;i++) {
+                    if(i == x1 || i == x2) continue;
+                    spawnParticle(player, p, {x: i, y: y1, z: z1})
+                    spawnParticle(player, p, {x: i, y: y2, z: z1})
+                    spawnParticle(player, p, {x: i, y: y1, z: z2})
+                    spawnParticle(player, p, {x: i, y: y2, z: z2})
                 }
             }
         }
+        continue;
         let inventory = player.getComponent("inventory");
         let item = inventory.container.getItem(player.selectedSlotIndex);
         if (item && item.typeId == "leaf:block_editor") {
@@ -260,7 +287,7 @@ system.runInterval(() => {
             ]);
         }
     }
-}, 10);
+}, 5);
 world.beforeEvents.itemUse.subscribe((e) => {
     if (
         e.itemStack.typeId == "leaf:wblock_editor" &&

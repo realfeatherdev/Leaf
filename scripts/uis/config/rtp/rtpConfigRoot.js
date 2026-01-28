@@ -3,6 +3,7 @@ import config from "../../../versionData";
 import { ModalForm } from "../../../lib/form_func";
 import configAPI from "../../../api/config/configAPI";
 import { prismarineDb } from "../../../lib/prismarinedb";
+import { world } from "@minecraft/server";
 configAPI.registerProperty("RTPEnabled", configAPI.Types.Boolean, false);
 configAPI.registerProperty("RTPCost", configAPI.Types.Number, 0);
 configAPI.registerProperty("RTPCurrency", configAPI.Types.String, "default");
@@ -48,6 +49,7 @@ uiManager.addUI(config.uiNames.Config.RTP, "RTP configuration", (player) => {
             : 1000
         ).toString()
     );
+    modalForm.toggle("Smart RTP (Broken!)", configAPI.getProperty("SmartRTP"), ()=>{}, "Makes RTP avoid active chunks. Broken as of right now, do not use!")
     modalForm.show(player, false, (player, response) => {
         configAPI.setProperty("RTPEnabled", response.formValues[0]);
         if (/^\d+$/.test(response.formValues[1]))
@@ -61,6 +63,10 @@ uiManager.addUI(config.uiNames.Config.RTP, "RTP configuration", (player) => {
                 "RTPRadius",
                 parseInt(response.formValues[3])
             );
+        configAPI.setProperty(
+            "SmartRTP",
+            response.formValues[4]
+        );
         return uiManager.open(player, config.uiNames.ConfigMain);
     });
 });

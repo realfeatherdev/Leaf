@@ -1,6 +1,7 @@
 import { world } from "@minecraft/server";
 import { prismarineDb } from "../../lib/prismarinedb";
 import CommandManager from "../../api/commands/commandManager"
+import uiBuilder from "../../api/uiBuilder";
 
 export class ChatModule {
     constructor() {
@@ -37,11 +38,12 @@ export class ChatModule {
 
             if(customMessage) {
                 e.cancel = true;
+                let exclude = [];
                 for(const player of world.getPlayers()) {
-                    if(this.plugins.some(plugin=> plugin.isEnabled() && plugin.playerFilter && !plugin.playerFilter(player, e))) continue;
-
-                    player.sendMessage(customMessage)
+                    if(this.plugins.some(plugin=> plugin.isEnabled() && plugin.playerFilter && !plugin.playerFilter(player, e))) exclude.push(player.id)
                 }
+
+                uiBuilder.playerBroadcast(e.sender, customMessage, exclude, true)
             }
         })
     }

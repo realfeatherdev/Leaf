@@ -81,6 +81,7 @@ export default {
         open: "leaf:open",
         openDefaultLegacy: "leaf:open_default",
         openDefault: "leafgui:",
+        openInternal: "leaf:open_command_internal"
     },
     uiNames: {
         LandClaims: {
@@ -88,6 +89,13 @@ export default {
             Manage: "land_claims_manage",
             ManageClaim: "manage_land_claim",
             Configure: "land_claims_config",
+        },
+        Channels: {
+            Add: "create_channel | Leaf/Channels/Create",
+            Overrides: "channel_overrides_edit_roles | Leaf/Channels/Overrides/Roles",
+            ChannelOverrides: "channel_overrides_edit_channels | Leaf/Channels/Overrides/Channels",
+            Visibility: "channel_visibility_edit | Leaf/Channels/Visibility",
+            Joinability: "channel_joinability_edit | Leaf/Channels/Joinability",
         },
         ServerInfo: "server_info | Leaf/ServerInfoo",
         CombatLogConfig: "combat_log",
@@ -399,7 +407,7 @@ export default {
             BanModal: "ban_modal | Leaf/Basic/BanModal",
             Confirmation: "confirmation | Leaf/Basic/Confirmation",
             ItemSelect: "item_select | Leaf/Basic/ItemSelect",
-            NumberSelector: "number_select | Leaf/Basic/Number",
+            NumberSelector: "number_select | Leaf/Basic/Number"
         },
         Warps: {
             Wizard: {
@@ -422,6 +430,8 @@ export default {
             ViewShared: "homes_viewshared | Leaf/Homes/ViewShared",
             Shared: "homes_shared | Leaf/Homes/Shared",
             Config: "homes_config | Leaf/Homes/Config",
+            ConfigBasic: "homes_config_basic | Leaf/Homes/Config/Basic",
+            ConfigLimitOverrides: "homes_config_limit_overrides | Leaf/Homes/Config/LimitOverrides",
         },
         Reports: {
             Dashboard: "reports_dashboard | Leaf/Reports/Dashboard",

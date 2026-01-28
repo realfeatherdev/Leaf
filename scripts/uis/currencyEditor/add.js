@@ -11,7 +11,7 @@ import { clear, getItemCount } from "../../api/openers/clear";
 import { themes } from "../uiBuilder/cherryThemes";
 
 configAPI.registerProperty("ItemCurrency", configAPI.Types.Boolean, true)
-let map = new Map();
+let maps = {};
 function getScoreboard(str) {
     let scoreboard = world.scoreboard.getObjective(str);
     if(!scoreboard) return world.scoreboard.addObjective(str)
@@ -21,6 +21,7 @@ function getScoreboard(str) {
 system.runInterval(()=>{
     if(!configAPI.getProperty("ItemCurrency")) return;
     for(const currency of prismarineDb.economy.getCurrencies()) {
+        let map = maps[currency.scoreboard] ? maps[currency.scoreboard] : new Map();
         try {
             if(!currency.itemID || !ItemTypes.get(currency.itemID)) continue;
             for(const player of world.getPlayers()) {
@@ -52,6 +53,7 @@ system.runInterval(()=>{
         } catch(e) {
             // world.sendMessage(`${e}`)
         }
+        maps[currency.scoreboard] = map;
     }
 },10)
 

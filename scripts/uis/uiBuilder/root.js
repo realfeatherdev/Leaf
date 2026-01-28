@@ -227,7 +227,7 @@ function getIcon(ui) {
     let definition = uiBuilder.definitions.find(_=>_.deftype == "ROOT" && _.type == ui.data.type)
     try {
         return ui.data.type == 15 ? `textures/azalea_icons/other/terrain` : ui.data.type == 13 ? `textures/azalea_icons/other/book` :
-        ui.data.type ==14 ? `textures/items/zones` : ui.data.type == 11
+        ui.data.type ==14 ? ui.data.disabled ? `textures/items/zones_disabled` :  ui.data.isRef ? `textures/items/zones_ref` : `textures/items/zones` : ui.data.type == 11
         ? `textures/azalea_icons/send_req`
         : ui.id == 1719775088275
         ? `textures/ui/boykisser`

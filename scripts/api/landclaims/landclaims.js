@@ -70,7 +70,7 @@ class LandClaims {
                 // // console.warn(player.name)
                 if (!playerMap.has(player.id)) {
                     // // console.warn(`Initializing keys`)
-                    let zone = zones.getZoneAtVec3(player.location);
+                    let zone = zones.getZoneAtVec3(player.location, player.dimension);
                     playerMap.set(player.id, zone ? zone.id : null);
                     continue;
                 }

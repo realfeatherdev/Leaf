@@ -17,7 +17,7 @@ import {
 } from "../preset_browser/nutUIConsts";
 import { themes } from "../uiBuilder/cherryThemes";
 
-let bansDB = prismarineDb.customStorage("Bans", SegmentedStoragePrismarine);
+export let bansDB = prismarineDb.customStorage("Bans", SegmentedStoragePrismarine);
 
 world.afterEvents.playerSpawn.subscribe(async (e) => {
     system.runTimeout(async () => {

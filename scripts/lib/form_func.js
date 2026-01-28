@@ -367,17 +367,24 @@ export class ModalForm {
         if (!(options instanceof Array))
             throw new Error(`params[1] is not an Array!`);
         options.forEach((object, i) => {
-            if (!(object instanceof Object))
+            if (!(object instanceof Object) && !(typeof object == "string"))
                 throw new Error(`index: ${i}, in params[1] is not an Object!`);
         });
-        const optionStrings = options.map(({ option }, i) => {
-            if (typeof option !== "string")
-                throw new Error(
-                    `property option: ${option}, at index: ${i}, in params[1] is not a String!`
-                );
-            return option;
+        const optionStrings = options.map((opt, i) => {
+            if(opt instanceof Object) {
+                let { option } = opt;
+                if (typeof option !== "string")
+                    throw new Error(
+                        `property option: ${option}, at index: ${i}, in params[1] is not a String!`
+                    );
+                return option;
+            } else if(typeof opt == "string") {
+                return opt;
+            }
         });
-        const optionCallbacks = options.map(({ callback }) => {
+        const optionCallbacks = options.map((opt) => {
+            if(!(opt instanceof Object)) return;
+            let { callback } = opt;
             if (callback && !(callback instanceof Function))
                 throw new Error(
                     `property callback at index: ${i}, in params[1] is not a Function!`

@@ -1,8 +1,9 @@
-import { world } from "@minecraft/server";
+import { system, world } from "@minecraft/server";
 import { prismarineDb } from "../lib/prismarinedb";
 import playerStorage from "./playerStorage";
 import configAPI from "./config/configAPI";
 import { SegmentedStoragePrismarine } from "../prismarineDbStorages/segmented";
+import uiBuilder from "./uiBuilder";
 /*>:3>:3>:3>:3>:3>:3>:3
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀>:3>:3>:3
 ⠀>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡤⠤⠤⠤⠴⠶⠶⠒⠚⠋⠉⠉⠉⠉⣷⢀⣀⡤⠤⠶⠶⠒⠛⢶⡄⠀⠀⠀
@@ -100,7 +101,7 @@ meow meow
 configAPI.registerProperty(
     "AzaleaStyleSharedHomes",
     configAPI.Types.Boolean,
-    true
+    false
 );
 configAPI.registerProperty("HomesLimit", configAPI.Types.Number, 5);
 class Homes {
@@ -115,11 +116,52 @@ class Homes {
                 }
             })
         })
+        system.afterEvents.scriptEventReceive.subscribe(e=>{
+            if(e.id == "leaf:test_hl") {
+                e.sourceEntity.sendMessage(`${this.getHL(e.sourceEntity)}`)
+            }
+        })
     }
-    createHome(name, player) {
+    getHLoverrideDoc() {
+        let doc = this.db.findFirst({type: "HL_OVERRIDE"});
+        if(doc) {
+            return doc;
+        } else {
+            let data = {
+                type: "HL_OVERRIDE",
+                roles: {"admin": {use: true, unlimited: true, limit: 5}}
+            }
+            let id = this.db.insertDocument(data)
+            return { id, data, createdAt: Date.now(), updatedAt: Date.now() }
+        }
+    }
+    getHL(player) {
+        try {
+            let roles = uiBuilder.getPlayerRoles(player);
+            let limit = configAPI.getProperty("HomesLimit");
+            let doc = this.getHLoverrideDoc()
+            for(const role of roles) {
+                if(doc.data.roles[role] && doc.data.roles[role].use) {
+                    if(doc.data.roles[role].unlimited) {
+                        return 2147483647;
+                    } else {
+                        if(doc.data.roles[role].limit > limit) limit = doc.data.roles[role].limit
+                    }
+                }
+            }
+            return limit;
+
+        } catch {
+            return configAPI.getProperty("HomesLimit");
+        }
+    }
+    setHLOverrideDoc(doc) {
+        this.db.overwriteDataByID(doc.id, doc.data);
+    }
+    createHome(name, player, dim) {
         let owner = playerStorage.getID(player);
         let hs = this.db.findDocuments({ owner });
-        if (hs.length + 1 > configAPI.getProperty("HomesLimit")) {
+        if ((hs.length + 1) > this.getHL(player)) {
             player.error("You have reached the homes limit!");
             return false;
         }
@@ -127,6 +169,7 @@ class Homes {
         let h = this.db.findFirst({ owner, name });
         if (h) return false;
         let h2 = this.db.insertDocument({
+            dim: dim.id,
             owner,
             name,
             loc: player.location,
@@ -151,11 +194,12 @@ class Homes {
     }
     teleport(id, player) {
         let h = this.db.getByID(id);
+        let dim = h.data.dim ? h.data.dim : "minecraft:overworld"
         player.teleport({
             x: h.data.loc.x,
             y: h.data.loc.y,
             z: h.data.loc.z,
-        });
+        }, { dimension: world.getDimension(dim) });
         return true;
     }
     shareHome(id, player) {

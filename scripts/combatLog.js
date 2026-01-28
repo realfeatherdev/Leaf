@@ -11,6 +11,7 @@ function getSeconds() {
         cfgDb.get("CombatlogSeconds") ? cfgDb.get("CombatlogSeconds") : 10
     );
 }
+// deprecated?
 function getIsEnabled() {
     return cfgDb.get("CombatlogEnabled") ? true : false;
 }

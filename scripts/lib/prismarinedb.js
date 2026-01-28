@@ -3161,7 +3161,7 @@ var PrismarineDB = class {
             _main: __privateGet(this, _reservedKeyVal),
         });
         this.permissions = new PermissionSystem();
-        this.version = 12.2;
+        this.version = 13;
         this.economy = new Economy(__privateGet(this, _reservedEconomyTable));
         this.config = this.keyval("conf");
     }

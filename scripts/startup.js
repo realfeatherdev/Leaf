@@ -121,10 +121,46 @@ system.beforeEvents.startup.subscribe(async (init) => {
             if(origin.sourceEntity) origin.sourceEntity.sendMessage(status ? "§aDeleted zone!" : "§cZone doesnt exist")
         })
     })
+    init.customCommandRegistry.registerCommand({
+        permissionLevel: CommandPermissionLevel.GameDirectors,
+        description: "Disable a zone",
+        name: "leaf:disablezone",
+        mandatoryParameters: [
+            {
+                name: "name",
+                type: CustomCommandParamType.String
+            },
+        ]
+    }, (origin, name)=>{
+        system.run(async ()=>{
+            let zonesModule = await import("./api/zones");
+            let status = zonesModule.default.disableZone(name);
+            if(origin.sourceEntity) origin.sourceEntity.sendMessage(status ? "§aDeleted zone!" : "§cZone doesnt exist")
+        })
+    })
+    init.customCommandRegistry.registerCommand({
+        permissionLevel: CommandPermissionLevel.GameDirectors,
+        description: "Enable a zone",
+        name: "leaf:enablezone",
+        mandatoryParameters: [
+            {
+                name: "name",
+                type: CustomCommandParamType.String
+            },
+        ]
+    }, (origin, name)=>{
+        system.run(async ()=>{
+            let zonesModule = await import("./api/zones");
+            let status = zonesModule.default.enableZone(name);
+            if(origin.sourceEntity) origin.sourceEntity.sendMessage(status ? "§aDeleted zone!" : "§cZone doesnt exist")
+        })
+    })
+
     init.customCommandRegistry.registerEnum("leaf:invite_type", [
         "send",
         "accept",
         "deny",
+        "cancel"
     ]);
 
     init.customCommandRegistry.registerCommand(
@@ -161,6 +197,34 @@ system.beforeEvents.startup.subscribe(async (init) => {
             );
         }
     );
+    init.customCommandRegistry.registerEnum("leaf:channel_action_type", [
+        "list",
+        "info",
+        "join"
+    ]);
+    init.customCommandRegistry.registerCommand(
+        {
+            name: "leaf:channel",
+            description: "Manage your current channel.",
+            permissionLevel: CommandPermissionLevel.Any,
+            mandatoryParameters: [
+                {
+                    type: CustomCommandParamType.Enum,
+                    name: "leaf:channel_action_type",
+                }
+            ],
+            optionalParameters: [
+                {
+                    type: CustomCommandParamType.String,
+                    name: "channel_name",
+                }
+            ]
+        },
+        (origin, channel_action_type, channel_name) => {
+            uiBuilder.default.channelCmd(origin, channel_action_type, channel_name)
+        }
+    );
+
 
     init.customCommandRegistry.registerCommand(
         {
@@ -204,6 +268,37 @@ system.beforeEvents.startup.subscribe(async (init) => {
             main();
         }
     );
+
+    init.customCommandRegistry.registerCommand(
+        {
+            name: "leaf:tell_formatted_channel",
+            description: "Send a leaf formatted message to any channel",
+            permissionLevel: CommandPermissionLevel.GameDirectors,
+            mandatoryParameters: [
+                {
+                    name: "channel",
+                    type: CustomCommandParamType.String,
+                },
+                {
+                    name: "message",
+                    type: CustomCommandParamType.String,
+                },
+            ],
+            optionalParameters: [
+                {
+                    name: "origin_pos",
+                    type: CustomCommandParamType.Location
+                }
+            ]
+        },
+        (origin, channel, str, origin_pos) => {
+            async function main() {
+                uiBuilder.default.broadcastToChannel(channel, str, [], origin && origin.sourceEntity && origin.sourceEntity.typeId == "minecraft:player" ? origin.sourceEntity : null, true, origin_pos)
+            }
+            main();
+        }
+    );
+
 
     init.customCommandRegistry.registerCommand(
         {
@@ -445,17 +540,20 @@ system.beforeEvents.startup.subscribe(async (init) => {
                 let itemdb = await import("./api/itemdb.js");
 
                 // console.warn(itemdb)
-                system.run(async () => {
+                system.run(() => {
+                    let thing = async() =>{
                     for (const player of players) {
                         await itemdb.saveInventory(
                             player,
                             `PLAYER_${player.id}_${inventory_name}`
                         );
-                        return;
                     }
-                })();
+
+                    }
+                    thing()
+                });
     
-            })
+            })()
         }
     );
 
@@ -545,7 +643,7 @@ system.beforeEvents.startup.subscribe(async (init) => {
                                 `PLAYER_${player.id}_${inventory_name}`
                             );
         
-                        } catch {
+                        } catch(e) {
                             let container = players[0].getComponent('inventory').container;
                             // if(!(container instanceof mc.Container)) return;
                             for(let i = 0;i < container.size;i++) {
@@ -812,7 +910,7 @@ system.beforeEvents.startup.subscribe(async (init) => {
     init.customCommandRegistry.registerCommand(
         {
             name: "leaf:open",
-            description: "Open custom UIs",
+            description: "Open UIs",
             permissionLevel: CommandPermissionLevel.GameDirectors,
             mandatoryParameters: [
                 {
@@ -828,7 +926,7 @@ system.beforeEvents.startup.subscribe(async (init) => {
         (origin, players, scriptevent) => {
             system.run(() => {
                 for (const player of players) {
-                    player.runCommand(`scriptevent leaf:open ${scriptevent}`);
+                    player.runCommand(`scriptevent leaf:open_command_internal ${scriptevent}`);
                 }
             });
         }

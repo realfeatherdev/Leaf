@@ -77,13 +77,13 @@ function spawnLine(player, particle, axis, fixedValue, centerValue) {
         if (axis === "x") {
             spawnParticle(player, particle, {
                 x: fixedValue,
-                y: 0,
+                y: player.dimension.heightRange.min + 192,
                 z: centerValue + i - OFFSET
             }, configAPI.getProperty("WorldBorderSize"));
         } else {
             spawnParticle(player, particle, {
                 x: centerValue + i - OFFSET,
-                y: 0,
+                y: player.dimension.heightRange.min + 192,
                 z: fixedValue
             }, configAPI.getProperty("WorldBorderSize"));
         }

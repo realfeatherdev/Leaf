@@ -9,7 +9,7 @@ uiManager.addUI(config.uiNames.Homes.Create, "Create a home", (player) => {
     form.textField("Name", "Example: Base", null);
     form.show(player).then((response) => {
         if (!response.formValues[0]) return player.error("Enter a name!");
-        homes.createHome(response.formValues[0], player);
+        homes.createHome(response.formValues[0], player, player.dimension);
         uiManager.open(player, config.uiNames.Homes.Root);
     });
 });

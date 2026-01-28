@@ -15,7 +15,7 @@ import playerActivityTracking from "../api/PlayerActivityTracking/index";
 function randomNumber(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-configAPI.registerProperty("SmartRTP", configAPI.Types.Boolean, true)
+configAPI.registerProperty("SmartRTP", configAPI.Types.Boolean, false)
 function generateRandomLocation() {
     let radius = configAPI.getProperty("RTPRadius");
     let x = randomNumber(-radius, radius);

@@ -9,7 +9,7 @@ import { reRegisterCommands } from "../handler";
 uiManager.addUI(versionData.uiNames.CustomCommandsV2.edit, "a", (player, id)=>{
     let form = new ActionForm();
     form.button(`§cBack\n§7Go back`, `textures/azalea_icons/other/door`, player=>{
-        uiManager.open(versionData.uiNames.UIBuilderEdit, id)
+        uiManager.open(player, versionData.uiNames.UIBuilderEdit, id)
     })
     form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[25][0]}§r§fEdit Custom Command`)
     let command = uiBuilder.db.getByID(id)
@@ -31,9 +31,11 @@ uiManager.addUI(versionData.uiNames.CustomCommandsV2.edit, "a", (player, id)=>{
             modalForm.textField("Name", "type a name for the subcommand", "")
             modalForm.toggle("Ensure Chat Closed", false)
             modalForm.textField("Description", "type a description for the subcommand", "")
+            modalForm.toggle("ExecOther", false)
+            modalForm.toggle("Don't allow executing on self", false)
             modalForm.show(player, false, (player, response)=>{
                 if(response.canceled || !response.formValues[0] || response.formValues[0].includes(' ') || command.data.subcommands.find(_=>_.name == response.formValues[0])) return uiManager.open(player, versionData.uiNames.CustomCommandsV2.edit, id);
-                command.data.subcommands.push({name: response.formValues[0], actions: [], ensureChatClosed: response.formValues[1], description: response.formValues[2]})
+                command.data.subcommands.push({name: response.formValues[0], actions: [], ensureChatClosed: response.formValues[1], description: response.formValues[2], execother: response.formValues[3], noself: response.formValues[4]})
                 uiBuilder.db.overwriteDataByID(command.id, command.data)
                 uiManager.open(player, versionData.uiNames.CustomCommandsV2.edit, id)
             })
@@ -51,11 +53,15 @@ uiManager.addUI(versionData.uiNames.CustomCommandsV2.edit, "a", (player, id)=>{
                     modalForm.textField("Name", "type a name for the subcommand", command.data.subcommands[subcommandIndex].name)
                     modalForm.toggle("Ensure Chat Closed", command.data.subcommands[subcommandIndex].ensureChatClosed)
                     modalForm.textField("Description", "type a description for the subcommand", command.data.subcommands[subcommandIndex].description)
+                    modalForm.toggle("ExecOther", command.data.subcommands[subcommandIndex].execother ? true : false)
+                    modalForm.toggle("Don't allow executing on self", command.data.subcommands[subcommandIndex].noself ? true : false)
                     modalForm.show(player, false, (player, response)=>{
-                        if(response.canceled || !response.formValues[0] || response.formValues[0].includes(' ') || command.data.subcommands.find(_=>_.name == response.formValues[0])) return uiManager.open(player, versionData.uiNames.CustomCommandsV2.edit, id);
+                        if(response.canceled || !response.formValues[0] || response.formValues[0].includes(' ') || command.data.subcommands.findIndex(_=>_.name == response.formValues[0]) != subcommandIndex) return uiManager.open(player, versionData.uiNames.CustomCommandsV2.edit, id);
                         command.data.subcommands[subcommandIndex].name = response.formValues[0]
                         command.data.subcommands[subcommandIndex].ensureChatClosed = response.formValues[1]
                         command.data.subcommands[subcommandIndex].description = response.formValues[2]
+                        command.data.subcommands[subcommandIndex].execother = response.formValues[3]
+                        command.data.subcommands[subcommandIndex].noself = response.formValues[4]
                         uiBuilder.db.overwriteDataByID(command.id, command.data)
                         uiManager.open(player, versionData.uiNames.CustomCommandsV2.edit, id)
                     })

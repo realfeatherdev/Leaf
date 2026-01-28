@@ -68,6 +68,10 @@ class OpenClanAPI {
     onClanMessage(fn) {
         this.clanMessageEvents.push(fn);
     }
+    // fuck you ninetails
+    getAllClans() {
+        return this.db.findDocuments({});
+    }
     /**
      * @description creates a clan
      * @param {Player} owner

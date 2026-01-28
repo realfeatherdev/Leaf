@@ -55,6 +55,9 @@ class UIManager {
             this.#altUIs.set(altName, ui);
         }
     }
+    hasUI(id) {
+        return this.#altUIs.has(id) || this.#mainUIs.has(id);
+    }
     removeUI(id) {
         this.#descriptions.delete(id);
 

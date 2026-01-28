@@ -4,6 +4,7 @@ import uiManager, { Button, UI } from "../../uiManager";
 import versionData from "../../versionData";
 import config from "../../versionData";
 import { NUT_UI_DISABLE_VERTICAL_SIZE_KEY, NUT_UI_DISBALE_BTN, NUT_UI_HEADER_BUTTON, NUT_UI_LEFT_HALF, NUT_UI_MODAL, NUT_UI_RIGHT_HALF } from "../preset_browser/nutUIConsts";
+import './channels';
 
 uiManager.registerBuilder(config.uiNames.UIBuilderAddSubmenu, () => {
     return new UI()
@@ -272,6 +273,14 @@ uiManager.registerBuilder(config.uiNames.UIBuilderAddSubmenu, () => {
             new Button()
                 .setText(`${NUT_UI_DISBALE_BTN}§r§eChat Widget\n§7Customize chat :3`)
                 .setIcon(`textures/azalea_icons/other/widget`)
+        )
+        .addButton(
+            new Button()
+                .setText(`§r§6Channel\n§7I overcomplicated this one`)
+                .setIcon(`textures/azalea_icons/other/key_c`)
+                .setCallback((player)=>{
+                    uiManager.open(player, versionData.uiNames.Channels.Add)
+                })
         )
         .addButton(
             new Button()

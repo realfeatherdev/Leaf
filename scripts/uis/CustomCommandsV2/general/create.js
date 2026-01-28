@@ -55,6 +55,18 @@ uiManager.addUI(
             () => {},
             "Ensure chat is closed when the command is run. Useful for opening UIs"
         );
+        modalForm.toggle(
+            "ExecOther?",
+            command ? command.data.execother : false,
+            () => {},
+            "Player2 moment"
+        );
+        modalForm.toggle(
+            "Don't allow executing on self",
+            command ? command.data.noself : false,
+            () => {},
+            "Pretty self explanatory"
+        );
         modalForm.show(player, false, (player, response) => {
             if (id == -1) {
                 uiBuilder.createCommand(
@@ -63,7 +75,9 @@ uiManager.addUI(
                     response.formValues[2],
                     response.formValues[3],
                     // response.formValues[4],
-                    response.formValues[4]
+                    response.formValues[4],
+                    response.formValues[5],
+                    response.formValues[6],
                 );
                 reRegisterCommands()
 
@@ -79,6 +93,8 @@ uiManager.addUI(
                 command.data.category = response.formValues[3];
                 // command.data.requiredTag = response.formValues[4];
                 command.data.ensureChatClosed = response.formValues[4];
+                command.data.execother = response.formValues[5];
+                command.data.noself = response.formValues[6];
                 uiBuilder.db.overwriteDataByID(command.id, command.data);
                 reRegisterCommands()
             }

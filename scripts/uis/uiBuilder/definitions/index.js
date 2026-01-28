@@ -312,7 +312,7 @@ uiBuilder.definitions.push({
             generatePathways(doc.data, doc.data.maxOnX * 12)
         })
         actionForm.button(`test2`, null, (player)=>{
-            for(let i = 0;i < doc.data.maxOnX * 12;i++) {
+            for(let i = 0;i < doc.data.maxOnX * 50;i++) {
                 spawnIsland(doc.data, i)
             }
         })
@@ -564,12 +564,12 @@ uiBuilder.definitions.push({
                         z: originalLoc.z + doc.data.offZ,
                     };
                     if (!isInCuboid(spawnPos, {...originalLoc, y: 0}, {...cornerLoc, y:6000000})) {
-                        player.error("Spawn pos is outside of the structure");
-                        return uiManager.open(
-                            player,
-                            versionData.uiNames.UIBuilderEdit,
-                            doc.id
-                        );
+                        // player.error("Spawn pos is outside of the structure");
+                        // return uiManager.open(
+                        //     player,
+                        //     versionData.uiNames.UIBuilderEdit,
+                        //     doc.id
+                        // );
                     }
                     let blocks = [];
                     let dim = player.dimension;

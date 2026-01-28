@@ -27,7 +27,9 @@ export default {
         ["Bypass Land Claims", "claim.bypass"],
         ["Bypass Generator Owner Requirements", "generator.manage"],
         ["View undeployed copies in action forms by default", "uibuilder.actionform.viewundeployedcopies"],
-        ["Anticheat Logs", "anticheat.logs"]
+        ["Anticheat Logs", "anticheat.logs"],
+        ["Combat Log - Bypass Commands", "clog.bypass.commands"],
+        ["Chat Channels - Bypass Joinability", "channels.bypassjoinability"],
     ],
     defaultPermissions: [
         "permissions.testing",
@@ -41,6 +43,10 @@ export default {
         "commands.help.version",
         "commands.help.my-id",
         "commands.tpa",
+        "commands.tpa.here",
+        "commands.tpa.accept",
+        "commands.tpa.deny",
+        "commands.tpa.cancel",
         "commands.warp",
         "commands.report",
         "commands.emojis",

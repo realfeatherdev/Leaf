@@ -84,7 +84,8 @@ class CommandManager {
             if (
                 configAPI.getProperty("CLog") &&
                 configAPI.getProperty("CLogDisableCommands") &&
-                combatMap.has(msg.sender)
+                combatMap.has(msg.sender.id) &&
+                !prismarineDb.permissions.hasPermission(msg.sender, "clog.bypass.commands")
             )
                 return msg.sender.error(
                     `You cant do this command while in combat`

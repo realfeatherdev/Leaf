@@ -11,15 +11,15 @@ Maybe it isnt so bad here, theres tons of miku plushies here too.
 class Icons {
     constructor() {
         this.icons = new Map([
-            ["vanilla/iron_sword", "textures/items/gold_sword"], // FUCK YOU LOL
+            ["vanilla/iron_sword", "textures/items/iron_sword"], // FUCK YOU LOL
             ["fishy!", "textures/custom_crates/fishy"],
-            ["i like kissing boys", "textures/ui/boykisser"]
+            // ["i like kissing boys", "textures/ui/boykisser"]
         ]);
         this.iconData = new Map([
             [
                 "vanilla/iron_sword",
                 {
-                    name: "Gold sword cuz fuckk you lol",
+                    name: "Iron Sword",
                 },
             ],
         ]);
