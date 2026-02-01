@@ -9,7 +9,7 @@ import { ActionForm } from "../../lib/prismarinedb";
 
 uiManager.addUI(config.uiNames.Homes.Shared, "Homes Root", (player) => {
     let form = new ActionForm();
-    form.title(`${NUT_UI_TAG}§r§f` + "Homes");
+    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§f` + "Homes");
     form.button(
         `${NUT_UI_HEADER_BUTTON}§cBack\n§7Go back to homes root`,
         "textures/azalea_icons/2.png",

@@ -1,3 +1,4 @@
+import configAPI from "../../../api/config/configAPI";
 import icons from "../../../api/icons";
 import uiBuilder from "../../../api/uiBuilder";
 import { ActionForm } from "../../../lib/form_func";
@@ -14,10 +15,17 @@ import { themes } from "../cherryThemes";
 uiManager.addUI(versionData.uiNames.CustomizerSettings, "a", (player) => {
     let form = new ActionForm();
     form.title(
-        `${NUT_UI_TAG}${NUT_UI_THEMED}${themes[38][0]}§rCustomizer Settings`
+        `${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rCustomizer Settings`
     );
     insertBackButton(form, `scriptevent leafgui:ui_builder_main_page`);
     form.label(`§aCreation Count: §r${uiBuilder.getAllUIs().length}`);
+    form.button(`§eLeaf Theme\n§7Current: ${themes[configAPI.getProperty("LeafTheme")][1]}`, themes[configAPI.getProperty("LeafTheme")][2], (player)=>{
+        uiManager.open(player, "edit_cherry_theme", 0, (id)=>{
+            if(id == -2) return uiManager.open(player, versionData.uiNames.CustomizerSettings)
+            configAPI.setProperty("LeafTheme", id)
+            uiManager.open(player, versionData.uiNames.CustomizerSettings)
+        }, configAPI.getProperty("LeafTheme"), false);
+    })
     form.button(
         `§dRegistered Icon Packs\n§7View this servers icon packs`,
         `textures/azalea_icons/other/image`,

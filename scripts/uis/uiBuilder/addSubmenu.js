@@ -9,7 +9,7 @@ import './channels';
 uiManager.registerBuilder(config.uiNames.UIBuilderAddSubmenu, () => {
     return new UI()
         .setCherryUI(true)
-        .setCherryUITheme(25)
+        .setCherryUITheme(68)
         .setTitle(`New creation`)
         .addButton(
             new Button()

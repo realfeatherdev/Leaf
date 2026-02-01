@@ -19,7 +19,7 @@ uiManager.addUI(
             category.items[itemIndex].type == "ITEMDB_ITEM"
         ) {
             let form = new ActionForm();
-            form.title(`${NUT_UI_TAG}§rEdit Item`);
+            form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rEdit Item`);
             form.button(
                 `${NUT_UI_HEADER_BUTTON}§r§cBack\n§7Go back`,
                 `textures/azalea_icons/2`,

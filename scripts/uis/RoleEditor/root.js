@@ -12,7 +12,7 @@ import { MessageFormData } from "@minecraft/server-ui";
 uiManager.addUI(config.uiNames.RoleEditor.Root, "roles OwO", (player) => {
     // what am i even supposed to add
     let form = new ActionForm();
-    form.title(`${NUT_UI_TAG}§rRole Editor`);
+    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rRole Editor`);
     form.button(`§aAdd Role\n§7Add a role`, null, (player) => {
         uiManager.open(player, config.uiNames.RoleEditor.Add)
     });

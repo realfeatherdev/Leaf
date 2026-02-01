@@ -13,7 +13,7 @@ uiManager.addUI(
     (player) => {
         return uiManager.open(player, config.uiNames.UIBuilderRoot);
         let form = new ActionForm();
-        form.title(`${NUT_UI_TAG}§rSidebarsV2`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rSidebarsV2`);
         form.button(
             `${NUT_UI_HEADER_BUTTON}§r§cBack\n§7Click to go back`,
             `textures/azalea_icons/2`,

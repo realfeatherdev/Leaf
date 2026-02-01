@@ -54,7 +54,7 @@ uiManager.addUI(
             }
         }
         actionForm.title(
-            `${NUT_UI_TAG}§rEditing ${button.type ? button.type : "button"}`
+            `${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rEditing ${button.type ? button.type : "button"}`
         );
         // world.sendMessage(JSON.stringify(button))
         actionForm.button(

@@ -35,6 +35,8 @@
 //     }
 // }
 
+import configAPI from "../../api/config/configAPI";
+
 export let themes = [
     ["", "Default", "textures/example/header"],
     ["§o§c§e§a§n", "Ocean", "textures/example/headerocean"],
@@ -102,8 +104,19 @@ export let themes = [
     ["§s§k§0§1","Spooky blue","textures/example/spookyblue"],
     ["§s§k§0§2","Spooky goop","textures/example/spookygoop"],
     ["§s§k§0§3","Spooky SQUARED","textures/example/spookysquared"],
-    ["§s§k§0§4","Spooky Spooky","textures/example/spookyspooky"]
+    ["§s§k§0§4","Spooky Spooky","textures/example/spookyspooky"],
+    ["§v§i§s§0§1","WindOwOs Vista","textures/example/headervista"],
+    ["a", "a", "a"]
 ];
-
+configAPI.registerProperty("LeafTheme", configAPI.Types.Number, 38)
+Object.defineProperty(themes, 68, {
+    get() {
+        let t = configAPI.getProperty("LeafTheme");
+        if(t == 68) t = (66 + 1); // no
+        return [themes[t][0], "Leaf Default", themes[t][2]]
+    }
+})
 export let leafThemeCurr = 25;
 // §s§k§0§4
+
+globalThis.themes = themes;

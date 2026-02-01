@@ -22,7 +22,7 @@ uiManager.addUI(
     (player, shopID, categoryID) => {
         let shop = shopAPI.shops.getByID(shopID);
         let form = new ActionForm();
-        form.title(`${NUT_UI_TAG}§rEdit category`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rEdit category`);
         form.body(`Category ID: ${categoryID}\nShop ID: ${shopID}`);
         form.button(
             `${NUT_UI_HEADER_BUTTON}§r§cBack\n§7Go back`,

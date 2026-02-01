@@ -33,7 +33,7 @@ function getBtnText(ui) {
 uiManager.addUI(versionData.uiNames.UIBuilderTrash, "", (player) => {
     let docs = uiBuilder.db.getTrashedDocuments();
     let form = new ActionForm();
-    form.title(`${NUT_UI_TAG}§rUI Trash`);
+    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rUI Trash`);
     form.button(
         `${NUT_UI_HEADER_BUTTON}§r§cBack\n§7Click to go back`,
         `textures/azalea_icons/2`,
@@ -44,7 +44,7 @@ uiManager.addUI(versionData.uiNames.UIBuilderTrash, "", (player) => {
     for (const doc of docs) {
         form.button(getBtnText(doc), getIcon(doc), (player) => {
             let newForm = new ActionForm();
-            newForm.title(`${NUT_UI_TAG}§rTrash Options`);
+            newForm.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rTrash Options`);
             newForm.button(
                 `${NUT_UI_HEADER_BUTTON}§cBack\n§7Click to go back`,
                 `textures/azalea_icons/2`,

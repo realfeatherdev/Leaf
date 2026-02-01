@@ -32,7 +32,7 @@ uiBuilder.definitions.push({
 uiManager.addUI(versionData.uiNames.Channels.Visibility, "", (player, id)=>{
     let form = new ActionForm();
     let channel = id > -1 ? uiBuilder.db.getByID(id) : null;
-    form.title(`${NUT_UI_TAG}§r§fEdit Channel Visibility`)
+    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§fEdit Channel Visibility`)
     form.label(`§fEnabling "§eShow to everyone§f" will make channel forwarding make the message not forward to those channels.`)
     form.label(`§fRole forwarding completely §coverrides these settings§f, including channel forwarding`)
     form.button(`§6Back\n§7Go back`, null, (player)=>{

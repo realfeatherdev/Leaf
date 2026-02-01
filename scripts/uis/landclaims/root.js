@@ -21,7 +21,7 @@ uiManager.addUI(
         let form = new ActionForm();
         let claim = landclaims.db.getByID(claimID);
         if (!claim) return;
-        form.title(`${NUT_UI_TAG}§r${claim.data.name}`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r${claim.data.name}`);
         form.button(
             `${NUT_UI_HEADER_BUTTON}§r§cGo back`,
             `textures/azalea_icons/2`,
@@ -182,7 +182,7 @@ uiManager.addUI(
             ? landclaims.db.findDocuments({ type: "CLAIM" })
             : landclaims.db.findDocuments({ type: "CLAIM", owner: id });
         let form = new ActionForm();
-        form.title(`${NUT_UI_TAG}§rLand Claims`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rLand Claims`);
         form.button(
             `${NUT_UI_HEADER_BUTTON}§r§cGo Back`,
             `textures/azalea_icons/2`,
@@ -342,7 +342,7 @@ uiManager.addUI(
         if (!configAPI.getProperty("LandClaims"))
             return player.error("Land claims are disabled");
         let form = new ActionForm();
-        form.title(`${NUT_UI_TAG}§rLand Claims`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rLand Claims`);
         if (!locMap.has(player.id)) locMap.set(player.id, {});
         let playerLocs = locMap.get(player.id);
         let disableAll = landclaims.isInClaim(player.location);

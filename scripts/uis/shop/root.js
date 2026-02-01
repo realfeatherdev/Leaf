@@ -20,10 +20,10 @@ uiManager.addUI(
         if (typeof id === "string") id = parseInt(id); // for compatibility with leafgui command
         let shop = shopAPI.shops.getByID(id);
         let form = new ActionForm();
-        form.title(`${NUT_UI_TAG}§r§f${formatStr(shop.data.title, player)}`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§f${formatStr(shop.data.title, player)}`);
         if (shop.data.description)
             form.body(
-                `${NUT_UI_TAG}§r§f${formatStr(shop.data.description, player)}`
+                `${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§f${formatStr(shop.data.description, player)}`
             );
         let hasPerms = false;
         if (shop.data.type == "PLAYER_SHOP") {

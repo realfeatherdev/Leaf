@@ -91,7 +91,7 @@ uiManager.addUI(
     "UI Builder Folders",
     (player) => {
         let form = new ActionForm();
-        form.title(`${NUT_UI_TAG}§rFolders`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rFolders`);
         form.button(
             `§aNew Folder\n§7Create a new folder`,
             `textures/azalea_icons/1`,
@@ -690,7 +690,7 @@ uiManager.addUI(
                 false,
                 () => {
                     let newForm = new ActionForm();
-                    newForm.title(`${NUT_UI_TAG}§rAdd UI To Folder`);
+                    newForm.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rAdd UI To Folder`);
                     newForm.button(
                         `${NUT_UI_HEADER_BUTTON}§r§cGo back`,
                         `textures/azalea_icons/2`,
@@ -744,7 +744,7 @@ uiManager.addUI(
             chest.show(player).then(() => {});
             return;
         }
-        form.title(`${!folderData.data.isCocks ? `${NUT_UI_TAG}§r` : ``}${folderData.data.name}`);
+        form.title(`${!folderData.data.isCocks ? `${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r` : ``}${folderData.data.name}`);
         form.button(
             `${NUT_UI_HEADER_BUTTON}§r§cGo back`,
             `textures/azalea_icons/2`,
@@ -757,7 +757,7 @@ uiManager.addUI(
             null,
             (player) => {
                 let newForm = new ActionForm();
-                newForm.title(`${NUT_UI_TAG}§rAdd UI To Folder`);
+                newForm.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rAdd UI To Folder`);
                 newForm.button(
                     `${NUT_UI_HEADER_BUTTON}§r§cGo back`,
                     `textures/azalea_icons/2`,
@@ -973,7 +973,7 @@ uiManager.addUI(config.uiNames.UIBuilderLeaf, "a", (player) => {
 uiManager.registerBuilder(config.uiNames.UIBuilderRoot, (player) => {
     const ui = new UI()
         .setCherryUI(true)
-        .setCherryUITheme(63)
+        .setCherryUITheme(68)
         .setTitle("Customizer");
 
     let doc = uiBuilder.db.findFirst({type: 2048});

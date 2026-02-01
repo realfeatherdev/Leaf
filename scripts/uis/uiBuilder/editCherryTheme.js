@@ -11,7 +11,6 @@ import {
     NUT_UI_RIGHT_HALF,
 } from "../preset_browser/nutUIConsts";
 import { themes } from "./cherryThemes";
-
 uiManager.addUI(
     "edit_cherry_theme",
     "Edits the cherry theme!",
@@ -22,7 +21,7 @@ uiManager.addUI(
             let themeID = overrideShit ? currTheme : doc.data.theme ? doc.data.theme : 0;
             let yes =
                 themeID > 0 ? `${NUT_UI_THEMED}${themes[themeID][0]}` : ``;
-            form.title(`${NUT_UI_TAG}${yes}§r§f§lThemes`);
+            form.title(`${NUT_UI_TAG}${yes}§r§fThemes`);
             form.button(
                 `${NUT_UI_HEADER_BUTTON}§r§c§lGo Back\n§r§7Click to go back`,
                 `textures/azalea_icons/2`,
@@ -57,7 +56,7 @@ uiManager.addUI(
                                 ? ""
                                 : al2
                             : al2
-                    }${themeID == i ? "§o§1" : ""}§r§f${theme[1]} §7[${i}]${theme.length > 3 && theme[3] ? `\n@${theme[3]}` : ``}`,
+                    }${themeID == i ? "§o§1" : ""}§r§f${theme[1]} §7[${i == 67 ? "66 + 1" : i}]${theme.length > 3 && theme[3] ? `\n@${theme[3]}` : ``}`,
                     theme[2],
                     (player) => {
                         if(!overrideShit) {

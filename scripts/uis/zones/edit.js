@@ -21,7 +21,7 @@ function getCuboidCenter(pos1, pos2) {
 uiManager.addUI(versionData.uiNames.Zones.Edit, "A", (player, id) => {
     let zone = uiBuilder.db.getByID(id);
     let form = new ActionForm();
-    form.title(`${NUT_UI_TAG}§rEdit Zone: ${zone.data.name}`);
+    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rEdit Zone: ${zone.data.name}`);
     form.button(
         `${NUT_UI_HEADER_BUTTON}§r§cBack`,
         `textures/azalea_icons/2`,

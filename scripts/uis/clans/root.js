@@ -22,7 +22,7 @@ uiManager.addUI(config.uiNames.Clans.Root, "Clans Root", (player) => {
         return player.runCommand("scriptevent leaf:open leaf/clans")
     let clanBaseEnabled = configAPI.getProperty("clans:enable_clan_base");
     let form = new ActionForm();
-    form.title(`${NUT_UI_TAG}§rClans`);
+    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rClans`);
     let clan = OpenClanAPI.getClan(player);
     form.button(
         `§dClan Invites\n§7View invites to clans`,
@@ -45,7 +45,7 @@ uiManager.addUI(config.uiNames.Clans.Root, "Clans Root", (player) => {
             clanNameNew = clanNameNew.replaceAll(colorCode, "");
         }
         let isClanOwner = clan.data.owner == playerStorage.getID(player);
-        form.title(`${NUT_UI_TAG}§r${clanNameNew}`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r${clanNameNew}`);
         form.button(
             `§bEnter/leave clan chat\n§7${
                 player.hasTag("clan-chat") ? "Click to leave" : "Click to enter"

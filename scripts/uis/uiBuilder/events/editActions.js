@@ -7,7 +7,7 @@ import { NUT_UI_TAG } from "../../preset_browser/nutUIConsts";
 
 uiManager.addUI(versionData.uiNames.EventsV2.EditActions, "", (player, id) => {
     let form = new ActionForm();
-    form.title(`${NUT_UI_TAG}§rEdit Tags`);
+    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rEdit Tags`);
     let doc = uiBuilder.db.getByID(id);
     form.button(`Add New Action`, `textures/azalea_icons/1`, (player) => {
         uiManager.open(

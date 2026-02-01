@@ -23,7 +23,7 @@ uiManager.addUI(
         title = "Select a player"
     ) => {
         let form = new ActionForm();
-        form.title(`${NUT_UI_TAG}§r§f§l${title}`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§f§l${title}`);
         form.button(
             `${NUT_UI_HEADER_BUTTON}§cGo Back\n§7Go back to main settings`,
             `textures/azalea_icons/2`,

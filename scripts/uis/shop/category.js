@@ -40,7 +40,7 @@ uiManager.addUI(
         );
         // // console.warn(JSON.stringify(shopAPI.shops.data).length)
         let category = shop.data.categories.find((_) => _.id == categoryID);
-        form.title(`${NUT_UI_TAG}§r${category.name}`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r${category.name}`);
         for (let i = 0; i < category.items.length; i++) {
             let item = category.items[i];
             if (item.type == "ITEMDB_ITEM") {

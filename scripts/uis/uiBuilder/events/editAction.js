@@ -13,7 +13,7 @@ uiManager.addUI(
         let doc = uiBuilder.db.getByID(id);
         let eventType = doc.data.eventType;
         let form = new ActionForm();
-        form.title(`${NUT_UI_TAG}§rEdit Action`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rEdit Action`);
         form.button(
             `§cBack\n§7Go back`,
             `textures/azalea_icons/2`,
