@@ -11,7 +11,7 @@ import {
 import debug_buttons from "./debug_buttons";
 import { lightMode } from "../basicConfig";
 import { colors } from "./prismarinedb";
-import { NUT_UI_ALT, NUT_UI_DISBALE_BTN, NUT_UI_HEADER_BUTTON } from "../uis/preset_browser/nutUIConsts";
+import { NUT_UI_ALT, NUT_UI_DISBALE_BTN, NUT_UI_HEADER_BUTTON, NUT_UI_PAPERDOLL } from "../uis/preset_browser/nutUIConsts";
 import configAPI from "../api/config/configAPI";
 import { adjustTextLength } from "./chatNotifs";
 configAPI.registerProperty("LightModeCompatibilityLayer", configAPI.Types.Boolean, false)
@@ -35,7 +35,10 @@ export const content = {
                 .join(" ") // im so cool - fruitkitty
         );
     },
-};
+}; // what were u gonna do in customizer
+// fix it
+// ok
+// dont touch this file btw its very important
 function isNumberDefined(input) {
     return (
         input !== false &&
@@ -149,6 +152,7 @@ export class ActionForm {
         this.callbacks = [];
         this.titleText = "";
         this.cherry = false;
+        this.chtheme = 0;
     }
     header(text) {
         try {
@@ -169,14 +173,23 @@ export class ActionForm {
             // world.sendMessage(`${e}`)
         }
     }
-    padCherry(title, header, border, hButton, deButton, diButton, hoButton) {
+    padCherry(title, header, border, hButton, deButton, diButton, hoButton, paperdoll) {
         // world.sendMessage(`Title: ${title}`)
         // world.sendMessage(`Header: ${header}`)
         // world.sendMessage(`Border: ${border}`)
         // world.sendMessage(`Header Button: ${hButton}`)
         // world.sendMessage(`Default Button: ${deButton}`)
         // world.sendMessage(`Disabled Button: ${diButton}`)
-        return NUT_UI_TAG + adjustTextLength(title, 100) + adjustTextLength(header, 50) + adjustTextLength(border, 50) + adjustTextLength(hButton, 50) + adjustTextLength(deButton, 50) + adjustTextLength(diButton, 50) + adjustTextLength(hoButton, 50)
+        // world.sendMessage(`Hovered Button: ${hoButton}`)
+        // world.sendMessage(`Paperdoll Button: ${paperdoll}`)
+        for(const t of themes) {
+            if(title.includes(t[0])) title = title.replaceAll(t[0], '')
+        }
+        title = title.replaceAll(NUT_UI_THEMED, '')
+        let res = NUT_UI_TAG + adjustTextLength(title, 100) + adjustTextLength(header, 50) + adjustTextLength(border, 50) + adjustTextLength(hButton, 50) + adjustTextLength(deButton, 50) + adjustTextLength(diButton, 50) + adjustTextLength(hoButton, 50) + adjustTextLength(paperdoll, 50)
+        // world.sendMessage(res.replaceAll('§', '&'))
+        // world.sendMessage(`${res.length}`)
+        return res;
     }
     /**
      * @method title
@@ -192,14 +205,30 @@ export class ActionForm {
         if(titleText.includes(NUT_UI_TAG)) {
             this.cherry = true;
             let header = 'textures/example/header';
+            let paperdoll = 'textures/example/paperdoll'
+            let border = 'textures/example/border'
+            let hButton = 'textures/example/button';
+            let deButton = 'textures/example/button';
+            let diButton = 'textures/example/button_disabled';
+            let hoButton = 'textures/example/button_hover';
+
             if(titleText.includes(NUT_UI_THEMED)) {
                 for(const theme of themes) {
                     if(titleText.includes(theme[0])) {
                         header = theme[2]
+                        // TAG, NAME, TEXTURE, AUTHOR, BORDER, HEADER BUTTON, DEFAULT BUTTON, DISABLED BUTTON, HOVER BUTTON, PAPERDOLL, OUTLINE
+                        if(theme.length > 4 && theme[4]) border = theme[4]
+                        if(theme.length > 5 && theme[5]) hButton = theme[5]
+                        if(theme.length > 6 && theme[6]) deButton = theme[6]
+                        if(theme.length > 7 && theme[7]) diButton = theme[7]
+                        if(theme.length > 8 && theme[8]) hoButton = theme[8]
+                        if(theme.length > 9 && theme[9]) paperdoll = theme[9]
+                        this.chtheme = Math.max(themes.findIndex(_=>_[0] == theme[0]), 0);
                     }
                 }
             }
-            this.form.title(this.padCherry(titleText.replace(NUT_UI_TAG, ''), header, 'textures/example/border', 'textures/example/button', 'textures/example/button', 'textures/example/disabled_button', 'textures/example/button_hover'));
+            this.deButton = deButton;
+            this.form.title(this.padCherry(titleText.replaceAll(NUT_UI_TAG, ''), header, border, hButton, deButton, diButton, hoButton, paperdoll));
         } else {
             this.form.title(titleText);
         }
@@ -222,19 +251,31 @@ export class ActionForm {
         this.customFormID = id;
     }
     btnCherry(text, bg) {
+        // world.sendMessage(`${text.length}`)
+        bg = this.deButton;
         if(!this.cherry) return text;
         if(text.includes(NUT_UI_HEADER_BUTTON)) return text;
+        let outline = 'textures/example/button_outline'
+        if(themes[this.chtheme ? this.chtheme : 0] && themes[this.chtheme ? this.chtheme : 0].length > 10 && themes[this.chtheme ? this.chtheme : 0][10]) outline = themes[this.chtheme ? this.chtheme : 0][10];
+        // world.sendMessage(outline)
+        if(text.includes("§o§1")) bg = outline
+        console.warn(JSON.stringify(themes[this.chtheme ? this.chtheme : 0]))
         if(text.includes(NUT_UI_ALT)) {
             for(const theme of themes) {
                 if(text.includes(theme[0])) {
-                    bg = theme[2]
+                    bg = theme[2];
+                    world.sendMessage(bg)
                 }
+
             }
         }
-        if(text.includes("§o§1")) bg = 'textures/example/button_outline'
         if(text.includes("§c§h§e§1")) bg = 'textures/example/buttoncherry'
         if(text.includes("§l§e§f§1")) bg = 'textures/example/buttonleaf'
-        return adjustTextLength(text, 300) + adjustTextLength(bg, 300)
+        if(!bg) bg = `textures/example/button`;
+        let res = adjustTextLength(text, 300) + adjustTextLength(bg, 150)
+        // world.sendMessage(res)
+        // world.sendMessage(`${res.length}`)
+        return res;
     }
     /**
      * @method body

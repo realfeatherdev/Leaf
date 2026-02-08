@@ -991,23 +991,35 @@ uiManager.registerBuilder(config.uiNames.UIBuilderRoot, (player) => {
     ui.addButton(
         new Button()
             .setText(
-                `${configAPI.getProperty("CustomizerCornerAdd") ? NUT_UI_HEADER_BUTTON : ""}§r§l§e§f§1§r§r§aNew creation\n§r§7Make a new creation`
+                `§r§l§e§f§1§r§r§aNew creation\n§r§7Make a new creation`
             )
             .setIcon("textures/azalea_icons/other/add")
             .setCallback((player) =>
                 uiManager.open(player, config.uiNames.UIBuilderAddSubmenu)
             )
     );
-
+    // furititty imma brb 30 mins luv u bye
     ui.addButton(
         new Button()
-            .setText(`${NUT_UI_HEADER_BUTTON}§r§vSettings\n§7Configure misc settings within customizer. Idk either tbqh`)
+            .setText(`§r§vSettings\n§7Configure misc settings within customizer.`)
             .setIcon("textures/items/config_ui")
             .setCallback((player) =>
                 uiManager.open(player, versionData.uiNames.CustomizerSettings)
             )
     );
+    
+    // ui.addDivider()
 
+    // THIS IS SO MUCH FUCKING BETTER
+    // mwhat
+    // move settings and new creation out of conrer
+    // it was an option to do that yk...
+    // couldve just enabled it by default
+    // too bad because who the fguck wants it in the corner
+    // i do
+    // sure
+    // bring back cherrycloud
+    
     // ui.addButton(
     //     new Button()
     //         .setText(`${NUT_UI_HEADER_BUTTON}§r§dZones\n§7Configure special zones on your server, along with permissions inside of them.`)

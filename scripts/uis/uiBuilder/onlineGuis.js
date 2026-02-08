@@ -52,9 +52,10 @@ uiManager.addUI(
     config.uiNames.OnlineGUIsList,
     "",
     (player, data, page = "main") => {
-        if (!http.player || !http.player.isValid())
+        if (!http.player)
             return player.error("No valid http player");
         let form = new ActionForm();
+        form.title(`${NUT_UI_TAG}`)
         if (player.getDynamicProperty("MCBEToolsToken")) {
             if (page == "main") {
                 form.button(
@@ -81,7 +82,7 @@ uiManager.addUI(
                                         let data2 = JSON.parse(res);
                                         let newForm = new ActionForm();
                                         newForm.title(
-                                            `${NUT_UI_TAG}${NUT_UI_THEMED}${themes[11][0]}§rSelect a profile picture`
+                                            `${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rSelect a profile picture`
                                         );
                                         newForm.button(
                                             `${NUT_UI_HEADER_BUTTON}§r§cGo Back`,
@@ -183,6 +184,10 @@ uiManager.addUI(
             }
         );
         if (page == "main") {
+            form.title(
+                `${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rOnline GUI Templates (${JSON.parse(data).length})`
+            );
+
             form.button(
                 `${NUT_UI_RIGHT_HALF}${NUT_UI_DISABLE_VERTICAL_SIZE_KEY}§r§bSearch\n§7Search Templates`,
                 icons.resolve(`azalea/book`),
@@ -240,11 +245,6 @@ uiManager.addUI(
                 }
             );
         }
-        form.title(
-            `${NUT_UI_TAG}${NUT_UI_THEMED}${
-                themes[11][0]
-            }§rOnline GUI Templates (${JSON.parse(data).length})`
-        );
         for (const thing of JSON.parse(data)) {
             // world.sendMessage(JSON.stringify(thing.guiData.name, null, 2))
             form.button(
@@ -256,7 +256,7 @@ uiManager.addUI(
                     // uiBuilder.db.insertDocument(thing.guiData)
                     let form2 = new ActionForm();
                     form2.title(
-                        `${NUT_UI_TAG}${NUT_UI_THEMED}${themes[11][0]}§r${
+                        `${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r${
                             thing.guiData.type == 4
                                 ? thing.guiData.title
                                 : thing.guiData.name

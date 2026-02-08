@@ -36,7 +36,6 @@
 // }
 
 import configAPI from "../../api/config/configAPI";
-
 export let themes = [
     ["", "Default", "textures/example/header"],
     ["§o§c§e§a§n", "Ocean", "textures/example/headerocean"],
@@ -110,15 +109,19 @@ export let themes = [
     ["§r§e§0§3§1","elbanosaeR","textures/example/elbanosaer", "disbready"], // 69!
     ["§s§k§0§1","Skobeloff","textures/example/skobeloff_green", "sillyfoxdev"],
     ["§o§u§r§0§1","Ourple","textures/example/ourple"],
+    ["§o§u§r§0§2","Ourple Ext.","textures/example/ourple", "", "textures/example/night/border", "textures/example/night/button", "textures/example/night/button", "textures/example/night/button_disabled", "textures/example/night/button_hover", "textures/example/night/paperdoll", "textures/example/night/button_outline"],
     ["§l§e§g§0§1","Legacy","textures/example/header2"],
+    ["§p§1§k","Pink 1000","textures/example/headerpink1000"],
+    ["§p§2§k","Pink 2000","textures/example/headerpink2000"],
 
 ];
+// TAG, NAME, TEXTURE, AUTHOR, BORDER, HEADER BUTTON, DEFAULT BUTTON, DISABLED BUTTON, HOVER BUTTON, PAPERDOLL, OUTLINE
 configAPI.registerProperty("LeafTheme", configAPI.Types.Number, 38)
 Object.defineProperty(themes, 68, {
     get() {
         let t = configAPI.getProperty("LeafTheme");
         if(t == 68) t = (66 + 1); // no
-        return [t == 0 ? "§d§w§d§0§1" : themes[t][0], "Leaf Default", themes[t][2]]
+        return [t == 0 ? "§d§w§d§0§1" : themes[t][0], "Leaf Default", themes[t][2], "leaf", ...(themes[t].slice(4))]
     }
 })
 export let leafThemeCurr = 25;

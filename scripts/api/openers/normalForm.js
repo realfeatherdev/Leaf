@@ -29,6 +29,8 @@ import { chunk } from "../iconViewer/underscore";
 import { worldTags } from "../../worldTags";
 import { handleActions } from "../../uis/CustomCommandsV2/handler";
 
+// normalform rewrite??? (coming 20301231)
+
 function replacePlaceholders(obj, i) {
     if (typeof obj === "string") {
         return obj.replace(/<#>/g, i); // ✨ Replace all!
@@ -40,7 +42,7 @@ function replacePlaceholders(obj, i) {
             newObj[key] = replacePlaceholders(obj[key], i); // 💫 Recurse in objects!
         }
         return newObj;
-    } else {
+    } else {//hi
         return obj; // 💤 Leave other types alone~
     }
 }

@@ -91,6 +91,15 @@ function getSpkiDer(spkiPem) {
     var binaryDerString = window.atob(pemContents);
     return str2ab(binaryDerString);
 }
+system.waitTicks(5).then(()=>{
+    system.afterEvents.scriptEventReceive.subscribe(e=>{
+        if(e.id == "leaf:req1") {
+            http.setPlayer(true)
+        }
+    })
+    system.sendScriptEvent('leaf:req2', 'loaded')
+
+})
 function str2ab(str) {
     const buf = new ArrayBuffer(str.length);
     const bufView = new Uint8Array(buf);
