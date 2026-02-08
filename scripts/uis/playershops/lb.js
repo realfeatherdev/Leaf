@@ -7,7 +7,7 @@ import { themes } from "../uiBuilder/cherryThemes";
 
 uiManager.addUI(config.uiNames.PlayerShops.Leaderboard, "yes", (player)=>{
     let form = new ActionForm();
-    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[25][0]}§rPlayer Shop Leaderboards`)
+    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rPlayer Shop Leaderboards`)
     form.button(`§aSort by most sales\n§7Show shops with the most sales`, null, (player)=>{
 
     })

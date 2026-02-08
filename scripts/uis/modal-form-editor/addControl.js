@@ -85,7 +85,7 @@ uiManager.addUI(
 
         if (!data.type) {
             let form = new ActionForm();
-            form.title(NUT_UI_TAG+NUT_UI_THEMED+themes[25][0]+"§rSelect control type");
+            form.title(NUT_UI_TAG+NUT_UI_THEMED+themes[68][0]+"§rSelect control type");
             form.button(
                 `§6Divider\n§7Separator line`,
                 `textures/azalea_icons/other/door`,

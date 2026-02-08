@@ -58,11 +58,22 @@ class Zones {
             "DisallowLandClaiming",
             "DisallowGenPlacing",
             "DisallowMobSpawning",
+            "DisallowExplosions",
         ];
         this.initEvents();
         this.msg = "You cant do this here";
     }
     initEvents() {
+        world.beforeEvents.explosion.subscribe(e=>{
+            let newBlocks = [];
+            for(const block of e.getImpactedBlocks()) {
+                let zone = this.getZoneAtVec3(block.location, block.dimension)
+                // let isA = ( && e)
+                if(zone && zone.data.flags.includes("DisallowExplosions")) continue;
+                newBlocks.push(block)
+            }
+            e.setImpactedBlocks(newBlocks)
+        })
         world.beforeEvents.playerPlaceBlock.subscribe((e) => {
             let zone = this.getZoneAtVec3(e.block.location, e.block.dimension);
             if (this.hasPerms(e.player, zone)) return;

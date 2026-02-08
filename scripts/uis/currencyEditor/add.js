@@ -84,7 +84,7 @@ uiManager.addUI(
     
         }
 
-        form2.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[38][0]}§r§fCurrency Setup`)
+        form2.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§fCurrency Setup`)
         form2.button(`§dSet settings\n§7Edit the basic settings of this curnc`, `textures/items/config_ui`, (player)=>{
             let form = new ModalForm();
             form.title(NUT_UI_MODAL + "§fDo a curnc");

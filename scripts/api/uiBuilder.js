@@ -95,6 +95,7 @@ class UIBuilder extends Router {
             [16, "Alec 6", "textures/example/alec/6"],
             [17, "Alec 7", "textures/example/alec/7"],
             [18, "Alec 8", "textures/example/alec/8"],
+            [19, "Pink Border", "textures/toasts/pinkBorder"],
         ]
         this.patternIDs = [
             {

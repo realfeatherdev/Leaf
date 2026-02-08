@@ -11,7 +11,7 @@ uiManager.addUI(versionData.uiNames.CustomCommandsV2.edit, "a", (player, id)=>{
     form.button(`§cBack\n§7Go back`, `textures/azalea_icons/other/door`, player=>{
         uiManager.open(player, versionData.uiNames.UIBuilderEdit, id)
     })
-    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[25][0]}§r§fEdit Custom Command`)
+    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§fEdit Custom Command`)
     let command = uiBuilder.db.getByID(id)
     form.button(`§eEdit Root Command\n§7Edit the root command`, `textures/azalea_icons/other/blip_orange`, player=>{
         uiManager.open(player, versionData.uiNames.CustomCommandsV2.editActions, command.data.actions, (arr)=>{
@@ -23,7 +23,7 @@ uiManager.addUI(versionData.uiNames.CustomCommandsV2.edit, "a", (player, id)=>{
     })
     form.button(`§eEdit Subcommands\n§7Edit the subcommands`, `textures/azalea_icons/other/group_edit`, (player)=>{
         let actionForm = new ActionForm();
-        actionForm.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[25][0]}§r§fEdit Subcommands`)
+        actionForm.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§fEdit Subcommands`)
 
         actionForm.button(`§aAdd`, `textures/azalea_icons/other/add`, (player)=>{
             let modalForm = new ModalForm();
@@ -45,7 +45,7 @@ uiManager.addUI(versionData.uiNames.CustomCommandsV2.edit, "a", (player, id)=>{
             let subcommandIndex = i;
             actionForm.button(`§b${subcommand.name}`, `textures/azalea_icons/other/blip_orange`, player=>{
                 let form2 = new ActionForm();
-                form2.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[25][0]}§r§fEdit Subcommand`)
+                form2.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§fEdit Subcommand`)
 
                 form2.button(`§aEdit General`, `textures/azalea_icons/other/script_lightning_edit`, (player)=>{
                     let modalForm = new ModalForm();

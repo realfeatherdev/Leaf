@@ -8,7 +8,7 @@ import { themes } from "../uiBuilder/cherryThemes";
 
 uiManager.addUI(versionData.uiNames.ChatRanks.Main, "ytesss", (player)=>{
     let form = new ActionForm();
-    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[25][0]}§rChatranks`)
+    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rChatranks`)
     insertBackButton(form, "scriptevent leafgui:config_menu_start_page")
     form.button(`${configAPI.getProperty("UseNewRanks") ? `§aEnable Legacy Ranks (Not Recommended)` : `§cDisable Legacy Ranks`}\n§7Choose between leafs old ranks and new ones`, `textures/azalea_icons/other/light_energy`, (player)=>{
         configAPI.setProperty("UseNewRanks", !configAPI.getProperty("UseNewRanks"))

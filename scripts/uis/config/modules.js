@@ -99,8 +99,27 @@ const toggleOptions = [
     { display: "Clans", property: "Clans" },
     { display: "Land Claims", property: "LandClaims" },
     { display: "Pwarps", property: "Pwarps" },
+    { display: "Sidebar", property: "Sidebar" },
     { display: "Shops", property: "Shops" },
     { display: "PlayerShops", property: "PlayerShops" },
+    { display: "AFK System", property: "AFKSystem" },
+    {
+        display: "Auction house",
+        property: "AH",
+    },
+    {
+        display: "Gifts",
+        property: "Gifts",
+    },
+    {
+        display: "Zones",
+        property: "Zones",
+    },
+    {
+        display: "Gifts",
+        property: "Gifts",
+    },
+
     // { display: "§aExtended UI Builder " + emojis.potion48, property: "ExtendedUIBuilder" },
     { header: "§7---- §aExperiments §7----" },
     {
@@ -110,25 +129,6 @@ const toggleOptions = [
         display:
             "§aShop Rewrite" + emojis.potion48 + "\n§7May not be functional",
         property: "ShopRewrite",
-    },
-    {
-        display:
-            "§aAuction house" + emojis.potion48 + "\n§7May not be functional",
-        property: "AH",
-    },
-    {
-        display:
-            "§aPlaceholder buttons" +
-            emojis.potion48 +
-            "\n§7Will not be functional",
-        property: "Placeholders",
-    },
-    {
-        display:
-            "§aExperimental Chat Rank Formatting " +
-            emojis.potion48 +
-            "\n§7WILL BREAK CHAT. NOT RECOMMENDED AT THE MOMENT",
-        property: "ExperimentalChatRankFormatting",
     },
     {
         display:
@@ -145,7 +145,7 @@ const toggleOptions = [
     },
 ];
 uiManager.addUI(config.uiNames.Config.Modules, "Module Config", (player) => {
-    return player.runCommand("scriptevent leaf:open nutui/features");
+    // return player.runCommand("scriptevent leaf:open nutui/features");
     let modalForm = new ModalForm();
     modalForm.title("Modules");
     for (const option of toggleOptions) {
@@ -170,8 +170,9 @@ uiManager.addUI(config.uiNames.Config.Modules, "Module Config", (player) => {
         // configAPI.setProperty("ExperimentalChatRankFormatting", response.formValues[6]);
         // configAPI.setProperty("Chatranks", response.formValues[7]);
         // configAPI.setProperty("DevMode", response.formValues[8]);
-        let toggleOptions2 = toggleOptions.filter((_) => !_.header);
+        let toggleOptions2 = toggleOptions;
         for (let i = 0; i < toggleOptions2.length; i++) {
+            if(toggleOptions2[i].header) continue;
             configAPI.setProperty(
                 toggleOptions2[i].property,
                 response.formValues[i]

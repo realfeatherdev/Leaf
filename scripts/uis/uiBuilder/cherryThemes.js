@@ -48,7 +48,7 @@ export let themes = [
     ["§c§s§1", "Cotton Sky", "textures/example/headercottonsky"],
     ["§f§p§1", "Frosted Petals", "textures/example/headerfrostedpetals"],
     ["§v§b§1", "Verdant Bloom", "textures/example/headerverdantbloom"],
-    ["§d§s§1", "Reasonable", "textures/example/dogshit"], // NOT DOGSHIT ANYMORE. JUST REPLACED DOGSHIT THEME CUZ ITS ASS!
+    ["§d§s§1", "Reasonable", "textures/example/dogshit", "disbready"], // NOT DOGSHIT ANYMORE. JUST REPLACED DOGSHIT THEME CUZ ITS ASS!
     ["§b§l§1", "Blue 1", "textures/example/headerblue1"],
     ["§c§d§1", "Candy", "textures/example/headercandy"],
     ["§p§r§1", "Purple 1", "textures/example/headerpurple1"],
@@ -106,14 +106,19 @@ export let themes = [
     ["§s§k§0§3","Spooky SQUARED","textures/example/spookysquared"],
     ["§s§k§0§4","Spooky Spooky","textures/example/spookyspooky"],
     ["§v§i§s§0§1","WindOwOs Vista","textures/example/headervista"],
-    ["a", "a", "a"]
+    ["a", "a", "a"],
+    ["§r§e§0§3§1","elbanosaeR","textures/example/elbanosaer", "disbready"], // 69!
+    ["§s§k§0§1","Skobeloff","textures/example/skobeloff_green", "sillyfoxdev"],
+    ["§o§u§r§0§1","Ourple","textures/example/ourple"],
+    ["§l§e§g§0§1","Legacy","textures/example/header2"],
+
 ];
 configAPI.registerProperty("LeafTheme", configAPI.Types.Number, 38)
 Object.defineProperty(themes, 68, {
     get() {
         let t = configAPI.getProperty("LeafTheme");
         if(t == 68) t = (66 + 1); // no
-        return [themes[t][0], "Leaf Default", themes[t][2]]
+        return [t == 0 ? "§d§w§d§0§1" : themes[t][0], "Leaf Default", themes[t][2]]
     }
 })
 export let leafThemeCurr = 25;

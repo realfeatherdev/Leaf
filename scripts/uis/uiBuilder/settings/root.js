@@ -1,4 +1,5 @@
 import configAPI from "../../../api/config/configAPI";
+import emojis from "../../../api/emojis";
 import icons from "../../../api/icons";
 import uiBuilder from "../../../api/uiBuilder";
 import { ActionForm } from "../../../lib/form_func";
@@ -11,7 +12,7 @@ import {
 } from "../../preset_browser/nutUIConsts";
 import { insertBackButton } from "../../sharedUtils/insertBackButton";
 import { themes } from "../cherryThemes";
-
+configAPI.registerProperty("CustomizerCornerAdd", configAPI.Types.Boolean, false)
 uiManager.addUI(versionData.uiNames.CustomizerSettings, "a", (player) => {
     let form = new ActionForm();
     form.title(
@@ -52,5 +53,10 @@ uiManager.addUI(versionData.uiNames.CustomizerSettings, "a", (player) => {
             form2.show(player, false, (player, response) => {});
         }
     );
+    form.divider();
+    form.button(`${configAPI.getProperty("CustomizerCornerAdd") ? emojis.green_dot : emojis.red_dot} §fAdd button on corner\n§r§7Make the customizer have the pre-v4.0 layout`, null, (player)=>{
+        configAPI.setProperty("CustomizerCornerAdd", !configAPI.getProperty("CustomizerCornerAdd"))
+        uiManager.open(player, versionData.uiNames.CustomizerSettings)
+    })
     form.show(player, false, (player, response) => {});
 });

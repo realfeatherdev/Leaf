@@ -13,7 +13,7 @@ function nan0(number) {
 
 uiManager.addUI(versionData.uiNames.CustomCommandsV2.editActions, "A", (player, actions = [], save=()=>{}, rootAction = false)=>{
     let form = new ActionForm();
-    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[25][0]}§r§fEdit Actions`)
+    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§fEdit Actions`)
     function reopen() {
         return uiManager.open(player, versionData.uiNames.CustomCommandsV2.editActions, actions, save, rootAction)
     }

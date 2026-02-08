@@ -137,7 +137,7 @@ uiManager.addUI(
     async (player, searchQuery = "") => {
         let form = new ActionForm();
         form.title(
-            `${NUT_UI_TAG}${NUT_UI_THEMED}${themes[8][0]}§r§f§lMute a player`
+            `${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§f§lMute a player`
         );
         form.button(
             `${NUT_UI_HEADER_BUTTON}§cGo Back\n§7Go back to main settings`,
@@ -221,7 +221,7 @@ uiManager.addUI(
     async (player, searchQuery = "") => {
         let form = new ActionForm();
         form.title(
-            `${NUT_UI_TAG}${NUT_UI_THEMED}${themes[8][0]}§r§f§lBan a player`
+            `${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§f§lBan a player`
         );
         form.button(
             `${NUT_UI_HEADER_BUTTON}§cGo Back\n§7Go back to main settings`,
@@ -305,7 +305,7 @@ uiManager.addUI(
     "Banms",
     (player) => {
         let form = new ActionForm();
-        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[8][0]}§r§f§lBans`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§f§lBans`);
         form.button(
             `${NUT_UI_HEADER_BUTTON}§cGo Back\n§7Go back to main settings`,
             `textures/azalea_icons/2`,
@@ -380,7 +380,7 @@ uiManager.addUI(
     "Mnutes!",
     (player) => {
         let form = new ActionForm();
-        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[8][0]}§r§f§lMute`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§f§lMute`);
         form.button(
             `${NUT_UI_HEADER_BUTTON}§cGo Back\n§7Go back to main settings`,
             `textures/azalea_icons/2`,

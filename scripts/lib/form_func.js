@@ -11,8 +11,9 @@ import {
 import debug_buttons from "./debug_buttons";
 import { lightMode } from "../basicConfig";
 import { colors } from "./prismarinedb";
-import { NUT_UI_ALT, NUT_UI_DISBALE_BTN } from "../uis/preset_browser/nutUIConsts";
+import { NUT_UI_ALT, NUT_UI_DISBALE_BTN, NUT_UI_HEADER_BUTTON } from "../uis/preset_browser/nutUIConsts";
 import configAPI from "../api/config/configAPI";
+import { adjustTextLength } from "./chatNotifs";
 configAPI.registerProperty("LightModeCompatibilityLayer", configAPI.Types.Boolean, false)
 export const content = {
     warn(...messages) {
@@ -31,7 +32,7 @@ export const content = {
                         4
                     )
                 )
-                .join(" ")
+                .join(" ") // im so cool - fruitkitty
         );
     },
 };
@@ -147,6 +148,7 @@ export class ActionForm {
         this.form = new ActionFormData();
         this.callbacks = [];
         this.titleText = "";
+        this.cherry = false;
     }
     header(text) {
         try {
@@ -154,16 +156,27 @@ export class ActionForm {
         } catch {}
     }
     label(text) {
+        // return;
         try {
             this.form.label(text);
         } catch {}
     }
     divider() {
+        // return;
         try {
             this.form.divider();
         } catch (e) {
             // world.sendMessage(`${e}`)
         }
+    }
+    padCherry(title, header, border, hButton, deButton, diButton, hoButton) {
+        // world.sendMessage(`Title: ${title}`)
+        // world.sendMessage(`Header: ${header}`)
+        // world.sendMessage(`Border: ${border}`)
+        // world.sendMessage(`Header Button: ${hButton}`)
+        // world.sendMessage(`Default Button: ${deButton}`)
+        // world.sendMessage(`Disabled Button: ${diButton}`)
+        return NUT_UI_TAG + adjustTextLength(title, 100) + adjustTextLength(header, 50) + adjustTextLength(border, 50) + adjustTextLength(hButton, 50) + adjustTextLength(deButton, 50) + adjustTextLength(diButton, 50) + adjustTextLength(hoButton, 50)
     }
     /**
      * @method title
@@ -176,7 +189,20 @@ export class ActionForm {
                 `titleText: ${titleText}, at params[0] is not a String!`
             );
         this.titleText = `§r${titleText}`;
-        this.form.title(titleText);
+        if(titleText.includes(NUT_UI_TAG)) {
+            this.cherry = true;
+            let header = 'textures/example/header';
+            if(titleText.includes(NUT_UI_THEMED)) {
+                for(const theme of themes) {
+                    if(titleText.includes(theme[0])) {
+                        header = theme[2]
+                    }
+                }
+            }
+            this.form.title(this.padCherry(titleText.replace(NUT_UI_TAG, ''), header, 'textures/example/border', 'textures/example/button', 'textures/example/button', 'textures/example/disabled_button', 'textures/example/button_hover'));
+        } else {
+            this.form.title(titleText);
+        }
         return this;
     }
     /**
@@ -195,7 +221,21 @@ export class ActionForm {
     setCustomFormID(id) {
         this.customFormID = id;
     }
-
+    btnCherry(text, bg) {
+        if(!this.cherry) return text;
+        if(text.includes(NUT_UI_HEADER_BUTTON)) return text;
+        if(text.includes(NUT_UI_ALT)) {
+            for(const theme of themes) {
+                if(text.includes(theme[0])) {
+                    bg = theme[2]
+                }
+            }
+        }
+        if(text.includes("§o§1")) bg = 'textures/example/button_outline'
+        if(text.includes("§c§h§e§1")) bg = 'textures/example/buttoncherry'
+        if(text.includes("§l§e§f§1")) bg = 'textures/example/buttonleaf'
+        return adjustTextLength(text, 300) + adjustTextLength(bg, 300)
+    }
     /**
      * @method body
      * @param {String} text
@@ -204,6 +244,7 @@ export class ActionForm {
      * @returns {ActionForm}
      */
     button(text, iconPath, callback) {
+        // return;
         if (typeof text !== "string")
             throw new Error(`text: ${label}, at params[0] is not a String!`);
         if (iconPath && typeof iconPath !== "string")
@@ -223,7 +264,7 @@ export class ActionForm {
             }
             return a;
         })}`.replaceAll('§r', '§r§0') : lightText;
-        this.form.button(configAPI.getProperty("LightModeCompatibilityLayer") ? lightText : text, iconPath);
+        this.form.button(configAPI.getProperty("LightModeCompatibilityLayer") ? lightText : this.btnCherry(text, 'textures/example/button'), iconPath);
         return this;
     }
     /**

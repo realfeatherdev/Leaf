@@ -7,7 +7,7 @@ import { themes } from "../cherryThemes";
 
 uiManager.addUI(versionData.uiNames.UIBuilderTodo.Edit, "AIRTHYUI*RE##w", (player, taskIndex)=>{
     let form = new ActionForm();
-    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[25][0]}§rTodo`)
+    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rTodo`)
     form.button(`${NUT_UI_HEADER_BUTTON}§r§cBack\n§7Go back to customizer :3`, `textures/azalea_icons/2`, player=>{
         uiManager.open(player, versionData.uiNames.UIBuilderTodo.Root);
     })

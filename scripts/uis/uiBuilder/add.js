@@ -178,7 +178,8 @@ uiManager.addUI(
                 response.formValues[4],
                 {
                     cancel: response.formValues[3],
-                    folder: folder ? folder : null
+                    folder: folder ? folder : null,
+                    theme: 68
                     // simplify: response.formValues[5]
                 }
             );

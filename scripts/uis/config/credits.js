@@ -116,11 +116,11 @@ uiManager.addUI(
     "Credits",
     (player, index = -1) => {
         let form = new ActionForm();
-        form.title(NUT_UI_TAG+NUT_UI_THEMED+themes[56][0]+"§r§fCredits");
+        form.title(NUT_UI_TAG+NUT_UI_THEMED+themes[68][0]+"§r§fCredits");
         if (useNewCreditsUI) {
             if (index == -1) {
                 let form = new ActionForm();
-                form.title(NUT_UI_TAG+NUT_UI_THEMED+themes[56][0]+"§r§fCredits");
+                form.title(NUT_UI_TAG+NUT_UI_THEMED+themes[68][0]+"§r§fCredits");
                 form.button(
                     `${NUT_UI_HEADER_BUTTON}§r§cBack\n§7Goes Back`,
                     `textures/azalea_icons/2`,

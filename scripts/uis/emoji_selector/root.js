@@ -32,7 +32,7 @@ uiManager.addUI(versionData.uiNames.EmojiSelectorCategory, "", (player, category
 
 uiManager.addUI(versionData.uiNames.EmojiSelector, "", (player, cb)=>{
     let form = new ActionForm();
-    form.title(`${NUT_UI_TAG}${themes[25][0]}§r§fEmoji Selector`)
+    form.title(`${NUT_UI_TAG}${themes[68][0]}§r§fEmoji Selector`)
     form.body(`Please select a category`)
     let categories = getEmojiDataFormatted();
     form.button(`§cCancel\n§7Cancel Selection`, `textures/azalea_icons/Delete`, (player)=>{

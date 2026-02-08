@@ -6,6 +6,7 @@ import { NUT_UI_TAG, NUT_UI_THEMED } from "./uis/preset_browser/nutUIConsts";
 import { themes } from "./uis/uiBuilder/cherryThemes";
 import { world } from "@minecraft/server";
 import { ActionForm } from "./lib/form_func";
+import normalForm from "./api/openers/normalForm";
 
 class UIManager {
     #mainUIs;
@@ -38,7 +39,8 @@ class UIManager {
         ];
     }
     registerBuilder(id, ui) {
-        this.#builders.set(id, ui);
+        // world.sendMessage(id.split(' | ')[0].replaceAll(' ', '*'))
+        this.#builders.set(id.split(' | ')[0], ui);
     }
     addUI(id, desc, ui) {
         this.#descriptions.set(id, desc ?? "No Description");
@@ -75,10 +77,10 @@ class UIManager {
     }
     #open(player, id, ...data) {
         try {
-            if (this.#builders.has(id)) {
+            if (this.#builders.has(id.split(' | ')[0])) {
                 // this is why we dont have nice things
                 let result = this.#builders
-                    .get(id)(player, ...data)
+                    .get(id.split(' | ')[0])(player, ...data)
                     .toUIData();
                 if (result.type == "ACTION") {
                     let form = new ActionForm();
@@ -92,6 +94,7 @@ class UIManager {
                         } else if (control.type == "divider") {
                             form.divider();
                         } else if (control.type == "button") {
+                            if(control.data.condition && !normalForm.playerIsAllowed(player, control.data.condition)) continue;
                             form.button(
                                 control.data.text,
                                 control.data.icon ? control.data.icon : null,
@@ -240,11 +243,16 @@ class Button {
     constructor() {
         this.text = "";
         this.icon = "";
+        this.condition = "";
         this.callback = () => {};
     }
 
     setText(text) {
         this.text = text;
+        return this;
+    }
+    setCondition(condition) {
+        this.condition = condition;
         return this;
     }
 
@@ -263,6 +271,7 @@ class Button {
             text: this.text,
             icon: this.icon,
             callback: this.callback,
+            condition: this.condition
         };
     }
 }

@@ -991,7 +991,7 @@ uiManager.registerBuilder(config.uiNames.UIBuilderRoot, (player) => {
     ui.addButton(
         new Button()
             .setText(
-                `§r§l§e§f§1§r§r§aNew creation\n§r§7Make a new creation`
+                `${configAPI.getProperty("CustomizerCornerAdd") ? NUT_UI_HEADER_BUTTON : ""}§r§l§e§f§1§r§r§aNew creation\n§r§7Make a new creation`
             )
             .setIcon("textures/azalea_icons/other/add")
             .setCallback((player) =>
