@@ -50,23 +50,23 @@ class GeneratorAPI {
         system.runInterval(()=>{
             if(!configAPI.getProperty("Generators")) return;
             for(const cacheDoc of this.cache.data) {
-                // console.warn(JSON.stringify(cacheDoc, null, 2))
+                // // console.warn(JSON.stringify(cacheDoc, null, 2))
                 let dim = world.getDimension('overworld');
                 let loaded = false;
                 try {
                     let block = dim.getBlock(cacheDoc.data.blockloc);
                     if(block) loaded = true;
                 } catch {}
-                // console.warn(`${!runningSessions.includes(cacheDoc.data.runningSession)}`)
+                // // console.warn(`${!runningSessions.includes(cacheDoc.data.runningSession)}`)
                 if(loaded && !runningSessions.includes(cacheDoc.data.runningSession)) {
                     let entities = dim.getEntities({
                         type: "leaf:floating_text",
                         tags: [`generator_text:${cacheDoc.data.genID}`],
                     });
-                    // console.warn(`${entities.length}`)
+                    // // console.warn(`${entities.length}`)
                     let entity = entities && entities.length ? entities[0] : null;
                     if(Date.now() >= cacheDoc.data.endTime) {
-                        // console.warn(`Done...`)
+                        // // console.warn(`Done...`)
                         if(entity) {
                             let doc = this.db.getByID(cacheDoc.data.genConfID);
                             if(doc) {
@@ -80,11 +80,11 @@ class GeneratorAPI {
                         dim.setBlockType(cacheDoc.data.blockloc, cacheDoc.data.block);
                         this.cache.deleteDocumentByID(cacheDoc.id)
                     } else {
-                        // console.warn(`Watiting...`)
+                        // // console.warn(`Watiting...`)
                         if(entity) {
-                            // console.warn(`Editing`)
+                            // // console.warn(`Editing`)
                             let doc = this.db.getByID(cacheDoc.data.genConfID);
-                            // console.warn(`${doc ? `Exists` : `Not exists`}`)
+                            // // console.warn(`${doc ? `Exists` : `Not exists`}`)
                             if(doc) {
                                 entity.nameTag = [
                                     `§b${doc.data.name}`,
@@ -478,15 +478,15 @@ class GeneratorAPI {
         world.beforeEvents.playerInteractWithBlock.subscribe(async (e) => {
             if(!e.isFirstEvent) return;
             system.run(async () => {
-                // // console.warn("A")
+                // // // console.warn("A")
                 if (e.itemStack && e.itemStack.typeId == "leaf:generator") {
                     let newLoc = directionAndVec3(
                         e.blockFace,
                         e.block.center()
                     );
-                    // // console.warn(JSON.stringify(newLoc))
+                    // // // console.warn(JSON.stringify(newLoc))
                     let zone = zones.getZoneAtVec3(newLoc);
-                    // // console.warn(JSON.stringify(zone))
+                    // // // console.warn(JSON.stringify(zone))
                     if (
                         zone &&
                         !zones.hasPerms(e.player) &&

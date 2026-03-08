@@ -14,10 +14,12 @@ import { colors } from "./prismarinedb";
 import { NUT_UI_ALT, NUT_UI_DISBALE_BTN, NUT_UI_HEADER_BUTTON, NUT_UI_PAPERDOLL } from "../uis/preset_browser/nutUIConsts";
 import configAPI from "../api/config/configAPI";
 import { adjustTextLength } from "./chatNotifs";
+import uiBuilder from "../api/uiBuilder";
+import normalForm from "../api/openers/normalForm";
 configAPI.registerProperty("LightModeCompatibilityLayer", configAPI.Types.Boolean, false)
 export const content = {
     warn(...messages) {
-        // // console.warn(messages.map(message => JSON.stringify(message, (key, value) => (value instanceof Function) ? '<f>' : value)).join(' '));
+        // // // console.warn(messages.map(message => JSON.stringify(message, (key, value) => (value instanceof Function) ? '<f>' : value)).join(' '));
     },
     chatFormat(...messages) {
         world.sendMessage(
@@ -142,7 +144,7 @@ export class MessageForm {
             if (callback instanceof Function) callback(player, response);
             return response;
         } catch (error) {
-            console.log(error, error.stack);
+            // console.log(error, error.stack);
         }
     }
 }
@@ -153,20 +155,56 @@ export class ActionForm {
         this.titleText = "";
         this.cherry = false;
         this.chtheme = 0;
+        this.buttonsM = [];
+        this.buttonsB = [];
+        this.buttonsA = [];
+    }
+    insAll(lis) {
+        for(const btn of lis) {
+            if(btn.type == "button") {
+                this.buttonAdd(btn.text, btn.iconPath, btn.callback)
+            } else if(btn.type == "label") {
+                this.form.label(btn.text)
+            } else if(btn.type == "header") {
+                this.form.header(btn.text)
+            } else if(btn.type == "divider") {
+                this.form.divider()
+            }
+        }
     }
     header(text) {
-        try {
-            this.form.header(text);
-        } catch {}
+        this.buttonsM.push({
+            type: "header",
+            text
+        })
+
+        // try {
+        //     this.form.header(text);
+        // } catch {}
     }
     label(text) {
-        // return;
-        try {
-            this.form.label(text);
-        } catch {}
+        this.buttonsM.push({
+            type: "label",
+            text
+        })
     }
+    // header(text) {
+    //     try {
+    //         this.form.header(text);
+    //     } catch {}
+    // }
+    // label(text) {
+    //     // return;
+    //     try {
+    //         this.form.label(text);
+    //     } catch {}
+    // }
     divider() {
         // return;
+        this.buttonsM.push({
+            type: "divider"
+        })
+        return;
         try {
             this.form.divider();
         } catch (e) {
@@ -211,10 +249,38 @@ export class ActionForm {
             let deButton = 'textures/example/button';
             let diButton = 'textures/example/button_disabled';
             let hoButton = 'textures/example/button_hover';
+            let overrideTheme = "";
+            this.modifiers = [];
+            if(!configAPI.getProperty("CustomizerSafeMode")) {
+                for(const ui of uiBuilder.db.findDocuments({type: 0})) {
+                    if(ui.data.toggles && ui.data.toggles.modui_t && ui.data.mSubstring) {
+                        if(uiBuilder.modifierUIConditionTypes[ui.data.mConditionType][1](ui.data.mSubstring, titleText)) {
+                            this.modifiers.push(ui);
+                            if(ui.data.toggles.modui_oth) {
+                                // world.sendMessage("override")
+                                overrideTheme = themes[ui.data.theme ? ui.data.theme : 0] ? themes[ui.data.theme ? ui.data.theme : 0][0] : themes[68][0];
+                                // world.sendMessage(overrideTheme.replaceAll('§', '&'))
+                            }
+                            let modifier = ui;
+                            if(modifier.data.toggles && modifier.data.toggles.modui_obo) {
+                                let bodyText = modifier.data.body ? modifier.data.body : "";
+                                if(bodyText) {
+                                    this.form.body(bodyText);
+                                }
+                            }
+                            if(modifier.data.toggles && modifier.data.toggles.modui_oti) {
+                                titleText = titleText.match(/§.|§/g)?.join("") + modifier.data.name;
+                            }
 
-            if(titleText.includes(NUT_UI_THEMED)) {
+                        }
+                    }
+                }
+
+            }
+            if(titleText.includes(NUT_UI_THEMED) || overrideTheme) {
                 for(const theme of themes) {
-                    if(titleText.includes(theme[0])) {
+                    if((!overrideTheme && titleText.includes(theme[0])) || theme[0] == overrideTheme) {
+                        // world.sendMessage(theme[1])
                         header = theme[2]
                         // TAG, NAME, TEXTURE, AUTHOR, BORDER, HEADER BUTTON, DEFAULT BUTTON, DISABLED BUTTON, HOVER BUTTON, PAPERDOLL, OUTLINE
                         if(theme.length > 4 && theme[4]) border = theme[4]
@@ -240,6 +306,14 @@ export class ActionForm {
      * @returns {ActionForm}
      */
     body(bodyText) {
+        if(this.modifiers) {
+            for(const modifier of this.modifiers) {
+                if(modifier.data.toggles && modifier.data.toggles.modui_obo) {
+                    bodyText = modifier.data.body ? modifier.data.body : "";
+                    if(!bodyText) return;
+                }
+            }
+        }
         if (typeof bodyText !== "string")
             throw new Error(
                 `bodyText: ${titleText}, at params[0] is not a String!`
@@ -259,12 +333,12 @@ export class ActionForm {
         if(themes[this.chtheme ? this.chtheme : 0] && themes[this.chtheme ? this.chtheme : 0].length > 10 && themes[this.chtheme ? this.chtheme : 0][10]) outline = themes[this.chtheme ? this.chtheme : 0][10];
         // world.sendMessage(outline)
         if(text.includes("§o§1")) bg = outline
-        console.warn(JSON.stringify(themes[this.chtheme ? this.chtheme : 0]))
+        // console.warn(JSON.stringify(themes[this.chtheme ? this.chtheme : 0]))
         if(text.includes(NUT_UI_ALT)) {
             for(const theme of themes) {
                 if(text.includes(theme[0])) {
                     bg = theme[2];
-                    world.sendMessage(bg)
+                    // world.sendMessage(bg)
                 }
 
             }
@@ -277,6 +351,14 @@ export class ActionForm {
         // world.sendMessage(`${res.length}`)
         return res;
     }
+    button(text, iconPath, callback) {
+        this.buttonsM.push({
+            type: "button",
+            text,
+            iconPath,
+            callback
+        })
+    }
     /**
      * @method body
      * @param {String} text
@@ -284,7 +366,7 @@ export class ActionForm {
      * @param {(player: Player, i: Number) => {}} callback
      * @returns {ActionForm}
      */
-    button(text, iconPath, callback) {
+    buttonAdd(text, iconPath, callback) {
         // return;
         if (typeof text !== "string")
             throw new Error(`text: ${label}, at params[0] is not a String!`);
@@ -316,6 +398,34 @@ export class ActionForm {
      * @returns {Promise<ActionFormResponse>}
      */
     async show(player, awaitNotBusy = false, callback) {
+        if(this.modifiers) {
+            for(const modifier of this.modifiers) {
+                if(modifier.data.toggles && (modifier.data.toggles.modui_ib || modifier.data.toggles.modui_ia)) {
+                    for(const button of modifier.data.buttons) {
+                                // const { player, data, args, currView } = context;
+                        let buttonProcessed2 = normalForm.buttonProcessor.processButtonSync(button, {
+                            player,
+                            data: modifier.data,
+                            args: [],
+                            currView: -1,
+                            ...normalForm.ctx
+                        })
+                        let buttonProcessed = buttonProcessed2.type != "label" && buttonProcessed2.type != "divider" && buttonProcessed2.type != "header" ? {
+                            type: "button",
+                            text: buttonProcessed2.text,
+                            iconPath: buttonProcessed2.icon,
+                            callback: buttonProcessed2.action
+                        } : buttonProcessed2;
+                        if(modifier.data.toggles.modui_ib) this.buttonsB.push(buttonProcessed)
+                        if(modifier.data.toggles.modui_ia) this.buttonsA.push(buttonProcessed)
+                    }
+                }
+            }
+        }
+
+        this.insAll(this.buttonsB)
+        this.insAll(this.buttonsM)
+        this.insAll(this.buttonsA)
         awaitNotBusy = true;
         if (
             player.hasTag("leaf:debug-modeOwOUwUKawaii :3 Nya~~~") &&
@@ -358,7 +468,7 @@ export class ActionForm {
             if (callback instanceof Function) callback(player, response);
             return response;
         } catch (error) {
-            console.log(error, error.stack);
+            // console.log(error, error.stack);
         }
     }
 }
@@ -507,7 +617,7 @@ export class ModalForm {
         valueStep,
         defaultValue = null,
         callback,
-        tooltip = null
+        tooltip = undefined
     ) {
         if (typeof label !== "string")
             throw new Error(`label: ${label}, at params[0] is not a String!`);
@@ -535,6 +645,7 @@ export class ModalForm {
         this.form.slider(label, minimumValue, maximumValue, {
             valueStep,
             defaultValue,
+            tooltip
         });
         return this;
     }
@@ -626,7 +737,7 @@ export class ModalForm {
             if (callback instanceof Function) callback(player, response);
             return response;
         } catch (error) {
-            // console.warn(error, error.stack);
+            // // console.warn(error, error.stack);
         }
     }
 }

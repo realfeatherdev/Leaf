@@ -10,6 +10,7 @@ import uiManager from "../../../uiManager.js";
 import versionData from "../../../versionData.js";
 import { isInCuboid } from "../../../api/zones.js";
 import configAPI from "../../../api/config/configAPI.js";
+import { minesAPI } from "../../../api/mines.js";
 function yes(str) {
     return `${str.split(":").length == 1 ? "mystructure:" : ""}${str}`
 }
@@ -302,7 +303,14 @@ function getFacingFromX(xRotation) {
 //         ].join('\n§r'))
 //     }
 // })
-
+uiBuilder.definitions.push({
+    deftype: "ROOT",
+    type: minesAPI.CUSTOMIZER_TYPE,
+    getName(doc) {
+        return doc.data.uniqueID
+    },
+    defaultIcon: "textures/azalea_icons/icontextures/tile2_024"
+})
 uiBuilder.definitions.push({
     deftype: "ROOT",
     type: 15,

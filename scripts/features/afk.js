@@ -150,6 +150,8 @@ system.runInterval(() => {
                 }
                 world.sendMessage(`§7* ${player.name} is now AFK`);
                 if(!player.hasTag(`leaf:afk`)) player.addTag(`leaf:afk`)
+            } else {
+                if(player.hasTag("leaf:afk")) player.removeTag("leaf:afk")
             }
             if(configAPI.getProperty("AFKWarp") && warpAPI.getWarp(configAPI.getProperty("AFKWarp"))) {
                 system.runTimeout(()=>{

@@ -428,6 +428,15 @@ export default {
     nimecoin: "\uE160",
     cheddar: "\uE161",
     pansexual: "\uE198",
+    "magma_cube": "",
+    "fox": "",
+    "fox_arctic": "",
+    "piglin": "",
+    "allay": "",
+    "zombie": "",
+    "frog": "",
+    "bee": "",
+    "breeze": "",
 };
 
 export const emojiCategories = {

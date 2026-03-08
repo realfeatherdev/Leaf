@@ -32,7 +32,7 @@ mc.system.run(() => {
             return;
 
         if (isItem) {
-            // console.log(e.id)
+            // // console.log(e.id)
             // mc.world.sendMessage(e.id)
             num_of_items += 1;
         }
@@ -249,8 +249,8 @@ class ChestFormData {
             let res = form.show(player);
             res.then((res) => {
                 if (res.canceled) return;
-                // console.warn(res.selection);
-                // console.warn(Object.keys(this.callbacks));
+                // // console.warn(res.selection);
+                // // console.warn(Object.keys(this.callbacks));
                 if (this.callbacks[res.selection])
                     this.callbacks[res.selection]();
             });
@@ -306,7 +306,7 @@ class ChestFormData {
         let res = form.show(player);
         res.then((res) => {
             if (res.canceled) return;
-            // console.warn(res.selection);
+            // // console.warn(res.selection);
             if (this.callbacks[res.selection]) this.callbacks[res.selection]();
         });
         return res;

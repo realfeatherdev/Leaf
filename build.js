@@ -2,9 +2,9 @@ const esbuild = require("esbuild");
 // const { externalGlobalPlugin } = require("esbuild-plugin-external-global");
 const fs = require('fs');
 
-console.log("Watching")
+// console.log("Watching")
 fs.watchFile('./scripts/pdb/prismarinedb.js', {}, (curr, prev)=>{
-    console.log("Building")
+    // console.log("Building")
     esbuild.build({
         bundle: true,
         entryPoints: ['./src/startup.js'],
@@ -24,6 +24,6 @@ fs.watchFile('./scripts/pdb/prismarinedb.js', {}, (curr, prev)=>{
         ],                  // mimic exclude node_modules (no bundling deps)
         logLevel: 'info'
     }).then(res => {
-        console.log("Built");
+        // console.log("Built");
     })
 })

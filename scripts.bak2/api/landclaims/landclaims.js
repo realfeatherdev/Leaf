@@ -67,16 +67,16 @@ class LandClaims {
             // return;
             if (!configAPI.getProperty("LandClaims")) return null;
             for (const player of world.getPlayers()) {
-                // // console.warn(player.name)
+                // // // console.warn(player.name)
                 if (!playerMap.has(player.id)) {
-                    // // console.warn(`Initializing keys`)
+                    // // // console.warn(`Initializing keys`)
                     let zone = zones.getZoneAtVec3(player.location, player.dimension);
                     playerMap.set(player.id, zone ? zone.id : null);
                     continue;
                 }
                 let zone = zones.getZoneAtVec3(player.location);
                 let currZone = playerMap.get(player.id);
-                // // console.warn(`Zone: ${zone ? zone.id : "null"}, Old Zone: ${currZone ? currZone : "null"}`)
+                // // // console.warn(`Zone: ${zone ? zone.id : "null"}, Old Zone: ${currZone ? currZone : "null"}`)
                 if ((zone ? zone.id : null) != currZone) {
                     if(configAPI.getProperty("LandClaims")) {
                         player.onScreenDisplay.setActionBar(

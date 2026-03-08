@@ -1,9 +1,16 @@
-import { system, world } from "@minecraft/server";
+import { Player, system, world } from "@minecraft/server";
 import { prismarineDb } from "../lib/prismarinedb";
 import playerStorage from "./playerStorage";
 import configAPI from "./config/configAPI";
 import { SegmentedStoragePrismarine } from "../prismarineDbStorages/segmented";
 import uiBuilder from "./uiBuilder";
+// heres ur code
+
+// fuck off
+// nothing here specifically im just showing u ur old homes code lol
+// um ok
+// this is like nothing like what it used to be
+// also wtf do u even want me to do
 /*>:3>:3>:3>:3>:3>:3>:3
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀>:3>:3>:3
 ⠀>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3>:3⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡤⠤⠤⠤⠴⠶⠶⠒⠚⠋⠉⠉⠉⠉⣷⢀⣀⡤⠤⠶⠶⠒⠛⢶⡄⠀⠀⠀
@@ -104,8 +111,101 @@ configAPI.registerProperty(
     false
 );
 configAPI.registerProperty("HomesLimit", configAPI.Types.Number, 5);
+configAPI.registerProperty(
+    "BedHomes",
+    configAPI.Types.Boolean,
+    false
+);
 class Homes {
     constructor() {
+        this.homeIcons = {
+            "Beds": [
+                "Red",
+                "^textures/items/bed_red",
+                "Orange",
+                "^textures/items/bed_orange",
+                "Yellow",
+                "^textures/items/bed_yellow",
+                "Lime",
+                "^textures/items/bed_lime",
+                "Blue",
+                "^textures/items/bed_blue",
+                "Light Blue",
+                "^textures/items/bed_light_blue",
+                "Purple",
+                "^textures/items/bed_purple",
+                "Magenta",
+                "^textures/items/bed_magenta",
+                "Pink",
+                "^textures/items/bed_pink",
+            ],
+            "Indicators": [
+                "Trees",
+                "^textures/azalea_icons/icontextures/tile2_031",
+                "Mountain 1",
+                "^textures/azalea_icons/icontextures/tile2_030",
+                "Mountain 2",
+                "^textures/azalea_icons/icontextures/tile2_029",
+                "Mountain 3",
+                "^textures/azalea_icons/icontextures/tile2_028",
+                "Mountain 4",
+                "^textures/azalea_icons/icontextures/tile2_027",
+                "Mountain 5",
+                "^textures/azalea_icons/icontextures/tile2_026",
+                "Ice Crystal",
+                "^textures/azalea_icons/icontextures/tile2_025",
+                "Gold Cart",
+                "^textures/azalea_icons/icontextures/tile2_024",
+                "Mine",
+                "^textures/azalea_icons/icontextures/tile2_023",
+                "Camp",
+                "^textures/azalea_icons/icontextures/tile2_022",
+                "Island",
+                "^textures/azalea_icons/icontextures/tile2_021",
+                "Ship",
+                "^textures/azalea_icons/icontextures/tile2_020",
+                "Sea",
+                "^textures/azalea_icons/icontextures/tile2_019",
+                "Pyramid (Damaged)",
+                "^textures/azalea_icons/icontextures/tile2_018",
+                "Pyramid (Intact)",
+                "^textures/azalea_icons/icontextures/tile2_017",
+                "Pyramid (Destroyed)",
+                "^textures/azalea_icons/icontextures/tile2_016",
+                "Dead tree",
+                "^textures/azalea_icons/icontextures/tile2_015",
+                "Dead tree 2",
+                "^textures/azalea_icons/icontextures/tile2_014",
+                "Tree 2",
+                "^textures/azalea_icons/icontextures/tile2_013",
+                "Tree 3",
+                "^textures/azalea_icons/icontextures/tile2_012",
+                "Tree 4",
+                "^textures/azalea_icons/icontextures/tile2_011",
+                "Tree 5",
+                "^textures/azalea_icons/icontextures/tile2_010",
+                "Tree 6",
+                "^textures/azalea_icons/icontextures/tile2_009",
+                "Tree 7",
+                "^textures/azalea_icons/icontextures/tile2_008",
+                "Tree 8",
+                "^textures/azalea_icons/icontextures/tile2_007",
+                "Tree 9",
+                "^textures/azalea_icons/icontextures/tile2_006",
+                "Hut",
+                "^textures/azalea_icons/icontextures/tile2_005",
+                "Castle",
+                "^textures/azalea_icons/icontextures/tile2_004",
+                "Cave",
+                "^textures/azalea_icons/icontextures/tile2_003",
+                "House",
+                "^textures/azalea_icons/icontextures/tile2_002",
+                "Tent",
+                "^textures/azalea_icons/icontextures/tile2_001",
+                "House 2",
+                "^textures/azalea_icons/icontextures/tile2_000",
+            ]
+        }
         this.db2 = prismarineDb.table("homes");
         this.db = prismarineDb.customStorage("homosexual", SegmentedStoragePrismarine);
         this.db.waitLoad().then(()=>{
@@ -158,6 +258,12 @@ class Homes {
     setHLOverrideDoc(doc) {
         this.db.overwriteDataByID(doc.id, doc.data);
     }
+    isHomeAlreadyMade(name, player) {
+        let owner = playerStorage.getID(player);
+        let h = this.db.findFirst({ owner, name });
+        if (h) return true;
+        return false;
+    }
     createHome(name, player, dim) {
         let owner = playerStorage.getID(player);
         let hs = this.db.findDocuments({ owner });
@@ -193,7 +299,7 @@ class Homes {
         return true;
     }
     teleport(id, player) {
-        let h = this.db.getByID(id);
+        let h = this.get(id, player);
         let dim = h.data.dim ? h.data.dim : "minecraft:overworld"
         player.teleport({
             x: h.data.loc.x,
@@ -212,6 +318,7 @@ class Homes {
     getSharedHomes(player) {
         let hs = [];
         for (const h of this.db.findDocuments()) {
+            if(h.id == this.getHLoverrideDoc().id) continue;
             for (const sh of h.data.sharedTo) {
                 if (sh == player.name) {
                     hs.push(h);
@@ -234,8 +341,32 @@ class Homes {
         return true;
     }
     getAllFromPlayer(player) {
+        if(!(player instanceof Player)) return;
         let owner = playerStorage.getID(player);
         let hs = this.db.findDocuments({ owner });
+        let sp = player.getSpawnPoint()
+        // world.sendMessage(JSON.stringify({
+        //     x: sp.x,
+        //     y: sp.y,
+        //     z: sp.z,
+        //     dim: sp.dimension.id
+        // }))
+        if (configAPI.getProperty("BedHomes") && sp) {
+            hs = [{
+                id: -21,
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+                data: {
+                    sharedTo: [],
+                    fakeHome: true,
+                    name: "§cBed",
+                    icon: "^textures/items/bed_red",
+                    loc: {x: sp.x, y: sp.y, z: sp.z},
+                    dim: sp.dimension.id
+
+                }
+            }, ...hs]
+        }
         if (configAPI.getProperty("AzaleaStyleSharedHomes")) {
             for (const doc of this.db.data) {
                 if (
@@ -253,7 +384,26 @@ class Homes {
         }
         return hs;
     }
-    get(id) {
+    get(id, player) {
+        if(id == -21 && player) {
+            let sp = player.getSpawnPoint();
+            if(sp && configAPI.getProperty("BedHomes")) {
+                return {
+                    id: -21,
+                    createdAt: Date.now(),
+                    updatedAt: Date.now(),
+                    data: {
+                        sharedTo: [],
+                        fakeHome: true,
+                        name: "Bed",
+                        loc: {x: sp.x, y: sp.y, z: sp.z},
+                        dim: sp.dimension.id,
+                        forceAllowSetIcons: true,
+                        bed: true,
+                    }
+                }
+            }
+        }
         return this.db.getByID(id);
     }
 }

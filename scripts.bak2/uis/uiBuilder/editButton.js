@@ -33,7 +33,7 @@ uiManager.addUI(
             // Button is in a group
             button = ui.data.buttons[index]?.buttons[buttonIndex];
             if (!button) {
-                // console.warn(
+                // // console.warn(
                     // `Failed to find group button at group ${index}, button ${buttonIndex}`
                 // );
                 return uiManager.open(
@@ -46,7 +46,7 @@ uiManager.addUI(
             // Regular button
             button = ui.data.buttons[index];
             if (!button) {
-                // console.warn(`Failed to find button at index ${index}`);
+                // // console.warn(`Failed to find button at index ${index}`);
                 return uiManager.open(
                     player,
                     config.uiNames.UIBuilderEditButtons,

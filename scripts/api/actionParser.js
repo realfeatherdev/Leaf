@@ -28,8 +28,8 @@ class ActionParser {
                 player.runCommand(command);
                 returns.push(true);
             } catch(e) {
-                player.sendMessage("§cSorry, but an error occurred while running this action. Please try again later.")
-                player.error(`${e}`)
+                // player.sendMessage("§cSorry, but an error occurred while running this action. Please try again later.")
+                // player.error(`${e}`)
                 returns.push(false);
             }
         }

@@ -20,10 +20,14 @@ uiManager.addUI(
         if (typeof id === "string") id = parseInt(id); // for compatibility with leafgui command
         let shop = shopAPI.shops.getByID(id);
         let form = new ActionForm();
-        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§f${formatStr(shop.data.title, player)}`);
+        if (shop.data.cherryTheme) {
+            form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[shop.data.cherryTheme][0]}§r§f${formatStr(shop.data.title, player)}`);
+        } else {
+            form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§f${formatStr(shop.data.title, player)}`);
+        }
         if (shop.data.description)
             form.body(
-                `${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§f${formatStr(shop.data.description, player)}`
+                `§r§f${formatStr(shop.data.description, player)}`
             );
         let hasPerms = false;
         if (shop.data.type == "PLAYER_SHOP") {
@@ -78,15 +82,13 @@ uiManager.addUI(
                 )
             ) {
                 form.button(
-                    `${NUT_UI_HEADER_BUTTON}§e${
-                        worldTags.hasTag(`Featured-Shop:${id}`)
-                            ? `Unfeature`
-                            : `Feature`
+                    `${NUT_UI_HEADER_BUTTON}§e${worldTags.hasTag(`Featured-Shop:${id}`)
+                        ? `Unfeature`
+                        : `Feature`
                     }\n§7Display this shop`,
-                    `${
-                        worldTags.hasTag(`Featured-Shop:${id}`)
-                            ? `textures/azalea_icons/other/heart_delete`
-                            : `textures/azalea_icons/other/heart_add`
+                    `${worldTags.hasTag(`Featured-Shop:${id}`)
+                        ? `textures/azalea_icons/other/heart_delete`
+                        : `textures/azalea_icons/other/heart_add`
                     }`,
                     (player) => {
                         if (worldTags.hasTag(`Featured-Shop:${id}`)) {
@@ -133,6 +135,13 @@ uiManager.addUI(
                     }
                 );
             }
+            form.button(`§uEdit CherryUI Theme\n§7Edit the theme of the shop's ui`, shop.data.cherryTheme ? themes[shop.data.cherryTheme][2] : null, (player) => {
+                uiManager.open(player, "edit_cherry_theme", 0, (id2) => {
+                    if (id2 == -2) return uiManager.open(player, config.uiNames.Shop.Root, id)
+                    shopAPI.setCherryTheme(id, id2)
+                    uiManager.open(player, config.uiNames.Shop.Root, id)
+                }, shop.data.cherryTheme, false);
+            })
             form.button(
                 "§6Manage Shop\n§7Edit this shop",
                 icons.resolve("leaf/image-068"),
@@ -143,8 +152,7 @@ uiManager.addUI(
         }
         for (const category of shop.data.categories) {
             form.button(
-                `${category.name}${
-                    category.subtext ? `\n§r§7${category.subtext}` : ``
+                `${category.name}${category.subtext ? `\n§r§7${category.subtext}` : ``
                 }`,
                 category.icon ? icons.resolve(category.icon) : null,
                 (player) => {
@@ -157,6 +165,6 @@ uiManager.addUI(
                 }
             );
         }
-        form.show(player, false, (player, response) => {});
+        form.show(player, false, (player, response) => { });
     }
 );

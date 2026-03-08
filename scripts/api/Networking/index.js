@@ -56,7 +56,7 @@ class Networking {
             this.bot = false
             communication.register('networking:bdslayerinstalled', ({ args,a }) => {
                 this.bds = true
-                console.log('[FeatherNetworking] BDS Networking layer is installed')
+                // console.log('[FeatherNetworking] BDS Networking layer is installed')
                 system.sendScriptEvent('networking:feathernetworkinginstalled')
                 communication.unregister('networking:bdslayerinstalled')
             })

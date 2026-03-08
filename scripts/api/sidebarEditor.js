@@ -50,6 +50,7 @@ class SidebarEditor {
                 refresh();
                 uiBuilder.db.onUpdate((id2, data)=>{
                     refresh()
+                    this.lineCaches = {};
                 })
             })
     
@@ -231,13 +232,16 @@ class SidebarEditor {
                     try {
                         if (!this.containsSpecialPatterns(line)) {
                             let replaced = line;
-                            for (const emoji of this.extractEmojis(line)) {
-                                const key = emoji.slice(1, -1);
-                                if (emojis[key])
-                                    replaced = replaced.replaceAll(
-                                        emoji,
-                                        emojis[key]
-                                    );
+                            if (line.includes(":")) {
+                                for (const emoji of this.extractEmojis(line)) {
+                                    const key = emoji.slice(1, -1);
+                                    if (emojis[key])
+                                        replaced = replaced.replaceAll(
+                                            emoji,
+                                            emojis[key]
+                                        );
+                                }
+
                             }
                             return replaced;
                         }

@@ -84,6 +84,7 @@ export default {
         openInternal: "leaf:open_command_internal"
     },
     uiNames: {
+        MinesAdd: "add_mine",
         LandClaims: {
             Root: "land_claims",
             Manage: "land_claims_manage",
@@ -149,6 +150,7 @@ export default {
             ConfigAPIRawEditor:
                 "configapi_editor | Leaf/MiscTools/ConfigAPIEditor",
         },
+        PVP: "PVP | Leaf/PVP/Settings",
         DevSettings: {
             Root: "dev | Leaf/Dev",
             DebugTools: "dev_debugtools | Leaf/DevDebugTools",

@@ -78,7 +78,7 @@ uiManager.addUI(
                                     try {
                                         // §o§1
                                         if (res.startsWith(".ERR")) return;
-                                        // console.warn(res);
+                                        // // console.warn(res);
                                         let data2 = JSON.parse(res);
                                         let newForm = new ActionForm();
                                         newForm.title(
@@ -97,7 +97,7 @@ uiManager.addUI(
                                                 );
                                             }
                                         );
-                                        // console.warn(JSON.stringify(leafPfps));
+                                        // // console.warn(JSON.stringify(leafPfps));
                                         for (const pfp of leafPfps) {
                                             newForm.button(
                                                 `${
@@ -146,12 +146,12 @@ uiManager.addUI(
                                             (player, response) => {}
                                         );
                                     } catch (e) {
-                                        // console.warn(`${e} ${e.stack}`);
+                                        // // console.warn(`${e} ${e.stack}`);
                                     }
                                 }
                             );
                         } catch (e) {
-                            // console.warn(`${e} ${e.stack}`);
+                            // // console.warn(`${e} ${e.stack}`);
                         }
                     }
                 );

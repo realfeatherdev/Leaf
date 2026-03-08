@@ -1386,7 +1386,7 @@ class ButtonProcessor {
                 // }
             }
         } catch (e) {
-            // console.warn(e);
+            // // console.warn(e);
         }
 
         normalForm.open(player, data, ...args);
@@ -1535,7 +1535,7 @@ class NormalFormOpener {
             data.buttons.findIndex((_) => _.type == "pagstart")
         );
         if (startIndex == -1) startIndex = 0;
-        // console.warn(`${endIndex > startIndex ? endIndex : items.length - 1}`)
+        // // console.warn(`${endIndex > startIndex ? endIndex : items.length - 1}`)
         // world.sendMessage(`Start/End Index: ${startIndex}-${endIndex}`)
         let includeLeft =
             data.buttons.findIndex((_) => _.type == "pagstart") > -1
@@ -1568,8 +1568,8 @@ class NormalFormOpener {
         const pb2 = pb3.chunks.filter(
             (_) => _.type != "pagstart" && _.type != "pagend"
         );
-        // console.warn(pb2)
-        console.warn(JSON.stringify(pb2.map((_) => Array.isArray(_))));
+        // // console.warn(pb2)
+        // console.warn(JSON.stringify(pb2.map((_) => Array.isArray(_))));
         // if(data.pagpb) data.buttons =
         let newChunk = [];
         let skip = data.buttons.find((_) => _.type == "pagstart")
@@ -1626,7 +1626,7 @@ class NormalFormOpener {
                 form.divider();
                 return;
             }
-            // console.warn(JSON.stringify(button))
+            // // console.warn(JSON.stringify(button))
             form.button(
                 button.text,
                 button.icon,
@@ -1670,7 +1670,7 @@ class NormalFormOpener {
         }
 
         for (const button of buttons) {
-            console.warn(JSON.stringify(button));
+            // console.warn(JSON.stringify(button));
             add(button);
         }
         function back(player) {
@@ -1791,7 +1791,7 @@ class NormalFormOpener {
                 }
             }
         }
-        // console.warn(`${pb3.after && pb3.after.length ? pb3.after.length : 0}`)
+        // // console.warn(`${pb3.after && pb3.after.length ? pb3.after.length : 0}`)
         if (data.pag) {
             for (const button of pb3.after && pb3.after.length
                 ? pb3.after
@@ -1802,7 +1802,7 @@ class NormalFormOpener {
                     isNextButton(button)
                 )
                     continue;
-                console.warn(button);
+                // console.warn(button);
                 let curr = await this.buttonProcessor.processButton(
                     button,
                     this.getContext2(...ctxargs)
@@ -1822,7 +1822,7 @@ class NormalFormOpener {
     }
 
     async openActionForm2(player, render_as, data, ...args) {
-        console.warn("AAA");
+        // console.warn("AAA");
         const form = new ActionForm();
         const pre = this.getFormPrefix(data);
         const themID = data.theme || 0;

@@ -31,7 +31,7 @@ import './uis/floating_text_editor/index.js'
 import * as mc from "@minecraft/server";
 import './uis/wands/index.js'
 import { CommandHandler } from "./api/commandHandler.js";
-import { transferPlayer } from "@minecraft/server-admin";
+// import { transferPlayer } from "@minecraft/server-admin";
 import "./uis/auctionhouse/index.js";
 import "./uis/chatranks/index.js";
 import "./uis/nametagplus/ui.js";
@@ -245,7 +245,7 @@ try {
     system.beforeEvents.watchdogTerminate.subscribe((e) => {
         system.run(() => {
             e.cancel = true;
-            // console.warn(`${e.terminateReason}`);
+            // // console.warn(`${e.terminateReason}`);
         });
     });
 }
@@ -5764,13 +5764,13 @@ system.afterEvents.scriptEventReceive.subscribe((e) => {
         if (e.id == "leaf:apply_impulse") {
             e.sourceEntity.applyImpulse({ x: 1, y: 1, z: 1 });
         }
-        if (e.id == "leaf:transfer_server") {
-            transferPlayer(
-                e.sourceEntity,
-                e.message.split(":")[0],
-                parseInt(e.message.split(":")[1])
-            );
-        }
+        // if (e.id == "leaf:transfer_server") {
+        //     transferPlayer(
+        //         e.sourceEntity,
+        //         e.message.split(":")[0],
+        //         parseInt(e.message.split(":")[1])
+        //     );
+        // }
         if (e.id == "leaf:delay") {
             let amt = parseInt(e.message.split(" ")[0]);
             let cmd = e.message.split(" ").slice(1).join(" ").trim();
@@ -6071,7 +6071,7 @@ function betterArgs(myString) {
 }
 let testLogs = [];
 system.runTimeout(() => {
-    // console.warn(
+    // // console.warn(
         // Object.entries(configAPI.propertiesRegistered)
             // .filter((_) => _[1].type == configAPI.Types.Boolean)
             // .map((_) => _[0])
@@ -6237,18 +6237,18 @@ if(
 world.afterEvents.playerSpawn.subscribe(async (e) => {
     if (!e.initialSpawn) return;
     await system.waitTicks(20);
-    // console.warn(`Handling rewards`);
+    // // console.warn(`Handling rewards`);
     let playerID = await playerStorage.getIDAsync(e.player);
-    // console.warn(playerID);
+    // // console.warn(playerID);
     let rewards = playerStorage.getRewards(playerID);
     let displayText = {};
     let total = 0;
-    // console.warn(rewards ? JSON.stringify(rewards) : "No rewards");
+    // // console.warn(rewards ? JSON.stringify(rewards) : "No rewards");
     for (const reward of rewards) {
         if (prismarineDb.economy.getCurrency(reward.currency)) {
             let currency = prismarineDb.economy.getCurrency(reward.currency);
             if (reward.amount < 0) {
-                // console.warn(`Negative reward: ${Math.abs(reward.amount)}`);
+                // // console.warn(`Negative reward: ${Math.abs(reward.amount)}`);
                 prismarineDb.economy.removeMoney(
                     e.player,
                     Math.abs(reward.amount),
@@ -6283,7 +6283,7 @@ world.afterEvents.playerSpawn.subscribe(async (e) => {
             type: "REWARD",
             player: playerID,
         }).length;
-        // console.warn(itemCount);
+        // // console.warn(itemCount);
         if (itemCount >= 1) {
             e.player.sendMessage(
                 dynamicToast(

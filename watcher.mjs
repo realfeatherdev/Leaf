@@ -17,12 +17,12 @@ const watcher = watch([srcGlob, bannerFile], {
 
 // Handle file changes
 watcher.on('change', (filePath) => {
-  console.log(`\nDetected change in ${filePath}, rebuilding...`);
+  // console.log(`\nDetected change in ${filePath}, rebuilding...`);
   exec('npx rollup -c', (err, stdout, stderr) => {
     if (err) console.error(err);
-    if (stdout) console.log(stdout);
+    if (stdout) // console.log(stdout);
     if (stderr) console.error(stderr);
   });
 });
 
-console.log('Watching src/**/*.js and banner.js for changes...');
+// console.log('Watching src/**/*.js and banner.js for changes...');

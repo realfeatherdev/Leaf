@@ -37,7 +37,7 @@
 
 import configAPI from "../../api/config/configAPI";
 export let themes = [
-    ["", "Default", "textures/example/header"],
+    ["", "Sunrise", "textures/example/header"], // Default is now Sunrise!
     ["§o§c§e§a§n", "Ocean", "textures/example/headerocean"],
     ["§b§t§0§8", "Batch 08", "textures/example/headerbatch08"],
     ["§u§w§u§1", "UwU", "textures/example/headeruwu1"],
@@ -113,6 +113,44 @@ export let themes = [
     ["§l§e§g§0§1","Legacy","textures/example/header2"],
     ["§p§1§k","Pink 1000","textures/example/headerpink1000"],
     ["§p§2§k","Pink 2000","textures/example/headerpink2000"],
+    ["§p§3§k","Pink 3000","textures/example/headerpink3000"],
+    ["§k§1§k","Kelli","textures/example/headerkelli", "", "textures/example/night/border", "textures/example/night/button", "textures/example/night/button", "textures/example/night/button_disabled", "textures/example/night/button_hover", "textures/example/night/paperdoll", "textures/example/night/button_outline"],
+    ["§k§2§k","Charcoal","textures/example/headercharcoal"],
+    ["§k§3§k","Amethyst","textures/example/amethyst"],
+    ["§k§6§k","Amethyst Ext.","textures/example/amethyst", "", "textures/example/night/border", "textures/example/night/button", "textures/example/night/button", "textures/example/night/button_disabled", "textures/example/night/button_hover", "textures/example/night/paperdoll", "textures/example/night/button_outline"],
+    ["§k§4§k","Mint","textures/example/headermint"],
+    ["§k§5§k","Aquamarine","textures/example/aquamarine"],
+    ["§k§7§k","Azalea Legacy","textures/example/al/h", "", "textures/example/al/border", "textures/example/al/button", "textures/example/al/button", "textures/example/al/button_disabled", "textures/example/al/button_outline"],
+    [
+        "§k§8§k",
+        "Vanilla",
+        "textures/ui/button_borderless_light",
+        "",
+        "textures/ui/dbg4",
+        "textures/ui/button_borderless_light",
+        "textures/ui/button_borderless_light",
+        "textures/ui/disabledButton",
+        "textures/ui/button_borderless_lighthover",
+        "textures/example/paperdoll",
+        "textures/ui/button_borderless_darkpressed",
+
+    ],
+    ["§k§a§k","Bloodlust","textures/example/bl/bloodlust", "banriot", "textures/example/bl/border", "textures/example/bl/button", "textures/example/bl/button", "textures/example/bl/button_disabled", "textures/example/bl/button_hover", "textures/example/bl/paperdoll", "textures/example/bl/button_outline"],
+    ["§k§b§k","Bloodbath","textures/example/bl/bloodlust", "banriot"], // no one makes em like trashy, down with banriot (JOKE)
+    ["§k§c§k","Rainbow","textures/example/2/gay"],
+    ["§k§d§k","Pride - Bi","textures/example/2/bi"],
+    ["§k§e§k","Pride - Pan","textures/example/2/pan"],
+    ["§k§f§k","Pissgirl","textures/example/2/pissgirl"],
+    ["§k§g§k","Pissboy","textures/example/2/pissboy"],
+    ["§k§h§k","Cherry Milkshake","textures/example/2/cherry"],
+    ["§k§i§k","Blossoming","textures/example/2/blossom"],
+    ["§k§l§k","Not so reasonable.","textures/example/2/reasonable"],
+    ["§k§m§k","Sunrise again","textures/example/2/sunrise"],
+    ["§k§j§k","Simple Essentials","textures/example/2/simple"],
+    ["§k§n§k","Cherry Syrup","textures/example/2/cherry", "", "textures/example/bordercn", "textures/example/buttoncn", "textures/example/button", "textures/example/button_disabled", "textures/example/hovercn", "textures/example/paperdollcn", "textures/example/outlinecn"],
+    ["§k§o§k","No","textures/example/headerno", ""],
+    ["§a§a§k","Blue Raspberry Syrup","textures/example/bluerasp", "", "textures/example/borderbr", "textures/example/buttonbr", "textures/example/button", "textures/example/button_disabled", "textures/example/hoverbr", "textures/example/paperdollbr", "textures/example/outlinebr"],
+
 
 ];
 // TAG, NAME, TEXTURE, AUTHOR, BORDER, HEADER BUTTON, DEFAULT BUTTON, DISABLED BUTTON, HOVER BUTTON, PAPERDOLL, OUTLINE

@@ -11,7 +11,7 @@ import {
 
 export const content = {
     warn(...messages) {
-        // // console.warn(messages.map(message => JSON.stringify(message, (key, value) => (value instanceof Function) ? '<f>' : value)).join(' '));
+        // // // console.warn(messages.map(message => JSON.stringify(message, (key, value) => (value instanceof Function) ? '<f>' : value)).join(' '));
     },
     chatFormat(...messages) {
         world.say(
@@ -133,7 +133,7 @@ export class MessageForm {
             if (callback instanceof Function) callback(player, response);
             return response;
         } catch (error) {
-            console.log(error, error.stack);
+            // console.log(error, error.stack);
         }
     }
 }
@@ -243,7 +243,7 @@ export class ActionForm {
             if (callback instanceof Function) callback(player, response);
             return response;
         } catch (error) {
-            console.log(error, error.stack);
+            // console.log(error, error.stack);
         }
     }
 }
@@ -491,7 +491,7 @@ export class ModalForm {
             if (callback instanceof Function) callback(player, response);
             return response;
         } catch (error) {
-            // console.warn(error, error.stack);
+            // // console.warn(error, error.stack);
         }
     }
 }

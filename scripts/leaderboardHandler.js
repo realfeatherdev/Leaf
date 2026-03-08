@@ -84,7 +84,7 @@ class LeaderboardHandler {
         // }
         for (const lb2 of this.db.data) {
             let lb = JSON.parse(JSON.stringify(lb2))
-            // // console.warn(JSON.stringify(lb.data))
+            // // // console.warn(JSON.stringify(lb.data))
             // let entityID = lb.data.entityID ? lb.data.entityID : null;
             // if(entityID) {
             //     try {
@@ -244,7 +244,7 @@ class LeaderboardHandler {
                 scripting.callHooks(null, "lbOverride", lbText, lb)
 
                 if (entities && entities.length && entities[0] && entities[0].isValid) {
-                    // // console.warn('a')
+                    // // // console.warn('a')
                     entities[0].nameTag = lbText.join("\n§r");
                     // for(const entity of entities.slice(1)) {
                     //     entity.kill();
@@ -258,18 +258,18 @@ class LeaderboardHandler {
                         } catch {
                             continue;
                         }
-                        // // console.warn("Entity not found. spawning now.")
+                        // // // console.warn("Entity not found. spawning now.")
                         let entity = dimension.spawnEntity(
                             "leaf:floating_text",
                             lb.data.loc
                         );
                         entity.addTag(`lbid:${lb.id}`);
                         entity.nameTag = lbText.join("\n§r");
-                        // // console.warn('Entity spawned!')
+                        // // // console.warn('Entity spawned!')
                     } catch (e) {}
                 }
             } catch (e) {
-                // console.warn(e, e.stack)
+                // // console.warn(e, e.stack)
             }
         }
     }

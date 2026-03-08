@@ -453,7 +453,7 @@ class EventHandler {
         let eventName = event.split('~')[0];
         let eventFrom = event.split('~').length > 1 ? event.split('~')[1] : null;
         this.events.forEach((eventData, i) => {
-            console.log(eventData)
+            // console.log(eventData)
             if (eventData.name != eventName && eventData.name != "$ALL") return;
             if (eventData.name == eventName) {
                 if (eventData.name == "$ALL") {
@@ -694,7 +694,7 @@ var PermissionSystem = class {
         return perms;
     }
     setPerms(tag, perms) {
-        // console.warn(JSON.stringify(perms))
+        // // console.warn(JSON.stringify(perms))
         let role = this.getRole(tag);
         if (!role) return;
         role.data.permissions = perms;

@@ -5,7 +5,9 @@ import {
     NUT_UI_TAG,
 } from "../preset_browser/nutUIConsts.js";
 import homes from "../../api/homes";
-import { ActionForm } from "../../lib/prismarinedb";
+import { ActionForm } from "../../lib/form_func";
+import icons from "../../api/icons.js";
+import playerStorage from "../../api/playerStorage.js";
 
 uiManager.addUI(config.uiNames.Homes.Shared, "Homes Root", (player) => {
     let form = new ActionForm();
@@ -18,8 +20,8 @@ uiManager.addUI(config.uiNames.Homes.Shared, "Homes Root", (player) => {
         }
     );
     for (const home of homes.getSharedHomes(player)) {
-        form.button(`§a${home.data.name}\n§7View this home`, null, (player) => {
-            uiManager.open(player, config.uiNames.Homes.ViewShared, home.id);
+        form.button(`§6${home.data.name}\n§7Owner: ${playerStorage.getPlayerByID(home.data.owner).name}`, home.data.icon ? icons.resolve(home.data.icon) ?? "textures/azalea_icons/icontextures/tile2_004" : "textures/azalea_icons/icontextures/tile2_004", (player) => {
+            uiManager.open(player, config.uiNames.Homes.View, home.id);
         });
     }
     form.show(player);

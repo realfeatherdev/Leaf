@@ -4,7 +4,7 @@ import playerStorage from "../api/playerStorage";
 import { ModalForm } from "../lib/form_func";
 let accessMap = new Map();
 world.beforeEvents.playerInteractWithBlock.subscribe((e) => {
-    if(prismarineDb.permissions.hasPermission(e.player, "claim.bypass")) return;
+    // if(prismarineDb.permissions.hasPermission(e.player, "claim.bypass")) return;
     try {
         if (
             e.block.typeId === "minecraft:barrel" ||
@@ -67,14 +67,15 @@ world.beforeEvents.playerInteractWithBlock.subscribe((e) => {
                     });
                 });
             } else if (mode == 2) {
-                system.run(() => {
-                    e.player.applyKnockback(
-                        e.player.getViewDirection().x,
-                        e.player.getViewDirection().z,
-                        1,
-                        20
-                    );
-                });
+                // What the FUCK was i doing here?!
+                // system.run(() => {
+                //     e.player.applyKnockback(
+                //         e.player.getViewDirection().x,
+                //         e.player.getViewDirection().z,
+                //         1,
+                //         20
+                //     );
+                // });
             }
         }
     } catch {}

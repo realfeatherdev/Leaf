@@ -40,7 +40,7 @@ var JSEncrypt = /** @class */ (function () {
      */
     JSEncrypt.prototype.setKey = function (key) {
         if (this.log && this.key) {
-            // console.warn("A key was already set, overriding existing.");
+            // // console.warn("A key was already set, overriding existing.");
         }
         this.key = new JSEncryptRSAKey(key);
     };

@@ -25,6 +25,8 @@ const configDb = await db1.keyval("LegacyConfig");
 const startingRank = configDb.get("StartingRank", "Member");
 const recursionSessions = new Map();
 let playersClicks = new Map();
+const emojiRegex = /:([a-z0-9_-]+):/g;
+const varRegex = /<([a-zA-Z_\/][a-zA-Z0-9_\/]*)>/g;
 // function parseQuotedString(s) {
 configAPI.registerProperty("ChatGreenText", configAPI.Types.Boolean, true)
 configAPI.registerProperty("AzaleaFormattingMaxInnerFunctionCheckingIterations", configAPI.Types.Number, 132.9)
@@ -38,28 +40,28 @@ let dimensionNames = [
     "The Nether",
     "The End"
 ]
-    function parseQuotedString2(s) {
-  const args = [];
-  let i = 0;
-  while (i < s.length) {
-    while (s[i] === ' ') i++;
-    if (s[i] === '"') {
-      i++;
-      let buf = '';
-      while (i < s.length && s[i] !== '"') {
-        if (s[i] === '\\' && s[i+1]) { buf += s[i+1]; i += 2; continue; }
-        buf += s[i++];
-      }
-      i++; // skip closing "
-      args.push(buf);
-    } else {
-      let j = i;
-      while (j < s.length && s[j] !== ' ') j++;
-      args.push(s.slice(i, j));
-      i = j;
+function parseQuotedString2(s) {
+    const args = [];
+    let i = 0;
+    while (i < s.length) {
+        while (s[i] === ' ') i++;
+        if (s[i] === '"') {
+            i++;
+            let buf = '';
+            while (i < s.length && s[i] !== '"') {
+                if (s[i] === '\\' && s[i + 1]) { buf += s[i + 1]; i += 2; continue; }
+                buf += s[i++];
+            }
+            i++; // skip closing "
+            args.push(buf);
+        } else {
+            let j = i;
+            while (j < s.length && s[j] !== ' ') j++;
+            args.push(s.slice(i, j));
+            i = j;
+        }
     }
-  }
-  return args;
+    return args;
 }
 // }
 function recordClick(player) {
@@ -94,7 +96,34 @@ world.afterEvents.entityHitEntity.subscribe((e) => {
         );
     }
 });
+function toRoman(num) {
+    const romanNumerals = [
+        { value: 1000, symbol: "M" },
+        { value: 900, symbol: "CM" },
+        { value: 500, symbol: "D" },
+        { value: 400, symbol: "CD" },
+        { value: 100, symbol: "C" },
+        { value: 90, symbol: "XC" },
+        { value: 50, symbol: "L" },
+        { value: 40, symbol: "XL" },
+        { value: 10, symbol: "X" },
+        { value: 9, symbol: "IX" },
+        { value: 5, symbol: "V" },
+        { value: 4, symbol: "IV" },
+        { value: 1, symbol: "I" },
+    ];
 
+    let result = "";
+
+    for (const { value, symbol } of romanNumerals) {
+        while (num >= value) {
+            result += symbol;
+            num -= value;
+        }
+    }
+
+    return result;
+}
 world.afterEvents.playerBreakBlock.subscribe((e) => {
     setScore(
         "leaf:blocksBroken",
@@ -147,7 +176,7 @@ let hoursScoreboard = "leaf:hours";
 let daysScoreboard = "leaf:days";
 
 system.runInterval(() => {
-    recursionSessions.clear();
+    // recursionSessions.clear();
     for (const player of world.getPlayers()) {
         setScore(
             "leaf:cps",
@@ -209,6 +238,8 @@ export function formatStr(
     formatcfg = {},
     session = (Date.now() * 1000) + Math.floor(Math.random() * 234882828)
 ) {
+    // console.time("formatting")
+    // const perfStart = performance.now()
     if (!recursionSessions.has(session)) recursionSessions.set(session, 0);
     let newStr = str;
     let vars = {};
@@ -219,7 +250,7 @@ export function formatStr(
     if (player) {
         newStr = newStr.replaceAll("[@username]", player.name);
         // const colors = getPlayerColors(player);
-        if(formatcfg.useOfflineMode) {
+        if (formatcfg.useOfflineMode) {
             if ((player instanceof Player)) return;
             let fakeFuckingPlayer = {
                 getTags() {
@@ -254,23 +285,23 @@ export function formatStr(
             vars.z = `${Math.floor(player.location.z)}`;
             vars.netherX = `${player.dimension.id == "minecraft:nether" ? player.location.x : Math.floor(player.location.x / 8)}`;
             vars.netherZ = `${player.dimension.id == "minecraft:nether" ? player.location.z : Math.floor(player.location.z / 8)}`;
-            vars.overworldX = `${player.dimension.id == "minecraft:overworld" ? player.location.x :  Math.floor(player.location.x * 8)}`;
+            vars.overworldX = `${player.dimension.id == "minecraft:overworld" ? player.location.x : Math.floor(player.location.x * 8)}`;
             vars.overworldZ = `${player.dimension.id == "minecraft:overworld" ? player.location.z : Math.floor(player.location.z * 8)}`;
             vars.chunkX = `${Math.floor(player.location.x / 16)}`
             vars.chunkInX = `${Math.floor(player.location.x - (Math.floor(player.location.x / 16) * 16))}`
-            vars.chunkZ = `${Math.floor(player.location.x / 16)}`
+            vars.chunkZ = `${Math.floor(player.location.z / 16)}`
             vars.chunkInZ = `${Math.floor(player.location.z - (Math.floor(player.location.z / 16) * 16))}`
             vars.dimension = dimensionNames[dimensionIDs.indexOf(player.dimension.id)]
             vars.name = player.name;
             vars.username = player.name;
             let curncs = [];
             try {
-                for(const currency of prismarineDb.economy.getCurrencies()) {
+                for (const currency of prismarineDb.economy.getCurrencies()) {
                     let amt = 0;
-                    try { amt = prismarineDb.economy.getMoney(player, abbreviateNumber(currency.scoreboard, 2))} catch {}
+                    try { amt = prismarineDb.economy.getMoney(player, abbreviateNumber(currency.scoreboard, 2)) } catch { }
                     curncs.push(`${currency.symbol} ${amt ? amt : 0}`)
                 }
-            } catch {}
+            } catch { }
             vars.currencies = curncs.join(' ')
             newStr = newStr.replaceAll("[@username]", player.name);
             vars.name_tag = player.nameTag;
@@ -325,22 +356,23 @@ export function formatStr(
                 parseFloat(vars.kills),
                 parseFloat(vars.deaths)
             ).toFixed(1)}`;
+            vars['trashyballs'] = 'Trashy has no balls'
             let zone = zones.getZoneAtVec3(player.location);
             vars.claim = zone
                 ? zone.data.type == "ZONE"
                     ? `§v${zone.data.name}`
                     : zone.data.type == "CLAIM"
-                    ? `§q${zone.data.name}`
-                    : `§c${zone.data.name}`
+                        ? `§q${zone.data.name}`
+                        : `§c${zone.data.name}`
                 : `§7Wilderness`;
             vars.dID = player.dimension.id;
             let biome = "Unknown"
             try {
                 let biome2 = player.dimension.getBiome(player.location).id
-                biome = biome2.split(':')[biome2.split(':').length - 1].split('_').map(_=>{
+                biome = biome2.split(':')[biome2.split(':').length - 1].split('_').map(_ => {
                     return `${_[0].toUpperCase()}${_.substring(1)}`
                 }).join(' ')
-            } catch {}
+            } catch { }
             vars.biome = biome;
         }
     }
@@ -359,8 +391,8 @@ export function formatStr(
         vars.name2 = player.name;
         vars.username2 = player.name;
         vars.chunkX2 = `${Math.floor(player.location.x / 16)}`
-        vars.chunkY2 = `${Math.floor(player.location.x / 16)}` // there is no chunk y in mc but adding this because why tf not
-        vars.chunkZ2 = `${Math.floor(player.location.x / 16)}`
+        vars.chunkY2 = `${Math.floor(player.location.y / 16)}` // there is no chunk y in mc but adding this because why tf not
+        vars.chunkZ2 = `${Math.floor(player.location.z / 16)}`
         newStr = newStr.replaceAll("[@username]", player.name);
         vars.name_tag2 = player.nameTag;
         try {
@@ -418,12 +450,13 @@ export function formatStr(
         )}`;
         vars.claim2 = getClaimText(player);
     }
+    let now = new Date();
     vars.tps = `${Math.floor(getTPS())}`;
     vars.online = `${world.getPlayers().length}`;
     vars.public_clan_count = `${abbreviateNumber(OpenClanAPI.getPublicClans().length, 2)}`;
     vars.day = `${Math.floor(world.getDay())}`;
-    vars.yr = `${new Date().getUTCFullYear()}`;
-    vars.mo = `${new Date().getUTCMonth() + 1}`;
+    vars.yr = `${now.getUTCFullYear()}`;
+    vars.mo = `${now.getUTCMonth() + 1}`;
     let monthNames = [
         "January",
         "February",
@@ -440,12 +473,12 @@ export function formatStr(
         "If you are seeing this, straight people deserve rights" // <------ NEVER appears ingame.
     ];
     vars["mo/n"] = monthNames[vars.mo - 1];
-    vars.m = `${new Date().getUTCMinutes()}`;
-    let num22 = new Date().getUTCHours();
+    vars.m = `${now.getUTCMinutes()}`;
+    let num22 = now.getUTCHours();
     vars.h = `${num22}`;
-    vars.s = `${new Date().getUTCSeconds()}`;
-    vars.ms = `${new Date().getUTCMilliseconds()}`;
-    vars.d = `${new Date().getDate()}`;
+    vars.s = `${now.getUTCSeconds()}`;
+    vars.ms = `${now.getUTCMilliseconds()}`;
+    vars.d = `${now.getDate()}`;
     vars.dra = `»`;
     vars.dla = `«`;
     vars.servername = configAPI.getProperty("ServerName2")
@@ -455,24 +488,24 @@ export function formatStr(
         moonPhase == MoonPhase.FirstQuarter
             ? "First Quarter"
             : moonPhase == MoonPhase.FullMoon
-            ? "Full Moon"
-            : moonPhase == MoonPhase.LastQuarter
-            ? "Last Quarter"
-            : moonPhase == MoonPhase.NewMoon
-            ? "New Moon"
-            : moonPhase == MoonPhase.WaningCrescent
-            ? "Waning Crescent"
-            : moonPhase == MoonPhase.WaningGibbous
-            ? "Waning Gibbous"
-            : moonPhase == MoonPhase.WaxingCrescent
-            ? "Waxing Crescent"
-            : moonPhase == MoonPhase.WaxingGibbous
-            ? "Waxing Gibbous"
-            : "Full Moon";
+                ? "Full Moon"
+                : moonPhase == MoonPhase.LastQuarter
+                    ? "Last Quarter"
+                    : moonPhase == MoonPhase.NewMoon
+                        ? "New Moon"
+                        : moonPhase == MoonPhase.WaningCrescent
+                            ? "Waning Crescent"
+                            : moonPhase == MoonPhase.WaningGibbous
+                                ? "Waning Gibbous"
+                                : moonPhase == MoonPhase.WaxingCrescent
+                                    ? "Waxing Crescent"
+                                    : moonPhase == MoonPhase.WaxingGibbous
+                                        ? "Waxing Gibbous"
+                                        : "Full Moon";
     vars.moonPhase = `${moonPhaseText}`;
     vars.randomShit = `${Math.random()}`;
 
-    let date = new Date();
+    let date = now;
     let _12hourformat = date.getHours();
     let isPm = false;
     if (_12hourformat >= 12) isPm = true;
@@ -497,16 +530,25 @@ export function formatStr(
         vars.mc = `§7`;
         vars.isGay = `true`;
     }
-    if(vars.name == "TrashyDaFox") vars.isGay = `true`;
-
+    if (vars.name == "TrashyDaFox") vars.isGay = `true`;
+    if (vars.name && vars.name.toLowerCase().includes('starlord')) {
+        vars.rank = '§dIdiot!'
+        vars.bc = `§8`
+        vars.nc = `§5`
+        vars.mc = `§7I love balls! `
+        vars.isGay = 'true'
+    }
     // Store original message before any formatting
     const originalMsg = vars.msg;
+    newStr = newStr.replace(varRegex, (match, key) => {
+        return key in vars ? vars[key] : match;
+    });
 
-    for (const key in vars) {
-        // if(key == "msg") continue;
-        let val = vars[key];
-        newStr = newStr.replaceAll(`<${key}>`, `${val}`);
-    }
+    // for (const key in vars) {
+    //     // if(key == "msg") continue;
+    //     let val = vars[key];
+    //     newStr = newStr.replaceAll(`<${key}>`, `${val}`);
+    // }
 
     let fns = {
         L(id) {
@@ -514,7 +556,7 @@ export function formatStr(
         },
         D(id, index2) {
             let index = parseInt(index2);
-            if(isNaN(index) || index < 0) index = 0;
+            if (isNaN(index) || index < 0) index = 0;
             return `${internalDatasets[id] ? internalDatasets[id][index] ? internalDatasets[id][index] : internalDatasets[id][0] : ""}`
         },
         getProperty(name) {
@@ -562,6 +604,10 @@ export function formatStr(
         scoreshort(objective) {
             if (!player) return `0`;
             return `${abbreviateNumber(getScore(objective, player), 1)}`;
+        },
+        scorerom(objective) {
+            if (!player) return `0`;
+            return `${toRoman(getScore(objective, player)) ?? "0"}`;
         },
         scoreshortp2(objective) {
             if (!formatcfg.player2) return `0`;
@@ -626,31 +672,31 @@ export function formatStr(
             if (typeof val == "boolean") return val;
         },
         clan_owner(text, notText) {
-            if(formatcfg.useOfflineMode) {
+            if (formatcfg.useOfflineMode) {
                 let clan = OpenClanAPI.getClan2(player.id)
-                if(!clan) return notText;
+                if (!clan) return notText;
                 return clan.data.owner == player.id ? text : notText;
             }
             return notText
         },
         activityscore() {
-            let {x, z} = vec3ToChunkCoordinates(player.location)
+            let { x, z } = vec3ToChunkCoordinates(player.location)
             return `${playerActivityTracking.getChunkScore(x, z)}`
         },
         clan(text, notText) {
             let clan2 = OpenClanAPI.getClan(player);
             return clan2
                 ? text
-                      .replace("[@CLAN]", clan2.data.name)
-                      .replace(
-                          "[@LVL]",
-                          `${OpenClanAPI.getLevel(
-                              clan2.data.xp ? clan2.data.xp : 0
-                          )}`
-                      )
+                    .replace("[@CLAN]", clan2.data.name)
+                    .replace(
+                        "[@LVL]",
+                        `${OpenClanAPI.getLevel(
+                            clan2.data.xp ? clan2.data.xp : 0
+                        )}`
+                    )
                 : notText
-                ? notText
-                : "";
+                    ? notText
+                    : "";
         },
         get_tag(startingChar, textIfHas, textIfNotHas) {
             let tags = player.getTags();
@@ -690,64 +736,70 @@ export function formatStr(
         },
     };
     if (vars.msg && vars.msg.includes("jsEval"))
-        return `${
+        return `${ // its this
             player ? player.name : "Unknown Player"
-        } - INSECURE CONTENT BLOCKED`;
-    if (str.includes(":")) {
-        let emojisUsed = str.match(/:([a-z0-9_-]+):/g) || [];
-        for (const emoji of emojisUsed) {
-            // console.warn("A")
-            if (emojis[emoji.substring(1).slice(0, -1)]) {
-                newStr = newStr.replaceAll(
-                    emoji,
-                    emojis[emoji.substring(1).slice(0, -1)]
-                );
+        } - INSECURE CONTENT BLOCKED`;    // 
+    // if (str.includes(":")) {
+    //     let emojisUsed = str.match(/:([a-z0-9_-]+):/g) || [];
+    //     for (const emoji of emojisUsed) {
+    //         // // console.warn("A")
+    //         if (emojis[emoji.substring(1).slice(0, -1)]) {
+    //             newStr = newStr.replaceAll(
+    //                 emoji,
+    //                 emojis[emoji.substring(1).slice(0, -1)]
+    //             );
+    //         }
+    //     }
+    // }
+    if (newStr.includes(":")) {
+        newStr = newStr.replace(emojiRegex, (match, name) => emojis[name] ?? match);
+    }
+    // find innermost "{{" by taking the last one, then its closing "}}"
+    let start = newStr.lastIndexOf("{{");
+    let iter = 0;
+    let AzaleaFormattingMaxInnerFunctionCheckingIterations = configAPI.getProperty("AzaleaFormattingMaxInnerFunctionCheckingIterations")
+    while (start !== -1) {
+        const end = newStr.indexOf("}}", start);
+        if (end === -1) break; // unmatched, stop
+        const inner = newStr.slice(start + 2, end).trim();
+
+        // now inner is the innermost content (no other "{{" after start)
+        const args = parseQuotedString(inner);
+        // world.sendMessage(JSON.stringify(args))
+        const fnName = args.shift();
+
+        let replacement = null;
+        if (fns[fnName]) {
+            try {
+                replacement = fns[fnName](...args);
+                if (replacement == null) replacement = ""; // avoid inserting "undefined"
+            } catch (e) {
+                console.error("template fn error:", e);
+                replacement = `{{${inner}}}`; // keep original on error
             }
+        } else {
+            // unknown function: keep original text (or you can remove/throw)
+            replacement = `{{${inner}}}`;
         }
+        let newNewStr = newStr.slice(0, start) + replacement + newStr.slice(end + 2);
+        iter++;
+        if (newStr === newNewStr) iter += 24;
+        // replace exactly that span
+        newStr = newNewStr;
+
+        if (iter >= AzaleaFormattingMaxInnerFunctionCheckingIterations) break;
+        // find next innermost
+        start = newStr.lastIndexOf("{{");
+
     }
-  // find innermost "{{" by taking the last one, then its closing "}}"
-  let start = newStr.lastIndexOf("{{");
-  let iter = 0;
-  while (start !== -1) {
-    const end = newStr.indexOf("}}", start);
-    if (end === -1) break; // unmatched, stop
-    const inner = newStr.slice(start + 2, end).trim();
-
-    // now inner is the innermost content (no other "{{" after start)
-    const args = parseQuotedString(inner);
-    // world.sendMessage(JSON.stringify(args))
-    const fnName = args.shift();
-
-    let replacement = null;
-    if (fns[fnName]) {
-      try {
-        replacement = fns[fnName](...args);
-        if (replacement == null) replacement = ""; // avoid inserting "undefined"
-      } catch (e) {
-        console.error("template fn error:", e);
-        replacement = `{{${inner}}}`; // keep original on error
-      }
-    } else {
-      // unknown function: keep original text (or you can remove/throw)
-      replacement = `{{${inner}}}`;
-    }
-    let newNewStr = newStr.slice(0, start) + replacement + newStr.slice(end + 2);
-    iter++;
-    if(newStr === newNewStr) iter += 24;
-    // replace exactly that span
-    newStr = newNewStr;
-
-    if(iter >= configAPI.getProperty("AzaleaFormattingMaxInnerFunctionCheckingIterations")) break;
-    // find next innermost
-    start = newStr.lastIndexOf("{{");
-
-  }
 
     recursionSessions.set(session, recursionSessions.get(session) + 1);
     if (
-        Object.keys(vars).some((_) => newStr.includes(`<${_}>`)) ||
-        Object.keys(fns).some((_) => newStr.includes(`{{${_}`)) ||
-        Object.keys(emojis).some((_) => newStr.includes(`:${_}:`))
+        // Object.keys(vars).some((_) => newStr.includes(`<${_}>`)) ||
+        // Object.keys(fns).some((_) => newStr.includes(`{{${_}`)) ||
+        // Object.keys(emojis).some((_) => newStr.includes(`:${_}:`))
+        (newStr.includes("<") && newStr.includes(">")) || newStr.includes("{{")
+        // newStr.includes("{{") || /<\w/.test(newStr) || /:\w/.test(newStr)
     ) {
         if (vars.msg !== undefined) {
             newStr = newStr.replaceAll(`<msg>`, vars.msg);
@@ -755,8 +807,15 @@ export function formatStr(
         if (recursionSessions.get(session) >= 10) {
             recursionSessions.delete(session);
             // Format message before returning on recursion limit
-            return newStr + "  §r§o§c(Error: recursion limit reached, §{ERRNO1)";
-        }    
+            if (configAPI.getProperty("DevMode")) {
+                // console.timeEnd("formatting")
+                // return newStr + "  §r§o§c(Error: recursion limit reached, §{ERRNO1)";
+                return newStr;
+            } else {
+                // console.timeEnd("formatting")
+                return newStr;
+            }
+        }
         return formatStr(newStr, player, extraVars, formatcfg, session);
     } else {
         recursionSessions.delete(session);
@@ -764,6 +823,7 @@ export function formatStr(
         if (vars.msg !== undefined) {
             newStr = newStr.replaceAll(`<msg>`, vars.msg);
         }
+        // console.timeEnd("formatting")
         return newStr;
     }
 }

@@ -220,8 +220,8 @@ class PlayerStorage {
         this.rewardsKeyval.set(playerID, rewards);
     }
     getRewards(playerID) {
-        // // console.warn(`GETTING REWARDS FOR ${playerID}`)
-        // // console.warn(JSON.stringify(db2.data))
+        // // // console.warn(`GETTING REWARDS FOR ${playerID}`)
+        // // // console.warn(JSON.stringify(db2.data))
         let rewards = this.rewardsKeyval.has(playerID)
             ? this.rewardsKeyval.get(playerID)
             : [];

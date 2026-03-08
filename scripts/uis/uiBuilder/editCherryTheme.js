@@ -21,7 +21,7 @@ uiManager.addUI(
             let themeID = overrideShit ? currTheme : doc.data.theme ? doc.data.theme : 0;
             let yes =
                 themeID > 0 ? `${NUT_UI_THEMED}${themes[themeID][0]}` : ``;
-            form.title(`${NUT_UI_TAG}${yes}§r§fThemes`);
+            form.title(`${NUT_UI_TAG}${yes}§r§fThemes §7» Scrollable «`);
             form.button(
                 `${NUT_UI_HEADER_BUTTON}§r§c§lGo Back\n§r§7Click to go back`,
                 `textures/azalea_icons/2`,

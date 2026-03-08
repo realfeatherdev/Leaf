@@ -612,7 +612,7 @@ uiManager.addUI(
                     }
                 );
             }
-            // console.warn(`meow meow meow!`);
+            // // console.warn(`meow meow meow!`);
 
             chest.button(
                 2 * 9,
@@ -623,7 +623,7 @@ uiManager.addUI(
                 false,
                 () => {
                     // page =
-                    // console.warn(`Page Count: ${pageCount}, Page: ${page}`);
+                    // // console.warn(`Page Count: ${pageCount}, Page: ${page}`);
                     uiManager.open(
                         player,
                         config.uiNames.UIBuilderFolder,
@@ -641,7 +641,7 @@ uiManager.addUI(
                 false,
                 () => {
                     // page =
-                    // console.warn(`Page Count: ${pageCount}, Page: ${page}`);
+                    // // console.warn(`Page Count: ${pageCount}, Page: ${page}`);
                     uiManager.open(
                         player,
                         config.uiNames.UIBuilderFolder,
@@ -962,7 +962,7 @@ uiManager.addUI(config.uiNames.UIBuilderLeaf, "a", (player) => {
         }
     );
     for (const ui of uis) {
-        console.warn(ui.data.scriptevent)
+        // console.warn(ui.data.scriptevent)
         root.button(getBtnText(ui), getIcon(ui), (player) => {
             uiManager.open(player, config.uiNames.UIBuilderEdit, ui.id);
         });

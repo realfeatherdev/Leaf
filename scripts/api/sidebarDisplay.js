@@ -19,8 +19,22 @@ system.runTimeout(async ()=>{
         })
     })
 },20)
+configAPI.registerProperty("SidebarUpdateRate", configAPI.Types.Number, 3)
+let updateRate = configAPI.getProperty("SidebarUpdateRate");
+let sidebarEnabled = configAPI.getProperty("Sidebar");
+configAPI.onChangeProperty((prop, val)=>{
+    if(prop == "SidebarUpdateRate")
+        updateRate = val;
+    else if(prop == "Sidebar")
+        sidebarEnabled = val;
+})
+let iter = 0;
 system.runInterval(() => {
-    if (!configAPI.getProperty("Sidebar")) return;
+    iter++;
+    if(iter < updateRate) return;
+    iter = 0;
+
+    if (!sidebarEnabled) return;
     for (const player of world.getPlayers()) {
         try {
             if(!player.isValid) continue;
@@ -43,4 +57,4 @@ system.runInterval(() => {
             }
         } catch {}
     }
-}, 3);
+}, 1);

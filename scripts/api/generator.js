@@ -50,23 +50,23 @@ class GeneratorAPI {
         system.runInterval(()=>{
             if(!configAPI.getProperty("Generators")) return;
             for(const cacheDoc of this.cache.data) {
-                // console.warn(JSON.stringify(cacheDoc, null, 2))
+                // // console.warn(JSON.stringify(cacheDoc, null, 2))
                 let dim = world.getDimension('overworld');
                 let loaded = false;
                 try {
                     let block = dim.getBlock(cacheDoc.data.blockloc);
                     if(block) loaded = true;
                 } catch {}
-                // console.warn(`${!runningSessions.includes(cacheDoc.data.runningSession)}`)
+                // // console.warn(`${!runningSessions.includes(cacheDoc.data.runningSession)}`)
                 if(loaded && !runningSessions.includes(cacheDoc.data.runningSession)) {
                     let entities = dim.getEntities({
                         type: "leaf:floating_text",
                         tags: [`generator_text:${cacheDoc.data.genID}`],
                     });
-                    // console.warn(`${entities.length}`)
+                    // // console.warn(`${entities.length}`)
                     let entity = entities && entities.length ? entities[0] : null;
                     if(Date.now() >= cacheDoc.data.endTime) {
-                        // console.warn(`Done...`)
+                        // // console.warn(`Done...`)
                         if(entity) {
                             let doc = this.db.getByID(cacheDoc.data.genConfID);
                             if(doc) {
@@ -80,11 +80,11 @@ class GeneratorAPI {
                         dim.setBlockType(cacheDoc.data.blockloc, cacheDoc.data.block);
                         this.cache.deleteDocumentByID(cacheDoc.id)
                     } else {
-                        // console.warn(`Watiting...`)
+                        // // console.warn(`Watiting...`)
                         if(entity) {
-                            // console.warn(`Editing`)
+                            // // console.warn(`Editing`)
                             let doc = this.db.getByID(cacheDoc.data.genConfID);
-                            // console.warn(`${doc ? `Exists` : `Not exists`}`)
+                            // // console.warn(`${doc ? `Exists` : `Not exists`}`)
                             if(doc) {
                                 entity.nameTag = [
                                     `§b${doc.data.name}`,
@@ -141,13 +141,14 @@ class GeneratorAPI {
         //     if(e.removedEntity.typeId ==)
         // })
     }
-    addGenerator(name, block, respawnTime, scriptevent) {
+    addGenerator(name, block, respawnTime, scriptevent, showText) {
         return this.db.insertDocument({
             type: "GENERATOR",
             name,
             block,
             respawnTime,
             scriptevent,
+            showText: showText ?? false,
             upgrades: [],
         });
     }
@@ -176,20 +177,24 @@ class GeneratorAPI {
             owner: playerStorage.getID(player),
             uniqueID: unique,
         });
-        let entity = world
-            .getDimension("overworld")
-            .spawnEntity("leaf:floating_text", {
-                x: vec3_2.x,
-                y: vec3_2.y + 1.75,
-                z: vec3_2.z,
-            });
-        entity.addTag("generator_text");
-        entity.addTag(`generator_text:${unique}`);
-        entity.nameTag = [
-            `§b${doc.data.name}`,
-            `Cooldown: §aReady`,
-            `Cooldown Level: §a1§7/§b${doc.data.upgrades.length + 1}`,
-        ].join("\n§r");
+        // Check if floating text is enabled for this generator type
+        if (doc.data.showText !== false) {
+            let entity = world
+                .getDimension("overworld")
+                .spawnEntity("leaf:floating_text", {
+                    x: vec3_2.x,
+                    y: vec3_2.y + 1.75,
+                    z: vec3_2.z,
+                });
+            entity.addTag("generator_text");
+            entity.addTag(`generator_text:${unique}`);
+            entity.nameTag = [
+                `§b${doc.data.name}`,
+                `Cooldown: §aReady`,
+                `Cooldown Level: §a1§7/§b${doc.data.upgrades.length + 1}`,
+            ].join("\n§r");
+        }
+
         this.keyval.set(unique, vec3);
     }
     getGeneratorItem(genID, level = -1) {
@@ -234,19 +239,19 @@ class GeneratorAPI {
                             tags: [`generator_text:${genData.uniqueID}`],
                         });
                     if (entities && entities.length) entity = entities[0];
-                    if (!entity && genData.uniqueID) {
-                        entity = world
-                            .getDimension("overworld")
-                            .spawnEntity("leaf:floating_text", {
-                                x: center.x,
-                                y: center.y + 1.75,
-                                z: center.z,
-                            });
+                    if (!entity && genData.uniqueID && doc.data.showText !== false) {
+                        entity = world.getDimension("overworld").spawnEntity("leaf:floating_text", {
+                            x: center.x,
+                            y: center.y + 1.75,
+                            z: center.z,
+                        });
                         entity.addTag("generator_text");
                         entity.addTag(`generator_text:${genData.uniqueID}`);
                     }
                     let ticks = 0;
-                    e.player.dimension.spawnParticle("leaf:magic", center);
+                    if (doc.data.enableGeneratorParticle == true) {
+                        e.player.dimension.spawnParticle("leaf:magic", center);
+                    }
                     let owner = playerStorage.getPlayerByID(genData.owner);
 
                     // the source of the worlds problems frfr
@@ -288,15 +293,19 @@ class GeneratorAPI {
                             return system.clearRun(run)
                         }
                         if (ticks % 20 == 0 && tickDelay - 15 >= ticks) {
-                            e.player.dimension.spawnParticle(
-                                "leaf:magic",
-                                center
-                            );
+                            if (doc.data.enableGeneratorParticle == true) {
+                                e.player.dimension.spawnParticle(
+                                    "leaf:magic",
+                                    center
+                                );
+                            }
                         }
                         if (ticks >= tickDelay) {
                             system.clearRun(run);
                             e.block.setType(doc.data.block);
-                            e.block.dimension.playSound("note.pling", center);
+                            if (genData2.data.enableGeneratorSound == true) {
+                                e.block.dimension.playSound("note.pling", center);
+                            }
                             if (entity) {
                                 entity.nameTag = [
                                     `§b${doc.data.name}`,
@@ -415,10 +424,12 @@ class GeneratorAPI {
                                         genData.level++;
                                         pos.set("Generator", genData);
                                         e.player.playSound("random.levelup");
-                                        e.player.dimension.spawnParticle(
-                                            "azalea:absorbw",
-                                            e.block.center()
-                                        );
+                                        if (doc.data.enableGeneratorParticle == true) {
+                                            e.player.dimension.spawnParticle(
+                                                "azalea:absorbw",
+                                                e.block.center()
+                                            );
+                                        }
                                         e.player.sendMessage(
                                             `§aUpgraded generator to §eLevel ${
                                                 genData.level + 2
@@ -478,15 +489,15 @@ class GeneratorAPI {
         world.beforeEvents.playerInteractWithBlock.subscribe(async (e) => {
             if(!e.isFirstEvent) return;
             system.run(async () => {
-                // // console.warn("A")
+                // // // console.warn("A")
                 if (e.itemStack && e.itemStack.typeId == "leaf:generator") {
                     let newLoc = directionAndVec3(
                         e.blockFace,
                         e.block.center()
                     );
-                    // // console.warn(JSON.stringify(newLoc))
+                    // // // console.warn(JSON.stringify(newLoc))
                     let zone = zones.getZoneAtVec3(newLoc);
-                    // // console.warn(JSON.stringify(zone))
+                    // // // console.warn(JSON.stringify(zone))
                     if (
                         zone &&
                         !zones.hasPerms(e.player) &&
@@ -516,101 +527,121 @@ class GeneratorAPI {
                         let genEffect = doc.data.effect ? doc.data.effect : 0;
                         e.source = e.player;
                         if (genEffect == 0) {
-                            e.source.dimension.spawnParticle(
-                                "azalea:fallingchant1",
-                                e.source.dimension.getBlock(newLoc).center()
-                            );
-                            e.source.dimension.spawnParticle(
-                                "azalea:fallingchant2",
-                                e.source.dimension.getBlock(newLoc).center()
-                            );
-                            e.source.dimension.spawnParticle(
-                                "azalea:fallingchant1",
-                                e.source.dimension.getBlock(newLoc).center()
-                            );
-                            e.source.dimension.spawnParticle(
-                                "azalea:fallingchant2",
-                                e.source.dimension.getBlock(newLoc).center()
-                            );
-                            e.source.dimension.spawnParticle(
-                                "azalea:green",
-                                e.source.dimension.getBlock(newLoc).center()
-                            );
-                            e.source.dimension.spawnParticle(
-                                "azalea:vortex",
-                                e.source.dimension.getBlock(newLoc).center()
-                            );
-                            e.source.dimension.spawnParticle(
-                                "leaf:leaf",
-                                e.source.dimension.getBlock(newLoc).center()
-                            );
-                            e.source.dimension.playSound(
-                                "block.end_portal.spawn",
-                                e.source.dimension.getBlock(newLoc).center()
-                            );
+                            if (doc.data.enableGeneratorParticle == true) {
+                                e.source.dimension.spawnParticle(
+                                    "azalea:fallingchant1",
+                                    e.source.dimension.getBlock(newLoc).center()
+                                );
+                                e.source.dimension.spawnParticle(
+                                    "azalea:fallingchant2",
+                                    e.source.dimension.getBlock(newLoc).center()
+                                );
+                                e.source.dimension.spawnParticle(
+                                    "azalea:fallingchant1",
+                                    e.source.dimension.getBlock(newLoc).center()
+                                );
+                                e.source.dimension.spawnParticle(
+                                    "azalea:fallingchant2",
+                                    e.source.dimension.getBlock(newLoc).center()
+                                );
+                                e.source.dimension.spawnParticle(
+                                    "azalea:green",
+                                    e.source.dimension.getBlock(newLoc).center()
+                                );
+                                e.source.dimension.spawnParticle(
+                                    "azalea:vortex",
+                                    e.source.dimension.getBlock(newLoc).center()
+                                );
+                                e.source.dimension.spawnParticle(
+                                    "leaf:leaf",
+                                    e.source.dimension.getBlock(newLoc).center()
+                                );
+                            }
+                            if (doc.data.enableGeneratorSound == true) {
+                                e.source.dimension.playSound(
+                                    "block.end_portal.spawn",
+                                    e.source.dimension.getBlock(newLoc).center()
+                                );
+                            }
                         } else if (genEffect == 1) {
                             for (let i = 0; i < 1; i += 0.1) {
                                 for (let i2 = 0; i2 < 1; i2 += 0.1) {
-                                    e.source.dimension.spawnParticle(
-                                        `azalea:updraft`,
+                                    if (doc.data.enableGeneratorParticle == true) {
+                                        e.source.dimension.spawnParticle(
+                                            `azalea:updraft`,
+                                            {
+                                                x: Math.floor(newLoc.x) + i,
+                                                y: Math.floor(newLoc.y) + 1,
+                                                z: Math.floor(newLoc.z) + i2,
+                                            }
+                                        );
+                                    }
+                                }
+                            }
+                            if (doc.data.enableGeneratorParticle == true) {
+                                e.source.dimension.spawnParticle(
+                                    `azalea:bang`,
+                                    e.source.dimension.getBlock(newLoc).center()
+                                );
+                            }
+                        
+                            if (doc.data.enableGeneratorSound == true) {
+                                e.source.dimension.playSound(
+                                    "block.end_portal.spawn",
+                                    e.source.dimension.getBlock(newLoc).center()
+                                );
+                            }
+                        } else if (genEffect == 2) {
+                            if (doc.data.enableGeneratorParticle == true) {
+                                e.source.dimension.spawnParticle(
+                                    `leaf:leaf`,
+                                    e.source.dimension.getBlock(newLoc).center()
+                                );
+                            }
+                            if (doc.data.enableGeneratorSound == true) {
+                                e.source.dimension.playSound(
+                                    "dig.grass",
+                                    e.source.dimension.getBlock(newLoc).center()
+                                );
+                                e.source.dimension.playSound(
+                                    "dig.moss",
+                                    e.source.dimension.getBlock(newLoc).center()
+                                );
+                                e.source.dimension.playSound(
+                                    "dig.stone",
+                                    e.source.dimension.getBlock(newLoc).center()
+                                );
+                            }
+                        } else if (genEffect == 3) {
+                            if (doc.data.enableGeneratorParticle == true) {
+                                e.source.dimension.spawnParticle(
+                                    `azalea:redflame`,
+                                    e.source.dimension.getBlock(newLoc).center()
+                                );
+                                e.source.dimension.spawnParticle(
+                                    `azalea:lava`,
+                                    e.source.dimension.getBlock(newLoc).center()
+                                );
+                            }
+                            if (doc.data.enableGeneratorSound == true) {
+                                e.source.dimension.playSound(
+                                    "block.campfire.crackle",
+                                    e.source.dimension.getBlock(newLoc).center()
+                                );
+                            }
+                            let no = [0, 0, 0, 0, 0];
+                            for (let i = 0; i < 2; i++) {
+                                if (doc.data.enableGeneratorSound == true) {
+                                    e.source.dimension.playSound(
+                                        "liquid.lava",
+                                        e.source.dimension
+                                            .getBlock(newLoc)
+                                            .center(),
                                         {
-                                            x: Math.floor(newLoc.x) + i,
-                                            y: Math.floor(newLoc.y) + 1,
-                                            z: Math.floor(newLoc.z) + i2,
+                                            volume: 50,
                                         }
                                     );
                                 }
-                            }
-                            e.source.dimension.spawnParticle(
-                                `azalea:bang`,
-                                e.source.dimension.getBlock(newLoc).center()
-                            );
-
-                            e.source.dimension.playSound(
-                                "block.end_portal.spawn",
-                                e.source.dimension.getBlock(newLoc).center()
-                            );
-                        } else if (genEffect == 2) {
-                            e.source.dimension.spawnParticle(
-                                `leaf:leaf`,
-                                e.source.dimension.getBlock(newLoc).center()
-                            );
-                            e.source.dimension.playSound(
-                                "dig.grass",
-                                e.source.dimension.getBlock(newLoc).center()
-                            );
-                            e.source.dimension.playSound(
-                                "dig.moss",
-                                e.source.dimension.getBlock(newLoc).center()
-                            );
-                            e.source.dimension.playSound(
-                                "dig.stone",
-                                e.source.dimension.getBlock(newLoc).center()
-                            );
-                        } else if (genEffect == 3) {
-                            e.source.dimension.spawnParticle(
-                                `azalea:redflame`,
-                                e.source.dimension.getBlock(newLoc).center()
-                            );
-                            e.source.dimension.spawnParticle(
-                                `azalea:lava`,
-                                e.source.dimension.getBlock(newLoc).center()
-                            );
-                            e.source.dimension.playSound(
-                                "block.campfire.crackle",
-                                e.source.dimension.getBlock(newLoc).center()
-                            );
-                            let no = [0, 0, 0, 0, 0];
-                            for (let i = 0; i < 2; i++) {
-                                e.source.dimension.playSound(
-                                    "liquid.lava",
-                                    e.source.dimension
-                                        .getBlock(newLoc)
-                                        .center(),
-                                    {
-                                        volume: 50,
-                                    }
-                                );
                                 await system.waitTicks(8);
                             }
                         }

@@ -60,7 +60,7 @@ class HTTP {
                 force: true
             }).then(val2=>{
                 let val = JSON.parse(val2)
-                console.warn(val)
+                // console.warn(val)
                 let body = val[1];
                 try {
                     body = JSON.stringify(JSON.parse(val[1]))
@@ -125,7 +125,7 @@ world.beforeEvents.chatSend.subscribe(async (e) => {
         let jsenc = new JSEncrypt();
         jsenc.setPublicKey(pubKey);
         let val = `${e.sender.name}/${Math.floor(Date.now() / 10000)}`;
-        // console.log(val)
+        // // console.log(val)
         let verified = jsenc.verify(val, signature, SHA256);
         if (!verified) {
             e.cancel = true;
@@ -137,7 +137,7 @@ world.beforeEvents.chatSend.subscribe(async (e) => {
         }
     }
     if (http.player && e.sender.id == http.player.id) {
-        // // console.warn(e.message)
+        // // // console.warn(e.message)
         //503
         if (e.message.startsWith(`.APPEND:`)) {
             e.cancel = true;

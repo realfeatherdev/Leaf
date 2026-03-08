@@ -14,7 +14,7 @@ configAPI.registerProperty("TPRCooldownFormat", configAPI.Types.String, "§b§lT
 export function playerWaitWithoutMoving(player, time, format, cb) {
     let initialLoc = {x: player.location.x, y: player.location.y, z: player.location.z}
     let timeLeft = time;
-    console.warn(time)
+    // console.warn(time)
     let interval = system.runInterval((e)=>{
         if(!player.isValid) return system.clearRun(interval);
         if(time > 0 && timeLeft != time && (player.location.x != initialLoc.x || player.location.y != initialLoc.y || player.location.z != initialLoc.z)) {

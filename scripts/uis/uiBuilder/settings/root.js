@@ -54,6 +54,10 @@ uiManager.addUI(versionData.uiNames.CustomizerSettings, "a", (player) => {
         }
     );
     form.divider();
+    form.button(`§cSidebar Settings\n§7Edit global sidebar settings`, null, (player)=>{
+        uiManager.open(player, versionData.uiNames.SidebarEditorSettings)
+    })
+    form.divider();
     form.button(`${configAPI.getProperty("CustomizerCornerAdd") ? emojis.green_dot : emojis.red_dot} §fAdd button on corner\n§r§7Make the customizer have the pre-v4.0 layout`, null, (player)=>{
         configAPI.setProperty("CustomizerCornerAdd", !configAPI.getProperty("CustomizerCornerAdd"))
         uiManager.open(player, versionData.uiNames.CustomizerSettings)

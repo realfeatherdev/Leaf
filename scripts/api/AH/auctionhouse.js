@@ -10,7 +10,7 @@ class AH {
     constructor() {
         this.db = prismarineDb.customStorage("AH", SegmentedStoragePrismarine);
         this.db.waitLoad().then(() => {
-            // console.warn(`loaded AH data!`);
+            // // console.warn(`loaded AH data!`);
         });
         this.durations = {
             _1_DAY: 1000 * 60 * 60 * 24,
@@ -20,7 +20,7 @@ class AH {
             let auctions = this.db.findDocuments({ type: "AUCTION" });
             for (const auction of auctions) {
                 if (auction.data.endTime > Date.now()) continue;
-                // console.warn(`AH: Auction ${auction.id} is ending`);
+                // // console.warn(`AH: Auction ${auction.id} is ending`);
                 this.handleWinner(auction);
                 this.db.deleteDocumentByID(auction.id);
             }

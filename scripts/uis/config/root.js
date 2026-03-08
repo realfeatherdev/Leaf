@@ -12,6 +12,7 @@ import "./combatLog";
 import versionData from "../../versionData";
 import { NUT_UI_ALT, NUT_UI_DISABLE_VERTICAL_SIZE_KEY, NUT_UI_HEADER_BUTTON, NUT_UI_LEFT_HALF, NUT_UI_LEFT_THIRD, NUT_UI_MIDDLE_THIRD, NUT_UI_PAPERDOLL, NUT_UI_RIGHT_HALF, NUT_UI_RIGHT_THIRD } from "../preset_browser/nutUIConsts";
 import { formatStr } from "../../api/azaleaFormatting";
+import actionParser from "../../api/actionParser";
 uiBuilder.addInternalUI({
     name: ":cookies: More Settings :cookies:",
     body: "",
@@ -315,7 +316,8 @@ let tabs = {
     FEATURES: 1,
     EXTRA: 2,
     MODERATION :3,
-    ADVANCED: 4
+    ADVANCED: 4,
+    PLUGINS: -1
 }
 let options = [
     {
@@ -348,6 +350,7 @@ let options = [
                 },
                 condition: "$perm/config.economy"
             },
+
             {
                 id: "ZONES",
                 text: "§eZones\n§7Configure this server's zones",
@@ -374,11 +377,35 @@ let options = [
                     uiManager.open(player, versionData.uiNames.ChatRanks.Main)
                 },
                 condition: "$cfg/Chatranks && $perm/config.chatranks.edit"
-            }
+            },
+            {
+                id: "THEME",
+                get text() {
+                    return `§cDefault Theme\n§7Current: ${themes[configAPI.getProperty("LeafTheme")][1]}`
+                },
+                get icon() {
+                    return themes[68][2]
+                },
+                callback(player) {
+                    uiManager.open(player, "edit_cherry_theme", 0, (id)=>{
+                        if(id == -2) return uiManager.open(player, versionData.uiNames.CustomizerSettings)
+                        configAPI.setProperty("LeafTheme", id)
+                        uiManager.open(player, versionData.uiNames.CustomizerSettings)
+                    }, configAPI.getProperty("LeafTheme"), false);
+                }
+            },
         ]
     },
     {
         options: [
+            {
+                id: "BASIC",
+                text: "§cBasic Server Info\n§7Edit basic server ifno",
+                icon: "textures/azalea_icons/other/tag_blue",
+                callback(player) {
+                    uiManager.open(player, versionData.uiNames.BasicInfo)
+                }
+            },
             {
                 id: "LANDCLAIMS",
                 text: "§5Land Claims\n§7Configure land claims :3",
@@ -450,6 +477,14 @@ let options = [
                     uiManager.open(player, versionData.uiNames.Homes.Config)
                 },
                 condition: "$perm/config.homesconfig"
+            },
+            {
+                id: "PVP",
+                text: "§bPvP Settings\n§7Configure misc PvP settings",
+                icon: "textures/azalea_icons/icontextures/wooden_shield",
+                callback(player) {
+                    uiManager.open(player, versionData.uiNames.PVP)
+                }
             },
             {
                 id: "CLOG",
@@ -527,7 +562,7 @@ let options = [
                 }
             },
             {
-                id: "CHATFORMAT",
+                id: "CHATFORMATRES",
                 text: "§cReset Chat Format\n§7Change leafs format to default",
                 icon: "textures/blocks/barrier",
                 callback(player) {
@@ -571,6 +606,7 @@ let options = [
     }
 ]
 uiManager.registerBuilder(config.uiNames.ConfigMain, (player, tab = 0)=>{
+    // world.sendMessage(`Opening tab ${tab}`)
     if(!tab) tab = 0
     // world.sendMessage(`${player.name} opened Config UI on tab: ${tab}`)
     let ui = new UI();
@@ -599,13 +635,36 @@ uiManager.registerBuilder(config.uiNames.ConfigMain, (player, tab = 0)=>{
                 uiManager.open(player, config.uiNames.ConfigMain, tabs.EXTRA)
             })
     )
+    let reg = uiBuilder.reg1.filter(_=>_.cat == "MAIN")
     ui.addButton(
         new Button()
-            .setText(`${tab == tabs.MODERATION ? "§o§1§r§f" : ""}§rModeration`)
+            .setText(`${reg.length ? NUT_UI_RIGHT_HALF + NUT_UI_DISABLE_VERTICAL_SIZE_KEY : ""}${tab == tabs.MODERATION ? "§o§1§r§f" : ""}§rModeration`)
             .setCallback(()=>{
                 uiManager.open(player, config.uiNames.ConfigMain, tabs.MODERATION)
             })
     )
+    if(reg.length) {
+        ui.addButton(
+            new Button()
+                .setText(`${NUT_UI_LEFT_HALF}${tab == tabs.PLUGINS ? "§o§1§r§f" : ""}§rPlugins`)
+                .setCallback(()=>{
+                    uiManager.open(player, config.uiNames.ConfigMain, tabs.PLUGINS)
+                })
+        )
+        if(tab == tabs.PLUGINS) {
+            ui.addDivider()
+            for(const r of reg) {
+                let btn = new Button();
+                btn.setText(r.text)
+                if(r.texture && icons.resolve(r.texture)) btn.setIcon(icons.resolve(r.texture))
+                btn.setCallback((p)=>{
+                    actionParser.runAction(player, r.cmd)
+                })
+                ui.addButton(btn)
+            }
+            return ui;
+        }
+    }
     // ui.addButton(
     //     new Button()
     //         .setText(`${NUT_UI_LEFT_HALF}${tab == tabs.ADVANCED ? "§o§1§r§f" : ""}§rAdvanced`)
@@ -613,9 +672,14 @@ uiManager.registerBuilder(config.uiNames.ConfigMain, (player, tab = 0)=>{
     //             uiManager.open(player, config.uiNames.ConfigMain, tabs.ADVANCED)
     //         })
     // )
+    if(tab == tabs.PLUGINS) return;
     ui.addDivider()
     try {
         for(const opt of options[tab].options) {
+            if(typeof opt == "string") {
+                ui.addLabel(opt)
+                continue;
+            }
             let btn = new Button();
             btn.setText(opt.text)
             btn.setCallback(opt.callback)

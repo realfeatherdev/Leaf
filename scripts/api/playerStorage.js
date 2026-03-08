@@ -220,8 +220,8 @@ class PlayerStorage {
         this.rewardsKeyval.set(playerID, rewards);
     }
     getRewards(playerID) {
-        // // console.warn(`GETTING REWARDS FOR ${playerID}`)
-        // // console.warn(JSON.stringify(db2.data))
+        // // // console.warn(`GETTING REWARDS FOR ${playerID}`)
+        // // // console.warn(JSON.stringify(db2.data))
         let rewards = this.rewardsKeyval.has(playerID)
             ? this.rewardsKeyval.get(playerID)
             : [];
@@ -249,7 +249,19 @@ class PlayerStorage {
         return ids;
     }
     getPlayerByID(id) {
-        return this.keyval.get(id);
+        return this.keyval.get(id) ?? {
+            tags: [],
+            dynamicProperties: [],
+            scores: [],
+            id: "-1",
+            name: "Unknown",
+            nameTag: "Unknown",
+            location: {
+                x: 0,
+                y: 9,
+                z: 0,
+            },
+        };
     }
 }
 

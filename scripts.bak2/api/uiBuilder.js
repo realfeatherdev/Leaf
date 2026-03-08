@@ -246,7 +246,7 @@ class UIBuilder extends Router {
         system.afterEvents.scriptEventReceive.subscribe(e=>{
             if(e.id == "leaf:reg1") {
                 try {
-                    console.warn(`Loaded conf UI module: ${JSON.parse(e.message).text}`)
+                    // console.warn(`Loaded conf UI module: ${JSON.parse(e.message).text}`)
                     this.reg1.push(JSON.parse(e.message))
                 } catch {}
             }
@@ -613,7 +613,7 @@ class UIBuilder extends Router {
     transitionSidebars() {
         sidebarEditor.db.waitLoad().then(() => {
             let sidebars = sidebarEditor.db.findDocuments({ _type: "SIDEBAR" });
-            // console.warn(sidebars.length);
+            // // console.warn(sidebars.length);
             let i = 0;
             for (const sidebar of sidebars) {
                 if (sidebar.data.transition1) continue;
@@ -1349,7 +1349,7 @@ class UIBuilder extends Router {
         let index = doc.data.buttons.findIndex((button) => button.id == btnID);
         if (index == -1) return;
         doc.data.buttons[index].conditionalActions = bool;
-        // console.warn(JSON.stringify(doc.data));
+        // // console.warn(JSON.stringify(doc.data));
         this.db.overwriteDataByID(id, doc.data);
         this.db.save();
     }
@@ -1710,8 +1710,8 @@ class UIBuilder extends Router {
                 internalID: versionData.versionInfo.versionInternalID,
                 theme: doc.layout == 4 ? 68 : doc.theme ? doc.theme : 0
             };
-            console.warn(data.scriptevent)
-            // console.warn(doc2 ? "Yes" : "No")
+            // console.warn(data.scriptevent)
+            // // console.warn(doc2 ? "Yes" : "No")
             if (doc2) {
                 // if(doc.type == 0) {
                 //     data.buttons = this.mixArrays(doc.buttons, doc2.data.buttons)
@@ -1720,8 +1720,8 @@ class UIBuilder extends Router {
                 if(!doc2.data.locked)
                     this.db.overwriteDataByID(doc2.id, data);
             } else {
-                console.warn(data.scriptevent)
-                // console.warn("INSERTING")
+                // console.warn(data.scriptevent)
+                // // console.warn("INSERTING")
                 this.db.insertDocument(data);
             }
     
@@ -2060,17 +2060,17 @@ class UIBuilder extends Router {
     addButtonToGroup(id, groupIndex, buttonData) {
         const doc = this.getByID(id);
         if (!doc) {
-            // console.warn(`No document found with ID ${id}`);
+            // // console.warn(`No document found with ID ${id}`);
             return;
         }
 
         // Debug log the buttons array
-        // console.warn(`Total buttons: ${doc.data.buttons.length}`);
-        // console.warn(`Attempting to add to group at index ${groupIndex}`);
+        // // console.warn(`Total buttons: ${doc.data.buttons.length}`);
+        // // console.warn(`Attempting to add to group at index ${groupIndex}`);
 
         const group = doc.data.buttons[groupIndex];
         if (!group || group.type !== "group") {
-            // console.warn(
+            // // console.warn(
                 // `Invalid group at index ${groupIndex}. Found: ${JSON.stringify(
                 //     group
                 // )}`
@@ -2096,7 +2096,7 @@ class UIBuilder extends Router {
         group.buttons.push(newButton);
 
         // Debug log
-        // console.warn(
+        // // console.warn(
             // `Added button to group ${groupIndex}, now has ${group.buttons.length} buttons`
 // ?        );
 

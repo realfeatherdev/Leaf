@@ -248,6 +248,14 @@ uiManager.registerBuilder(config.uiNames.UIBuilderAddSubmenu, () => {
         )
         .addButton(
             new Button()
+                .setText("§cMine\n§7Create a prison-like mine")
+                .setIcon("textures/azalea_icons/icontextures/tile2_024")
+                .setCallback((player)=>{
+                    uiManager.open(player, versionData.uiNames.MinesAdd)
+                })
+        )
+        .addButton(
+            new Button()
                 .setText(`${NUT_UI_DISBALE_BTN}§r§qIsland\n§7Delayed to v3.2`)
                 .setIcon(`textures/azalea_icons/other/terrain`)
                 .setCallback((player)=>{

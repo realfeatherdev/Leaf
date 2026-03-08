@@ -141,7 +141,7 @@ system.runInterval(() => {
                     // world.sendMessage("a")
                     if (entity.getDynamicProperty("interact")) {
                         try {
-                            // // console.warn("a")
+                            // // // console.warn("a")
                             let location = entity.location;
                             let block = {
                                 x: location.x,

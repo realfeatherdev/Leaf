@@ -39,13 +39,13 @@ uiManager.addUI(
                 uiManager.open(player, config.uiNames.Shop.Root, shopID);
             }
         );
-        // // console.warn(JSON.stringify(shopAPI.shops.data).length)
+        // // // console.warn(JSON.stringify(shopAPI.shops.data).length)
         let category = shop.data.categories.find((_) => _.id == categoryID);
         form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r${category.name}`);
         for (let i = 0; i < category.items.length; i++) {
             let item = category.items[i];
             if (item.type == "ITEMDB_ITEM") {
-                // console.warn("E");
+                // // console.warn("E");
                 let itemStack = itemdb.getItem(item.stash, item.slot);
                 if (!itemStack) continue;
                 let currency = prismarineDb.economy.getCurrency(item.currency)

@@ -89,7 +89,7 @@ class NormalFormOpener {
                                     }
                                 }
                             } catch (e) {
-                                // console.warn(e);
+                                // // console.warn(e);
                             }
                             resolve();
                             player.playSound("note.pling");
@@ -758,7 +758,7 @@ class NormalFormOpener {
                                                     }
                                                 }
                                             } catch (e) {
-                                                // console.warn(e);
+                                                // // console.warn(e);
                                             }
                                             this.open(player, data, ...args);
                                             player.playSound("note.pling");
@@ -998,7 +998,7 @@ class NormalFormOpener {
                 data.layout == 4 ? `${nutUIText}§r§f` : ""
             }${unprocessedButtonText2}`;
 
-            // // console.warn(JSON.stringify(button));
+            // // // console.warn(JSON.stringify(button));
             if (
                 button.requiredTag &&
                 !this.playerIsAllowed(
@@ -1383,7 +1383,7 @@ class NormalFormOpener {
                                             }
                                         }
                                     } catch (e) {
-                                        // console.warn(e);
+                                        // // console.warn(e);
                                     }
                                     this.open(player, data, ...args);
                                     player.playSound("note.pling");

@@ -23,7 +23,7 @@ uiManager.addUI(
         let advancedSlots = [];
         for (let i = 0; i < chest.data.icons.length; i++) {
             let icon = chest.data.icons[i];
-            // console.warn(icon);
+            // // console.warn(icon);
             if (chest.data.advanced) {
                 let data = {};
                 let slot = 0;

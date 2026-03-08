@@ -285,8 +285,8 @@ class ModalFormOpener {
                             response.formValues[responseIndex]
                         );
                     }
-                    // console.warn(JSON.stringify(response.formValues[responseIndex]))
-                    // console.warn(response.formValues[responseIndex])
+                    // // console.warn(JSON.stringify(response.formValues[responseIndex]))
+                    // // console.warn(response.formValues[responseIndex])
                     // world.sendMessage("hi")
                     let newActions = getActionsLegacy(control.action, ...args);
                     // world.sendMessage(JSON.stringify(newActions))

@@ -172,7 +172,7 @@ export class CommandHandler {
     ) {
         const command = this.commands.get(commandName.toLowerCase());
         if (!command) {
-            // console.warn(
+            // // console.warn(
                 // `Cannot register subcommand for non-existent command: ${commandName}`
             // );
             return;

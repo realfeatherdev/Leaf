@@ -1,9 +1,21 @@
-import { EntityInitializationCause, system, world } from "@minecraft/server";
+import { EntityInitializationCause, EquipmentSlot, Player, system, world } from "@minecraft/server";
 import { prismarineDb } from "../lib/prismarinedb";
 import { SegmentedStoragePrismarine } from "../prismarineDbStorages/segmented";
 import landclaims from "./landclaims/landclaims";
 import playerStorage from "./playerStorage";
 import uiBuilder from "./uiBuilder";
+import configAPI from "./config/configAPI";
+import OpenClanAPI from "./OpenClanAPI";
+// import { getScore } from "./formatting/scores";
+function getScore(obj, p) {
+    let obj2 = world.scoreboard.getObjective(obj);
+    let score = 0;
+    try {
+        score = obj2.getScore(p)
+    } catch {score = 0}
+    return score;
+}
+
 export function stripMinecraft(id) {
     return id.startsWith('minecraft:') ? id.replace('minecraft:', '') : id;
 }
@@ -37,7 +49,7 @@ export function isPointInCube(px, py, pz, x1, y1, z1, x2, y2, z2) {
 export function isInCuboid(p, loc1, loc2) {
     return isPointInCube(p.x, p.y, p.z, loc1.x, loc1.y, loc1.z, loc2.x, loc2.y, loc2.z)
 }
-
+configAPI.registerProperty("NoHitLowerTier", configAPI.Types.Boolean, false);
 class Zones {
     constructor() {
         this.zonesDB = prismarineDb.customStorage(
@@ -59,11 +71,87 @@ class Zones {
             "DisallowGenPlacing",
             "DisallowMobSpawning",
             "DisallowExplosions",
+            "NoHitLowerTier",
+            "ForceAllowHitLowerTier"
         ];
         this.initEvents();
         this.msg = "You cant do this here";
     }
+    getTierFromItem(item) {
+        if(!item) return 0;
+        let id = item.typeId;
+        return id.includes('leather') ? 1 : id.includes('chainmail') ? 2 : id.includes('copper') ? 3 : id.includes('gold') ? 4 : id.includes('diamond') ? 6 : id.includes('iron') ? 5 : id.includes('netherite') ? 7 : 0;
+    }
+    getTier(player) {
+        if(!(player instanceof Player)) return;
+
+        let equippable = player.getComponent('equippable')
+        let head = equippable.getEquipment(EquipmentSlot.Head)
+        let chest = equippable.getEquipment(EquipmentSlot.Chest)
+        let legs = equippable.getEquipment(EquipmentSlot.Legs)
+        let feet = equippable.getEquipment(EquipmentSlot.Feet) // No foot fetishes! >:( Bad girl!
+
+        return Math.max(
+            this.getTierFromItem(head),
+            this.getTierFromItem(chest),
+            this.getTierFromItem(legs),
+            this.getTierFromItem(feet),
+        )
+    }
     initEvents() {
+        try {
+            system.run(()=>{
+                // world.scoreboard.addObjective("leaf:team", "Team") UNUSED!
+            })
+        } catch {}
+        system.afterEvents.scriptEventReceive.subscribe(e=>{
+            if(e.id == "leaf:switch_team" && e.sourceEntity && e.sourceEntity.typeId == "minecraft:player") {
+                let team = e.message ? e.message : "default";
+                for(const tag of e.sourceEntity.getTags()) {
+                    if(tag.startsWith('team:')) e.sourceEntity.removeTag(tag);
+                }
+                if(team != "default") e.sourceEntity.addTag(`team:${team}`)
+            }
+        })
+        world.beforeEvents.entityHurt.subscribe(e=>{
+            if(e.damageSource.damagingEntity && e.damageSource.damagingEntity.typeId == "minecraft:player" && e.hurtEntity.typeId == "minecraft:player") {
+                let FLAG = "DisablePVP";
+                let zone = this.getZoneAtVec3(e.hurtEntity.location, e.hurtEntity.dimension);
+                if(zone && zone.data.flags.includes("DisablePVP")) {
+                    e.cancel = true;
+                }
+                function yes(tags, pre, d = "default") {
+                    let tag = tags.find(_=>_.startsWith(pre))
+                    if(tag) return tag.substring(pre.length)
+                    return d;
+                }
+                let teamWS = yes(e.damageSource.damagingEntity.getTags(), "team:", "default")
+                // let teamWS = getScore("leaf:team", e.damageSource.damagingEntity)
+
+                let teamCR = yes(e.hurtEntity.getTags(), "team:", "default")
+                // let teamCR = getScore("leaf:team", e.damageSource.hurtEntity)
+                // world.sendMessage(`D: ${teamWS}, H: ${teamCR}`)
+                if(teamWS == teamCR && teamWS != "default" && teamCR != "default") e.cancel = true;
+
+                let WS = e.damageSource.damagingEntity;
+                let CR = e.hurtEntity;
+                if(configAPI.getProperty("Clans")) {
+                    let clanWS = OpenClanAPI.getClanID(WS);
+                    let clanCR = OpenClanAPI.getClanID(CR);
+                    if(clanWS && clanCR && clanWS == clanCR && configAPI.getProperty("clans:disable_friendly_fire")) e.cancel = true;
+                }
+                // let NoHitLowerTier = configAPI.getProperty("NoHitLowerTier");
+                // world.sendMessage(`${NoHitLowerTier ? "true" : "false"}`)
+                // console.warn(NoHitLowerTier)
+                if(configAPI.getProperty("NoHitLowerTier") || (zone && zone.data.flags.includes("NoHitLowerTier"))) {
+                    if(zone && zone.data.flags.includes("ForceAllowHitLowerTier")) return;
+                    // world.sendMessage("YES")
+                    let tierWS = this.getTier(WS);
+                    let tierCR = this.getTier(CR);
+                    if(tierWS != tierCR) e.cancel = true;
+                }
+            }
+        })
         world.beforeEvents.explosion.subscribe(e=>{
             let newBlocks = [];
             for(const block of e.getImpactedBlocks()) {
@@ -255,6 +343,12 @@ class Zones {
         return uiBuilder.db.findDocuments({ type: 14 }).sort((a,b)=>{
             return b.data.priority - a.data.priority;
         })
+    }
+    zoneDataToVolume(zone) {
+        return {
+            start: {x: zone.data.x1, y: zone.data.y1, z: zone.data.z1},
+            end: {x: zone.data.x2, y: zone.data.y2, z: zone.data.z2},
+        }
     }
     addZone(name, x1, y1, z1, x2, y2, z2, priority = 1, flags = [], dimension) {
         if (uiBuilder.db.findFirst({ type: 14, name })) return false;

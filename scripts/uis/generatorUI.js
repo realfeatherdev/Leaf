@@ -1,10 +1,11 @@
-import { system, world } from "@minecraft/server";
+import { BlockTypes, system, world } from "@minecraft/server";
 import generator from "../api/generator";
 import config from "../versionData";
 import { ActionForm, ModalForm } from "../lib/form_func";
 import uiManager from "../uiManager";
 import { prismarineDb } from "../lib/prismarinedb";
 import configAPI from "../api/config/configAPI";
+import { NUT_UI_ALT, NUT_UI_DISABLE_VERTICAL_SIZE_KEY, NUT_UI_HEADER_BUTTON, NUT_UI_LEFT_THIRD, NUT_UI_MIDDLE_THIRD, NUT_UI_RIGHT_THIRD } from "./preset_browser/nutUIConsts";
 
 uiManager.addUI(
     config.uiNames.Generator.Create,
@@ -28,8 +29,32 @@ uiManager.addUI(
             "gold_gen",
             undefined
         );
+
+        modalForm.toggle(
+            "Enable floating text",
+            false,
+            () => {},
+            "Enables the generators information floating text."
+        )
+
+        modalForm.toggle(
+            "Enable generator sound",
+            false,
+            () => {},
+            "Enables the generators spawn and break sound."
+        )
+
+        modalForm.toggle(
+            "Enable generator particles",
+            false,
+            () => {},
+            "Enables the generators spawn and break particles."
+        )
+
         modalForm.show(player, false, (player, response) => {
             if (response.canceled) return;
+            const showText = response.formValues[3]; 
+
             if (
                 !response ||
                 response.canceled ||
@@ -48,7 +73,8 @@ uiManager.addUI(
                 response.formValues[0],
                 blockTypeID,
                 parseInt(response.formValues[1]),
-                response.formValues[2]
+                response.formValues[2],
+                showText // Pass the new boolean here
             );
         });
     }
@@ -60,7 +86,11 @@ uiManager.addUI(
         if (!configAPI.getProperty("Generators"))
             return player.sendMessage("Generators are not enabled");
         let form = new ActionForm();
-        form.title("Generators");
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}Generators`);
+        form.label(`To make a §dgenerator§f:\n§71. §fGrab the "generator editor" item\n§72. §fUse it on the block you want to make a gen out of`)
+        form.button(`${NUT_UI_HEADER_BUTTON}§cBack`, `textures/azalea_icons/2`, (player)=>{
+            uiManager.open(player, config.uiNames.Config.Misc)
+        })
         for (const generatorData of generator.getGenerators()) {
             form.button(
                 `§a${generatorData.data.name}\n§r§7${
@@ -87,15 +117,38 @@ uiManager.addUI(config.uiNames.Generator.EditGenerator, "a", (player, id) => {
         return player.sendMessage("Generators are not enabled");
     let gen = generator.db.getByID(id);
     let form = new ActionForm();
-    form.title(gen.data.name);
-    form.button("Edit Upgrades", null, (player) => {
+    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}${gen.data.name}`);
+    form.button(`${NUT_UI_HEADER_BUTTON}§cBack`, `textures/azalea_icons/2`, (player)=>{
+        uiManager.open(player, config.uiNames.Generator.EditRoot)
+    })
+    form.button(`§eEdit Basic Info\n§7Edit basic info for this generator`, `textures/azalea_icons/misc`, (player)=>{
+        let modalForm = new ModalForm();
+        modalForm.title("Edit Basic Info");
+        modalForm.textField("Name", "Generator name", gen.data.name ? gen.data.name : "Default");
+        modalForm.textField("Block ID", "minecraft:dirt", gen.data.block ? gen.data.block : "minecraft:dirt");
+        modalForm.textField("Unique ID", "meow", gen.data.scriptevent ? gen.data.scriptevent : "meow", ()=>{}, "Get the item by doing /scriptevent leaf:give_gen <unique id>");
+        modalForm.show(player, false, (player, response)=>{
+            if(response.canceled) return uiManager.open(player, config.uiNames.Generator.EditGenerator, id)
+            let blockID = BlockTypes.get(response.formValues[1]) ? response.formValues[1] : "minecraft:dirt";
+            if(!BlockTypes.get(response.formValues[1])) player.warn(`Block type: ${response.formValues[1]} not found. Defaulting to minecraft:dirt`)
+            gen.data.block = blockID;
+            gen.data.name = response.formValues[0]
+            gen.data.scriptevent = response.formValues[2]
+            return uiManager.open(player, config.uiNames.Generator.EditGenerator, id)
+        })
+    })
+    form.button(`§uGet Generator Item\n§7Get this generators item :3`, `textures/items/paper`, (player)=>{
+        player.runCommand(`scriptevent leaf:give_gen ${gen.data.scriptevent}`)
+        return uiManager.open(player, config.uiNames.Generator.EditGenerator, id)
+    })
+    form.button("§dEdit Upgrades\n§7Edit this generators upgrades!", `textures/azalea_icons/ChestLarge`, (player) => {
         uiManager.open(
             player,
             config.uiNames.Generator.EditGeneratorUpgrades,
             id
         );
     });
-    form.button(`Edit Effect`, null, (player) => {
+    form.button(`§cEdit Effect\n§7Current: ${effects[gen.data.effect ? gen.data.effect : 0]}`, `textures/azalea_icons/10`, (player) => {
         let modal = new ModalForm();
         modal.dropdown(
             "Effect",
@@ -120,8 +173,8 @@ uiManager.addUI(config.uiNames.Generator.EditGenerator, "a", (player, id) => {
         });
     });
     form.button(
-        `Edit Base Cooldown\n${gen.data.respawnTime}`,
-        null,
+        `§bEdit Base Cooldown\n§7Current: ${gen.data.respawnTime}`,
+        `textures/items/clock_item`,
         (player) => {
             let modal = new ModalForm();
             modal.textField(
@@ -148,7 +201,49 @@ uiManager.addUI(config.uiNames.Generator.EditGenerator, "a", (player, id) => {
             });
         }
     );
-    form.button(`Delete`, null, (player) => {
+    form.button(
+        `${NUT_UI_LEFT_THIRD}${NUT_UI_DISABLE_VERTICAL_SIZE_KEY}§r§fFloating Text${ gen.data.showText ? `\n§r§aON`: `\n§r§cOFF`}`,
+        // `textures/azalea_icons/label`,
+        null,
+        (player) => {
+            gen.data.showText = !gen.data.showText
+            generator.db.overwriteDataByID(gen.id, gen.data);
+            return uiManager.open(
+                player,
+                config.uiNames.Generator.EditGenerator,
+                id
+            );
+        }
+    );
+    form.button(
+        `${NUT_UI_MIDDLE_THIRD}${NUT_UI_DISABLE_VERTICAL_SIZE_KEY}§r§fSounds${ gen.data.enableGeneratorSound ? `\n§r§aON`: `\n§r§cOFF`}`,
+        // `textures/blocks/noteblock`,
+        null,
+        (player) => {
+            gen.data.enableGeneratorSound = !gen.data.enableGeneratorSound
+            generator.db.overwriteDataByID(gen.id, gen.data);
+            return uiManager.open(
+                player,
+                config.uiNames.Generator.EditGenerator,
+                id
+            );
+        }
+    );
+    form.button(
+        `${NUT_UI_RIGHT_THIRD}§r§fParticles${ gen.data.enableGeneratorParticle ? `\n§r§aON`: `\n§r§cOFF`}`,
+        // `textures/azalea_icons/main`,
+        null,
+        (player) => {
+            gen.data.enableGeneratorParticle = !gen.data.enableGeneratorParticle
+            generator.db.overwriteDataByID(gen.id, gen.data);
+            return uiManager.open(
+                player,
+                config.uiNames.Generator.EditGenerator,
+                id
+            );
+        }
+    );
+    form.button(`§cDelete\n§7Delete this generator`, `textures/azalea_icons/Delete`, (player) => {
         uiManager.open(
             player,
             config.uiNames.Basic.Confirmation,

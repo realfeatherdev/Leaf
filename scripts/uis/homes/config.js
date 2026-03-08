@@ -23,11 +23,21 @@ uiManager.addUI(versionData.uiNames.Homes.ConfigBasic, "ruighvn8et2", (player)=>
             "§"
         )
     );
+    modalForm.toggle(
+        "Bed Homes",
+        configAPI.getProperty("BedHomes"),
+        () => {},
+        `When enabled, the player's spawnpoint (set via bed) will show up in the homes list.\n&eUNSTABLE`.replaceAll(
+            "&",
+            "§"
+        )
+    );
     modalForm.show(player, false, (player, response) => {
         if (response.canceled)
             return uiManager.open(player, versionData.uiNames.Homes.Config);
         configAPI.setProperty("HomesLimit", response.formValues[0]);
         configAPI.setProperty("AzaleaStyleSharedHomes", response.formValues[1]);
+        configAPI.setProperty("BedHomes", response.formValues[2]);
         return uiManager.open(player, versionData.uiNames.Homes.Config);
     });
 })

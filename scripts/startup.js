@@ -8,7 +8,7 @@ import {
 } from "@minecraft/server";
 import * as mc from "@minecraft/server";
 import * as ui from "@minecraft/server-ui";
-import { transferPlayer } from "@minecraft/server-admin";
+// import { transferPlayer } from "@minecraft/server-admin";
 // meow
 // let a = false;
 // import * as diag from '@minecraft/diagnostics';
@@ -18,7 +18,7 @@ import { transferPlayer } from "@minecraft/server-admin";
 let events = {};
 let stasherID = "leaf:item_stasher";
 // if (system.beforeEvents.startup) {
-// // console.warn("A")
+// // // console.warn("A")
 system.beforeEvents.startup.subscribe(async (init) => {
     init.blockComponentRegistry.registerCustomComponent("leaf:code_block", {
         onTick(arg0, arg1) {
@@ -27,8 +27,8 @@ system.beforeEvents.startup.subscribe(async (init) => {
                 let db = libPDB.positionalDb.getPosition(arg0.block.location);
                 // if(db.has("code")) {
                 //     let code = db.get("code")
-                //     // console.warn(arg0.block.location)
-                //     // console.warn(code)
+                //     // // console.warn(arg0.block.location)
+                //     // // console.warn(code)
                 // }
                 let redstone = arg0.block.getRedstonePower() || 0;
                 if (redstone > 0) {
@@ -363,6 +363,36 @@ system.beforeEvents.startup.subscribe(async (init) => {
 
     init.customCommandRegistry.registerCommand(
         {
+            name: "leaf:pers_point_del",
+            description: "Persistently store a point",
+            permissionLevel: CommandPermissionLevel.GameDirectors,
+            mandatoryParameters: [
+                {
+                    type: CustomCommandParamType.EntitySelector,
+                    name: "entities",
+                },
+                {
+                    type: CustomCommandParamType.String,
+                    name: "name",
+                },
+            ],
+        },
+        (origin, entities, position, name) => {
+            system.run(() => {
+                for (const entity of entities) {
+                    entity.setDynamicProperty(`perspointloc:${name}`, undefined);
+                    entity.setDynamicProperty(
+                        `perspointdim:${name}`,
+                        undefined
+                    );
+                }
+            });
+        }
+    );
+
+
+    init.customCommandRegistry.registerCommand(
+        {
             name: "leaf:pers_point_tp",
             description: "Teleport to persistent point",
             permissionLevel: CommandPermissionLevel.GameDirectors,
@@ -396,6 +426,98 @@ system.beforeEvents.startup.subscribe(async (init) => {
             });
         }
     );
+
+    init.customCommandRegistry.registerCommand(
+        {
+            name: "leaf:g_pers_point_set",
+            description: "Persistently store a point",
+            permissionLevel: CommandPermissionLevel.GameDirectors,
+            mandatoryParameters: [
+                {
+                    type: CustomCommandParamType.Location,
+                    name: "position",
+                },
+                {
+                    type: CustomCommandParamType.String,
+                    name: "name",
+                },
+            ],
+        },
+        (origin, entities, position, name) => {
+            system.run(() => {
+                world.setDynamicProperty(`perspointloc:${name}`, position);
+                world.setDynamicProperty(
+                    `perspointdim:${name}`,
+                    origin && origin.sourceEntity ? origin.sourceEntity.dimension.id : "minecraft:overworld"
+                );
+            });
+        }
+    );
+
+    init.customCommandRegistry.registerCommand(
+        {
+            name: "leaf:g_pers_point_del",
+            description: "Persistently store a point",
+            permissionLevel: CommandPermissionLevel.GameDirectors,
+            mandatoryParameters: [
+                {
+                    type: CustomCommandParamType.EntitySelector,
+                    name: "entities",
+                },
+                {
+                    type: CustomCommandParamType.String,
+                    name: "name",
+                },
+            ],
+        },
+        (origin, entities, position, name) => {
+            system.run(() => {
+                world.setDynamicProperty(`perspointloc:${name}`, undefined);
+                world.setDynamicProperty(
+                    `perspointdim:${name}`,
+                    undefined
+                );
+            });
+        }
+    );
+
+
+    init.customCommandRegistry.registerCommand(
+        {
+            name: "leaf:g_pers_point_tp",
+            description: "Teleport to persistent point",
+            permissionLevel: CommandPermissionLevel.GameDirectors,
+            mandatoryParameters: [
+                {
+                    type: CustomCommandParamType.EntitySelector,
+                    name: "entities",
+                },
+                {
+                    type: CustomCommandParamType.String,
+                    name: "name",
+                },
+            ],
+        },
+        (origin, entities, name) => {
+            system.run(() => {
+                for (const entity of entities) {
+                    if (entity.getDynamicProperty(`perspointloc:${name}`)) {
+                        entity.teleport(
+                            world.getDynamicProperty(`perspointloc:${name}`),
+                            {
+                                dimension: world.getDimension(
+                                    world.getDynamicProperty(
+                                        `perspointdim:${name}`
+                                    )
+                                ),
+                            }
+                        );
+                    }
+                }
+            });
+        }
+    );
+
 
     init.customCommandRegistry.registerCommand(
         {
@@ -469,34 +591,34 @@ system.beforeEvents.startup.subscribe(async (init) => {
         }
     );
 
-    init.customCommandRegistry.registerCommand(
-        {
-            name: "leaf:transferserver",
-            description: "Transfer player to another server",
-            permissionLevel: CommandPermissionLevel.GameDirectors,
-            mandatoryParameters: [
-                {
-                    type: CustomCommandParamType.PlayerSelector,
-                    name: "players",
-                },
-                {
-                    type: CustomCommandParamType.String,
-                    name: "host",
-                },
-                {
-                    type: CustomCommandParamType.Integer,
-                    name: "port",
-                },
-            ],
-        },
-        (origin, players, host, port) => {
-            system.run(() => {
-                for (const player of players) {
-                    transferPlayer(player, { hostname: host, port });
-                }
-            });
-        }
-    );
+    // init.customCommandRegistry.registerCommand(
+    //     {
+    //         name: "leaf:transferserver",
+    //         description: "Transfer player to another server",
+    //         permissionLevel: CommandPermissionLevel.GameDirectors,
+    //         mandatoryParameters: [
+    //             {
+    //                 type: CustomCommandParamType.PlayerSelector,
+    //                 name: "players",
+    //             },
+    //             {
+    //                 type: CustomCommandParamType.String,
+    //                 name: "host",
+    //             },
+    //             {
+    //                 type: CustomCommandParamType.Integer,
+    //                 name: "port",
+    //             },
+    //         ],
+    //     },
+    //     (origin, players, host, port) => {
+    //         system.run(() => {
+    //             for (const player of players) {
+    //                 transferPlayer(player, { hostname: host, port });
+    //             }
+    //         });
+    //     }
+    // );
 
     init.customCommandRegistry.registerCommand(
         {
@@ -539,7 +661,7 @@ system.beforeEvents.startup.subscribe(async (init) => {
             (async ()=>{
                 let itemdb = await import("./api/itemdb.js");
 
-                // console.warn(itemdb)
+                // // console.warn(itemdb)
                 system.run(() => {
                     let thing = async() =>{
                     for (const player of players) {
@@ -958,7 +1080,7 @@ system.beforeEvents.startup.subscribe(async (init) => {
                 if (!render_as || !render_as.length) return;
 
                 for (const player of show_to) {
-                    // console.warn("TEST")
+                    // // console.warn("TEST")
                     let ui = uiBuilder.default.db.findFirst({
                         type: 0,
                         scriptevent,
@@ -1209,6 +1331,6 @@ function setup() {}
 //aaaa
 await system.waitTicks(0)
 // system.runTimeout(()=>{
-import("./main.js");
+await import("./main.js");
 // },10)
 // test

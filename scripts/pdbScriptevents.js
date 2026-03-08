@@ -98,7 +98,7 @@ function isJsonObject(value) {
 // // Example usage
 // const input = 'command arg1 arg2 --flag1 value1 --flag2 123 --flag3 --json {"key": "value"}';
 // const parsed = parseCommandLine(input);
-// console.log(parsed);
+// // console.log(parsed);
 
 export async function getTable(name) {
     if (tables[name]) return tables[name];

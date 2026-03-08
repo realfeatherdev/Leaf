@@ -8,3 +8,8 @@ class ScriptEventActions {
         if (this.db.findFirst({ name })) return;
     }
 }
+// (birds chirping)
+
+// where's the code
+
+// i have no FUCKING idea

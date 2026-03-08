@@ -19,7 +19,7 @@ system.runTimeout(()=>{
                 oldPerms[perm[1]] = config.permissionList.defaultPermissions.includes(perm[1]) ? true : false;
             }
         }
-        // console.warn(JSON.stringify(oldPerms))
+        // // console.warn(JSON.stringify(oldPerms))
         prismarineDb.permissions.setPerms("default", oldPerms)
     })    
 },2)

@@ -5,7 +5,7 @@ configAPI.registerProperty("CurrVersion", configAPI.Types.Number, versionData.ve
 
 let migrationMap = new Map();
 migrationMap.set(11, function() {
-    console.warn("Migrating to v11")
+    // console.warn("Migrating to v11")
 })
 
 configAPI.db.waitLoad().then(()=>{

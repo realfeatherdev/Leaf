@@ -73,7 +73,7 @@ world.beforeEvents.playerLeave.subscribe((e) => {
                 try {
                     dim.spawnItem(item, loc);
                 } catch (e) {
-                    // console.warn(`${e}`);
+                    // // console.warn(`${e}`);
                 }
             }
         });

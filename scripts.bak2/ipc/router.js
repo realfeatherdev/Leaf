@@ -225,7 +225,7 @@ export class Router {
             payload: response,
         });
         if (err) {
-            console.warn(err);
+            // console.warn(err);
         }
     }
     async callListener(listener, rawPayload) {
@@ -233,11 +233,11 @@ export class Router {
         try {
             const result = await listener(payload);
             if (result instanceof Failure) {
-                console.warn(result);
+                // console.warn(result);
             }
         }
         catch (err) {
-            console.warn(err);
+            // console.warn(err);
         }
     }
     routeEvent(id, rawMsg) {

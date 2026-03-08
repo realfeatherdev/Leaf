@@ -3048,10 +3048,10 @@ let b = {};
          * @example
          * db.loadDatabase({}, function(err) {
          *   if (err) {
-         *     console.log("error : " + err);
+         *     // console.log("error : " + err);
          *   }
          *   else {
-         *     console.log("database loaded.");
+         *     // console.log("database loaded.");
          *   }
          * });
          */
@@ -3208,10 +3208,10 @@ let b = {};
          * @example
          * db.saveDatabase(function(err) {
          *   if (err) {
-         *     console.log("error : " + err);
+         *     // console.log("error : " + err);
          *   }
          *   else {
-         *     console.log("database saved.");
+         *     // console.log("database saved.");
          *   }
          * });
          */
@@ -4414,7 +4414,7 @@ let b = {};
          *   return grandTotal;
          * }
          * var grandOrderTotal = orders.chain().mapReduce(mapfun, reducefun);
-         * console.log(grandOrderTotal);
+         * // console.log(grandOrderTotal);
          */
         Resultset.prototype.mapReduce = function (mapFunction, reduceFunction) {
             try {
@@ -4470,7 +4470,7 @@ let b = {};
          * // join orders with relevant product info via eqJoin
          * var orderSummary = orders.chain().eqJoin(products, "prodId", "productId", mapfun).data();
          *
-         * console.log(orderSummary);
+         * // console.log(orderSummary);
          */
         Resultset.prototype.eqJoin = function (
             joinData,
@@ -6152,7 +6152,7 @@ let b = {};
          * var result = coll.checkAllIndexes({ repair: true, randomSampling: true, randomSamplingFactor: 0.15 });
          * if (result.length > 0) {
          *   results.forEach(function(name) {
-         *     console.log('problem encountered with index : ' + name);
+         *     // console.log('problem encountered with index : ' + name);
          *   });
          * }
          */

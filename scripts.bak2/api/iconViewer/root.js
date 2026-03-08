@@ -491,7 +491,7 @@ uiManager.addUI(
                 () => {
                     try {
                         let nextPage = page + 1 >= icons_.length ? 0 : page + 1;
-                        // console.warn(nextPage);
+                        // // console.warn(nextPage);
                         uiManager.open(
                             player,
                             config.uiNames.IconViewer,
@@ -500,7 +500,7 @@ uiManager.addUI(
                             favoritedOnly
                         );
                     } catch (e) {
-                        // console.warn(e);
+                        // // console.warn(e);
                     }
                 }
             );
@@ -511,7 +511,7 @@ uiManager.addUI(
             // })
             chest.show(player);
         } catch (e) {
-            // console.warn(e);
+            // // console.warn(e);
         }
     }
 );

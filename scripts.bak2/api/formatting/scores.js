@@ -5,7 +5,7 @@ export function getScore(objective, player) {
     if(!(player instanceof Player)) {
         try {
             let obj = player.scores.find(_=>_.objective == objective)
-            // console.warn(JSON.stringify(obj))
+            // // console.warn(JSON.stringify(obj))
             return obj ? obj.score : 0;
         } catch {
             return 0;

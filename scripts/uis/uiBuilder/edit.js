@@ -24,6 +24,7 @@ import versionData from "../../versionData";
 import scripting from "../../api/scripting";
 import normalForm from "../../api/openers/normalForm";
 import commandManager from "../../api/commands/commandManager";
+import { minesAPI } from "../../api/mines";
 uiManager.addUI(
     config.uiNames.UIBuilderEdit,
     "UI Builder Edit",
@@ -55,7 +56,7 @@ uiManager.addUI(
                     ? `${NUT_UI_ALT}${themes[themID][0]}`
                     : `${NUT_UI_ALT}`;
             try {
-                if (doc.data.type != 10 && doc.data.type != 11) {
+                if (doc.data.type != 10 && doc.data.type != 11 && doc.data.type != minesAPI.CUSTOMIZER_TYPE) {
                     actionForm.title(
                         `${
                             doc.data.layout == 4 && doc.data.paperdoll
@@ -73,11 +74,14 @@ uiManager.addUI(
                     );
                 } else if (doc.data.type == 11) {
                     actionForm.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rEditing Invite`);
+                } else if(doc.data.type == minesAPI.CUSTOMIZER_TYPE) {
+                    actionForm.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rEditing Mine`);
                 } else {
                     actionForm.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rEditing Event`);
                 }
     
-            } catch {
+            } catch(e) {
+                player.error(e)
                 actionForm.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§fUnknown`)
             }
             actionForm.button(
@@ -100,6 +104,15 @@ uiManager.addUI(
                 if(def.extendEditButtons) {
                     def.extendEditButtons(actionForm, doc)
                 }
+            }
+            if(doc.data.type == minesAPI.CUSTOMIZER_TYPE) {
+                actionForm.button(`Edit`, null, (player)=>{
+                    uiManager.open(player, versionData.uiNames.MinesAdd, doc.id)
+                })
+                actionForm.button(`Refill`, null, (player)=>{
+                    minesAPI.refill(doc)
+                    uiManager.open(player, versionData.uiNames.UIBuilderEdit, doc.id)
+                })
             }
             if (doc.data.type == 10) {
                 actionForm.button(
@@ -287,6 +300,25 @@ uiManager.addUI(
                         return uiManager.open(player, versionData.uiNames.UIBuilderEdit, doc.id)
                     })
                 })
+                if(doc.data.toggles && doc.data.toggles.modui_t) {
+                    actionForm.button(`§vUI Modifier Condition\n§7Edit da condition! :3`, `textures/azalea_icons/other/item`, (player)=>{
+                        let modal = new ModalForm();
+                        modal.title("Edit UI Modifier Condition");
+                        modal.dropdown("Checking Method", uiBuilder.modifierUIConditionTypes.map(_=>{
+                            return {
+                                option: _[0],
+                                callback() {}
+                            }
+                        }), doc.data.mConditionType ? doc.data.mConditionType : 0, ()=>{}, "the flingle mabob");
+                        modal.textField("Text to check", " ", doc.data.mSubstring ? doc.data.mSubstring : "", ()=>{}, "Text to match for to inject this into the UIs")
+                        modal.show(player, false, (player, response)=>{
+                            if(response.canceled) return uiManager.open(player, versionData.uiNames.UIBuilderEdit, doc.id)
+                            doc.data.mConditionType = response.formValues[0]
+                            doc.data.mSubstring = response.formValues[1]
+                            return uiManager.open(player, versionData.uiNames.UIBuilderEdit, doc.id)
+                        })
+                    })
+                }
                 actionForm.button(`§bPreview\n§7Get a full preview of this UI`, `textures/azalea_icons/other/eye`, (player)=>{
                     normalForm.open(player, {...JSON.parse(JSON.stringify(doc.data)), cancel: `/scriptevent leafgui:ui_builder_edit_ui ${doc.id}`, body: `You are in §bpreview mode (BETA)§f. Please §creport §fany issues to the §aleaf discord§f. §cClose this UI §fto go back to §eediting!`})
                 })

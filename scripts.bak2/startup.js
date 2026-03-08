@@ -8,7 +8,7 @@ import {
 } from "@minecraft/server";
 import * as mc from "@minecraft/server";
 import * as ui from "@minecraft/server-ui";
-import { transferPlayer } from "@minecraft/server-admin";
+// import { transferPlayer } from "@minecraft/server-admin";
 // meow
 // let a = false;
 // import * as diag from '@minecraft/diagnostics';
@@ -18,7 +18,7 @@ import { transferPlayer } from "@minecraft/server-admin";
 let events = {};
 let stasherID = "leaf:item_stasher";
 // if (system.beforeEvents.startup) {
-// // console.warn("A")
+// // // console.warn("A")
 system.beforeEvents.startup.subscribe(async (init) => {
     init.blockComponentRegistry.registerCustomComponent("leaf:code_block", {
         onTick(arg0, arg1) {
@@ -27,8 +27,8 @@ system.beforeEvents.startup.subscribe(async (init) => {
                 let db = libPDB.positionalDb.getPosition(arg0.block.location);
                 // if(db.has("code")) {
                 //     let code = db.get("code")
-                //     // console.warn(arg0.block.location)
-                //     // console.warn(code)
+                //     // // console.warn(arg0.block.location)
+                //     // // console.warn(code)
                 // }
                 let redstone = arg0.block.getRedstonePower() || 0;
                 if (redstone > 0) {
@@ -469,34 +469,34 @@ system.beforeEvents.startup.subscribe(async (init) => {
         }
     );
 
-    init.customCommandRegistry.registerCommand(
-        {
-            name: "leaf:transferserver",
-            description: "Transfer player to another server",
-            permissionLevel: CommandPermissionLevel.GameDirectors,
-            mandatoryParameters: [
-                {
-                    type: CustomCommandParamType.PlayerSelector,
-                    name: "players",
-                },
-                {
-                    type: CustomCommandParamType.String,
-                    name: "host",
-                },
-                {
-                    type: CustomCommandParamType.Integer,
-                    name: "port",
-                },
-            ],
-        },
-        (origin, players, host, port) => {
-            system.run(() => {
-                for (const player of players) {
-                    transferPlayer(player, { hostname: host, port });
-                }
-            });
-        }
-    );
+    // init.customCommandRegistry.registerCommand(
+    //     {
+    //         name: "leaf:transferserver",
+    //         description: "Transfer player to another server",
+    //         permissionLevel: CommandPermissionLevel.GameDirectors,
+    //         mandatoryParameters: [
+    //             {
+    //                 type: CustomCommandParamType.PlayerSelector,
+    //                 name: "players",
+    //             },
+    //             {
+    //                 type: CustomCommandParamType.String,
+    //                 name: "host",
+    //             },
+    //             {
+    //                 type: CustomCommandParamType.Integer,
+    //                 name: "port",
+    //             },
+    //         ],
+    //     },
+    //     (origin, players, host, port) => {
+    //         system.run(() => {
+    //             for (const player of players) {
+    //                 transferPlayer(player, { hostname: host, port });
+    //             }
+    //         });
+    //     }
+    // );
 
     init.customCommandRegistry.registerCommand(
         {
@@ -539,7 +539,7 @@ system.beforeEvents.startup.subscribe(async (init) => {
             (async ()=>{
                 let itemdb = await import("./api/itemdb.js");
 
-                // console.warn(itemdb)
+                // // console.warn(itemdb)
                 system.run(() => {
                     let thing = async() =>{
                     for (const player of players) {
@@ -958,7 +958,7 @@ system.beforeEvents.startup.subscribe(async (init) => {
                 if (!render_as || !render_as.length) return;
 
                 for (const player of show_to) {
-                    // console.warn("TEST")
+                    // // console.warn("TEST")
                     let ui = uiBuilder.default.db.findFirst({
                         type: 0,
                         scriptevent,
