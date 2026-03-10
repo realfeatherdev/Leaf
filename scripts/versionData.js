@@ -12,7 +12,7 @@ export default {
         chatformat: `{{has_tag clan-chat "<nc>:small_diamond: " "<bl>"}}{{is_afk "§7AFK "}}{{clan "<bc>[§r§7<nc>[@CLAN]§r<bc>] "}}{{has_tag staffchat "<bc>[<nc> StaffChat §r<bc>] " "<bl>"}}§r<bc>[ <rc>{{rank_joiner "<drj>"}}§r<bc> ] §r<nc><name> §r§l<bc><dra> §r<mc><msg>`,
     },
     versionInfo: {
-        versionName: "4.1",
+        versionName: "4.3",
         versionInternalID: 14, // 1 starts with october 2024 update
         versionData: new Map([
             [

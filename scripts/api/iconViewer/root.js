@@ -18,7 +18,9 @@ uiManager.addUI(
         favoritedOnly = false,
         iconIDSearch = false,
         iconIDSearchError = false,
-        defaultIconID = null
+        defaultIconID = null,
+        searchTerm = null,
+        allowedIconPacks = []
     ) => {
         try {
             let enttable = prismarineDb.entityTable("icons", player);
@@ -68,9 +70,15 @@ uiManager.addUI(
                 return;
             }
             let keys = Array.from(icons.icons.keys());
+            if(searchTerm) {
+                keys = keys.filter(_=>{
+                    let meta = icons.iconData.get(_);
+                    let name = meta && meta.name ? meta.name : _;
+                    return name.toLowerCase().replaceAll(' ', '').includes(searchTerm)
+                })
+            }
             if (favoritedOnly == true)
                 keys = keys.filter((_) => player.hasTag(`favorited-icon:${_}`));
-
             if (favoritedOnly == "RECENTLY_USED")
                 keys = recentlyUsed.filter((_) =>
                     Array.from(icons.icons.keys()).includes(_)
@@ -133,7 +141,7 @@ uiManager.addUI(
                         ? "Favorited Icons"
                         : favoritedOnly == "RECENTLY_USED"
                         ? "Recently Used"
-                        : "Icon Viewer"
+                        : searchTerm ? searchTerm : "Icon Viewer"
                 } (Page ${page + 1}/${
                     icons_ && icons_.length ? icons_.length : 1
                 })`
@@ -216,7 +224,13 @@ uiManager.addUI(
                                     config.uiNames.IconViewer,
                                     page,
                                     callbackFn,
-                                    favoritedOnly
+                                    favoritedOnly,
+                                    favoritedOnly,
+                                    iconIDSearch,
+                                    iconIDSearchError,
+                                    defaultIconID,
+                                    searchTerm,
+                                    allowedIconPacks
                                 );
                             }
                         );
@@ -373,7 +387,7 @@ uiManager.addUI(
                     9 * rowCount + 2,
                     "§dUse Icon ID",
                     ["Manually input an icon ID"],
-                    "textures/items/spyglass",
+                    "textures/azalea_icons/label",
                     1,
                     false,
                     () => {
@@ -441,11 +455,12 @@ uiManager.addUI(
                 callbackFn ? 9 * rowCount + 5 : 9 * rowCount + 5,
                 favoritedOnly == "RECENTLY_USED"
                     ? "§dClear Recently Used"
-                    : "§cClear Favorites",
+                    : "§cSearch for icons",
                 favoritedOnly == "RECENTLY_USED"
                     ? ["Clear icons you have recently used"]
-                    : ["Clear all the icons you have favorited"],
-                "textures/blocks/barrier",
+                    : ["Search for icons"],
+                favoritedOnly == "RECENTLY_USED" ?
+                "textures/blocks/barrier" : "textures/items/spyglass",
                 1,
                 false,
                 () => {
@@ -462,20 +477,42 @@ uiManager.addUI(
                             defaultIconID
                         );
                     } else {
-                        for (const tag of player.getTags()) {
-                            if (tag.startsWith(`favorited-icon:`))
-                                player.removeTag(tag);
-                        }
-                        uiManager.open(
-                            player,
-                            config.uiNames.IconViewer,
-                            page,
-                            callbackFn,
-                            favoritedOnly,
-                            iconIDSearch,
-                            iconIDSearchError,
-                            defaultIconID
-                        );
+                        // for (const tag of player.getTags()) {
+                        //     if (tag.startsWith(`favorited-icon:`))
+                        //         player.removeTag(tag);
+                        // }
+                        let modal = new ModalForm();
+                        modal.textField("Search Term", " ", "")
+                        modal.show(player, false, (player, response)=>{
+                            if(response.canceled) {
+                                uiManager.open(
+                                    player,
+                                    config.uiNames.IconViewer,
+                                    page,
+                                    callbackFn,
+                                    favoritedOnly,
+                                    iconIDSearch,
+                                    iconIDSearchError,
+                                    defaultIconID,
+                                    null
+                                );
+
+                                return;
+                            }
+
+                            uiManager.open(
+                                player,
+                                config.uiNames.IconViewer,
+                                page,
+                                callbackFn,
+                                favoritedOnly,
+                                iconIDSearch,
+                                iconIDSearchError,
+                                defaultIconID,
+                                response.formValues[0]
+                            );
+
+                        })
                     }
                 }
             );
@@ -497,7 +534,12 @@ uiManager.addUI(
                             config.uiNames.IconViewer,
                             nextPage,
                             callbackFn,
-                            favoritedOnly
+                            favoritedOnly,
+                            iconIDSearch,
+                            iconIDSearchError,
+                            defaultIconID,
+                            searchTerm,
+                            allowedIconPacks
                         );
                     } catch (e) {
                         // // console.warn(e);

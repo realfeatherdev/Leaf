@@ -219,7 +219,7 @@ import { dynamicToast } from "./lib/chatNotifs.js";
 import auctionhouse from "./api/AH/auctionhouse.js";
 import "./bcd.js";
 import scripting from "./api/scripting.js";
-import { rpgiabIconPack } from "./icon_packs/rpgiab.js";
+import { rpgiabIconPack, technicalIconPack } from "./icon_packs/rpgiab.js";
 import "./uis/CustomCommandsV2/index.js";
 import "./uis/landclaims/index.js";
 import proximityChat from "./api/other/proximityChat.js";
@@ -6055,6 +6055,7 @@ commandManager.addCommand(
 // );
 
 icons.install(rpgiabIconPack);
+icons.install(technicalIconPack);
 icons.install(leafIconPack);
 icons.install(leafIconPack2, true);
 icons.install(azaleaIconPack, false);
