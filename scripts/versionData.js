@@ -13,7 +13,7 @@ export default {
     },
     versionInfo: {
         versionName: "4.3",
-        versionInternalID: 14, // 1 starts with october 2024 update
+        versionInternalID: 15, // 1 starts with october 2024 update
         versionData: new Map([
             [
                 1,
@@ -72,6 +72,13 @@ export default {
                     versionInternalID: 8,
                 },
             ],
+            [
+                15,
+                {
+                    versionName: "Update v4.3",
+                    versionInternalID: 15
+                }
+            ]
         ]),
     },
     tableNames: {

@@ -78,6 +78,7 @@ configAPI.registerProperty("AuctionHouse", configAPI.Types.Boolean, true);
 configAPI.registerProperty("Homes", configAPI.Types.Boolean, true);
 configAPI.registerProperty("Gifts", configAPI.Types.Boolean, true);
 configAPI.registerProperty("Zones", configAPI.Types.Boolean, true);
+configAPI.registerProperty("BankCMD", configAPI.Types.Boolean, true);
 
 let data = [{}];
 
@@ -103,6 +104,7 @@ const toggleOptions = [
     { display: "Shops", property: "Shops" },
     { display: "PlayerShops", property: "PlayerShops" },
     { display: "AFK System", property: "AFKSystem" },
+    { display: "Bank", property: 'BankCMD'},
     {
         display: "Auction house",
         property: "AH",
