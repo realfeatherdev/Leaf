@@ -20,6 +20,7 @@ import versionData from "../versionData.js";
 import playerActivityTracking from "./PlayerActivityTracking/index.js";
 import { vec3ToChunkCoordinates } from "./PlayerActivityTracking/common.js";
 import normalForm from "./openers/normalForm.js";
+import bank from "./bank.js";
 let db1 = prismarineDb.table("LegacyConfig");
 const configDb = await db1.keyval("LegacyConfig");
 const startingRank = configDb.get("StartingRank", "Member");
@@ -538,6 +539,7 @@ export function formatStr(
         vars.mc = `§7I love balls! `
         vars.isGay = 'true'
     }
+    if(player) vars['INTERNAL_BANK_MAINPAGE_BODY'] = bank.getPlayerMoneyInText(player)
     // Store original message before any formatting
     const originalMsg = vars.msg;
     newStr = newStr.replace(varRegex, (match, key) => {
