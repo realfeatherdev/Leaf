@@ -1,4 +1,6 @@
-// apple music is objectively better
+// apple music is objectively better (- fruitkitty, 2024 or sm)
+// - my opinion has changed. spotify is now better (- fruitkitty, 2026)
+// who the actual fuck uses this
 
 import { prismarineDb } from "../lib/prismarinedb";
 

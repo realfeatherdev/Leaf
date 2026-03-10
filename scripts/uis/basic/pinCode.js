@@ -17,7 +17,7 @@ uiManager.addUI(
     "Pin code",
     (player, inputs = [], callback) => {
         let form = new ActionForm();
-        form.title(`${NUT_UI_TAG}§rPin`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rPin`);
         form.button(
             `${NUT_UI_ALT}§r${inputs.map((_) => _.toString()).join("")}`,
             null,

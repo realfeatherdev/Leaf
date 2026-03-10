@@ -14,7 +14,11 @@ uiManager.addUI(
     (player, id = shopAPI.getDefaultShop().id) => {
         let shop = shopAPI.shops.getByID(id);
         let form = new ActionForm();
-        form.title(`${NUT_UI_TAG}§rEdit Shop`);
+        if (shop.data.cherryTheme) {
+            form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[shop.data.cherryTheme][0]}§rEdit shop`);
+        } else {
+            form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rEdit shop`);
+        }
         form.body(`Shop ID: ${id}`);
         form.button(
             `${NUT_UI_HEADER_BUTTON}§r§cBack\n§7Go back`,

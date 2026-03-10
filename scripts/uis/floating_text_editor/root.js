@@ -8,7 +8,7 @@ import { insertBackButton } from "../sharedUtils/insertBackButton";
 
 uiManager.addUI(versionData.uiNames.FloatingText.Root, "", (player)=>{
     let form = new ActionForm();
-    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[25][0]}§rHolograms`)
+    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rHolograms`)
     form.button(`§aAdd New Hologram\n§7[ Click to Add ]`, `textures/azalea_icons/other/add`, (player)=>{
         let modalForm = new ModalForm();
         modalForm.title(`Add a label`)
@@ -35,7 +35,7 @@ uiManager.addUI(versionData.uiNames.FloatingText.Root, "", (player)=>{
         if(!entity.getDynamicProperty('label')) continue;
         form.button(`§b${entity.getDynamicProperty('label')}\n§7[ Click to Edit ]`, null, (player)=>{
             let form2 = new ActionForm();
-            form2.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[25][0]}§r§f${entity.getDynamicProperty('label')}`)
+            form2.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§f${entity.getDynamicProperty('label')}`)
             insertBackButton(form2, "/scriptevent leafgui:floating_text_root", true)
             form2.button(`§cSet Label\n§7Edit the label`, null, (player)=>{
                 let modalForm = new ModalForm();

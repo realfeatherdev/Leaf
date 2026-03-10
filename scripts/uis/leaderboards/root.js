@@ -10,7 +10,7 @@ uiManager.addUI(
     "Leaderboards Root",
     (player) => {
         let form = new ActionForm();
-        form.title(`${NUT_UI_TAG}§gBleederblorrds uwu kawaii meow mrrp`)
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§fLeaderboards`)
         form.body(
             `§e!lb §badd §a<objective> §r§7- §fAdds a leaderboard\n§e!lb §bremove §a<objective> §r§7- §fRemoves a leaderboard\n\n§eREMEMBER: DO NOT INCLUDE THE <>`
         );

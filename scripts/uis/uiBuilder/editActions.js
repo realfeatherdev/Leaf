@@ -49,7 +49,7 @@ uiManager.addUI(
 
         let form = new ActionForm();
 
-        form.title(`${NUT_UI_TAG}§rEdit Action`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rEdit Action`);
 
         form.button(
             `${NUT_UI_HEADER_BUTTON}§6Back\n§7Go back`,
@@ -146,7 +146,7 @@ uiManager.addUI(
 
 uiManager.addUI("edit_actions", "a", (player, id, index, buttonIndex) => {
     let form = new ActionForm();
-    form.title(`${NUT_UI_TAG}§rEdit Actions`);
+    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rEdit Actions`);
     let ui = uiBuilder.db.getByID(id);
 
     // Handle both regular and group buttons

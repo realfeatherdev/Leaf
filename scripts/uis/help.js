@@ -200,7 +200,7 @@ uiManager.addUI(config.uiNames.Help, "Help Page", (player, page = "home") => {
     let form = new ActionForm();
     let pageData = pages.find((_) => _.path == page);
     if (!pageData) pageData = pages[0];
-    form.title(NUT_UI_TAG + NUT_UI_THEMED + themes[25][0] + `§r${pageData.title}`);
+    form.title(NUT_UI_TAG + NUT_UI_THEMED + themes[68][0] + `§r${pageData.title}`);
     // form.body(Array.isArray(pageData.text) ? pageData.text.join('\n§r') : pageData.text);
     form.button(
         `${NUT_UI_HEADER_BUTTON}§r§cBack\n§7Click to Go Back`,
@@ -221,7 +221,7 @@ uiManager.addUI(config.uiNames.Help, "Help Page", (player, page = "home") => {
             form.label(pageData.banner)
         }
         if(pageData.path == "home") {
-            form.button(`${NUT_UI_LEFT_THIRD}${NUT_UI_ALT}${themes[25][0]}${NUT_UI_DISABLE_VERTICAL_SIZE_KEY}§rGuides`, null, (player)=>{
+            form.button(`${NUT_UI_LEFT_THIRD}${NUT_UI_ALT}${themes[68][0]}${NUT_UI_DISABLE_VERTICAL_SIZE_KEY}§rGuides`, null, (player)=>{
 
             })
             form.button(`${NUT_UI_MIDDLE_THIRD}${NUT_UI_DISABLE_VERTICAL_SIZE_KEY}§rPresets`, null, (player)=>{

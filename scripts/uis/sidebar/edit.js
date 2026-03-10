@@ -16,7 +16,7 @@ uiManager.addUI(
     "Sidebar editor root",
     (player, sidebarName) => {
         let form = new ActionForm();
-        form.title(`${NUT_UI_TAG}§rEditing Sidebar`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rEditing Sidebar`);
         form.button(
             NUT_UI_HEADER_BUTTON + "§r§cBack\n§r§7Go back",
             icons.resolve(`^textures/azalea_icons/2`),

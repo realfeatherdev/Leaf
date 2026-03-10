@@ -8,18 +8,32 @@ let useNewCreditsUI = true;
 
 let creditsList = [
     {
-        name: `§dTrashy§bKitty ${emojis.trans}`,
+        banner: `textures/leaf_dyn_images/trashybanner.jpg`,
+        listname: `§bTrashyDaFox`,
+        name: `TrashyDaFox`,
+        NUT_UI_THEME: 15,
         role: `Main Developer and Founder`,
-        message: `leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf, azalea?!\n\nchronic strawberry eater\n(she/her btw)`,
+        // message: `leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf, azalea?!\n\nchronic strawberry eater\n(she/her btw)`,
+        message: `Ye ol' §epeaf lessentials§f! Do §cnot §feat toenail clippings, §vI know from §bexperience§r§f...\n\nchronic strawberry eater\n(she/her btw)`,
         socials: {
             bsky: "trashdev.org",
-            discord: "powertrash",
+            discord: "trashydafox",
         },
-        icon: `textures/minidevs/TrashyKittyFem`,
+        icon: `textures/minidevs/gay`,
     },
     {
+        name: `§vDal4y`,
+        role: `Main graphics designer`,
+        message: `Your propaganda bullshitt makes me sick, Murdered fascist make no noise`,
+        socials: {
+            discord: "dal4y",
+        },
+        icon: `textures/minidevs/Dal4y`,
+    },
+
+    {
         name: `§bPheonial`,
-        role: `Texture designer`,
+        role: `Main texture designer`,
         message: `I am just like trashy but not gay`,
         socials: {
             discord: "pheonial",
@@ -37,13 +51,22 @@ let creditsList = [
         icon: `textures/minidevs/TrashyKitty`,
     },
     {
-        name: `§nUpdate Pings`,
+        name: `§nAlex`,
         role: `Texture Designer`,
         socials: {
             discord: "i_ate_my_keyboard_i_think",
         },
         icon: `textures/minidevs/UpdatePings`,
         message: "WHAT THE FUCKK IS OATMEAL?!",
+    },
+    {
+        name: `§dAlec`,
+        role: `CherryUI theme designer`,
+        message: `:V`,
+        socials: {
+            discord: "alec.kwke",
+        },
+        icon: `textures/minidevs/alec`,
     },
     {
         name: `§6DisBready`,
@@ -93,11 +116,11 @@ uiManager.addUI(
     "Credits",
     (player, index = -1) => {
         let form = new ActionForm();
-        form.title(NUT_UI_TAG+NUT_UI_THEMED+themes[25][0]+"§r§fCredits");
+        form.title(NUT_UI_TAG+NUT_UI_THEMED+themes[68][0]+"§r§fCredits");
         if (useNewCreditsUI) {
             if (index == -1) {
                 let form = new ActionForm();
-                form.title(NUT_UI_TAG+NUT_UI_THEMED+themes[53][0]+"§r§0Credits");
+                form.title(NUT_UI_TAG+NUT_UI_THEMED+themes[68][0]+"§r§fCredits");
                 form.button(
                     `${NUT_UI_HEADER_BUTTON}§r§cBack\n§7Goes Back`,
                     `textures/azalea_icons/2`,
@@ -112,7 +135,7 @@ uiManager.addUI(
                         continue;
                     }
                     form.button(
-                        `${entry.name}\n§r§7${entry.role}`,
+                        `${entry.listname ? entry.listname : entry.name}\n§r§7${entry.role}`,
                         entry.icon,
                         (player) => {
                             uiManager.open(
@@ -127,10 +150,11 @@ uiManager.addUI(
             } else {
                 let form = new ActionForm();
                 let entry = creditsList[index];
-                form.title(entry.name);
-                form.body(entry.message);
+                form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[entry.NUT_UI_THEME ? entry.NUT_UI_THEME : 56][0]}§r${entry.name}`);
+                if(entry.banner) form.label(entry.banner)
+                form.label(`§r${entry.message}`);
                 form.button(
-                    `§cBack\n§7Goes Back`,
+                    `${NUT_UI_HEADER_BUTTON}§r§cBack\n§7Goes Back`,
                     `textures/azalea_icons/2`,
                     (player) => {
                         uiManager.open(player, config.uiNames.ConfigCredits);

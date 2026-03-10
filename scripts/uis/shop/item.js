@@ -19,7 +19,11 @@ uiManager.addUI(
             category.items[itemIndex].type == "ITEMDB_ITEM"
         ) {
             let form = new ActionForm();
-            form.title(`${NUT_UI_TAG}§rEdit Item`);
+            if (shop.data.cherryTheme) {
+                form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[shop.data.cherryTheme][0]}§rEdit item`);
+            } else {
+                form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rEdit item`);
+            }
             form.button(
                 `${NUT_UI_HEADER_BUTTON}§r§cBack\n§7Go back`,
                 `textures/azalea_icons/2`,
@@ -128,7 +132,7 @@ uiManager.addUI(
                     );
                 }
             );
-            form.show(player, false, (player, response) => {});
+            form.show(player, false, (player, response) => { });
         }
     }
 );

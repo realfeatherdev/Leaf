@@ -13,6 +13,7 @@ import {
 import { world } from "@minecraft/server";
 import { array_move } from "../../api/utils/array_move";
 import versionData from "../../versionData";
+import emojis from "../../api/emojis";
 
 let nonNormalTypes = ['pagstart', 'pagend']
 
@@ -31,7 +32,7 @@ uiManager.addUI(
             // Button is in a group
             button = ui.data.buttons[index]?.buttons[buttonIndex];
             if (!button) {
-                // console.warn(
+                // // console.warn(
                     // `Failed to find group button at group ${index}, button ${buttonIndex}`
                 // );
                 return uiManager.open(
@@ -44,7 +45,7 @@ uiManager.addUI(
             // Regular button
             button = ui.data.buttons[index];
             if (!button) {
-                // console.warn(`Failed to find button at index ${index}`);
+                // // console.warn(`Failed to find button at index ${index}`);
                 return uiManager.open(
                     player,
                     config.uiNames.UIBuilderEditButtons,
@@ -53,7 +54,7 @@ uiManager.addUI(
             }
         }
         actionForm.title(
-            `${NUT_UI_TAG}§rEditing ${button.type ? button.type : "button"}`
+            `${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rEditing ${button.type ? button.type : "button"}`
         );
         // world.sendMessage(JSON.stringify(button))
         actionForm.button(
@@ -152,7 +153,18 @@ uiManager.addUI(
                     }
                 }
             );
-
+            actionForm.button(`§2Edit Group IDs\n§7${button.gids && button.gids.length ? button.gids.map(_=>_.toString()).join(', ') : `§oNo GIDs set...`}`, button.gids && button.gids.length ? `textures/azalea_icons/other/group_tiles` : `textures/azalea_icons/other/group`, (player)=>{
+                let modalForm = new ModalForm();
+                modalForm.title("Edit Component GIDs");
+                modalForm.textField("GIDs (Comma-Separated)", "§oEnter GIDs here...", button.gids && button.gids.length ? button.gids.map(_=>_.toString()).join(',') : ``, ()=>{}, "§bExamples:§r\n- 1,2,3\n- 1, 5\n- 2")
+                modalForm.label("§b§l[INFO] §rGIDs are used in the state components, which can be used to store player preferences")
+                modalForm.show(player, false, (player, response)=>{
+                    if(response.canceled) return uiManager.open(player, versionData.uiNames.UIBuilderEditButton, id, index, buttonIndex);
+                    ui.data.buttons[index].gids = response.formValues[0].split(',').map(_=>parseInt(_.trim())).filter(_=>!isNaN(_));
+                    uiBuilder.db.overwriteDataByID(ui.id, ui.data);
+                    uiManager.open(player, versionData.uiNames.UIBuilderEditButton, id, index, buttonIndex)
+                })
+            })
             actionForm.button(
                 `§aDuplicate\n§7Create a copy`,
                 `textures/azalea_icons/other/node_copy`,
@@ -284,6 +296,26 @@ uiManager.addUI(
             button.type != "poll" && !nonNormalTypes.includes(button.type)
         ) {
             if(!isGroupButton) {
+
+                actionForm.button(`§dComment (editor-only)\n§7Set a comment for this button`, `textures/azalea_icons/other/dialogue`, (player)=>{
+                    let modal = new ModalForm();
+                    modal.title("Edit Button Comment")
+                    modal.textField("Comment", "Write a comment for this button", button.comment ? button.comment : "");
+                    modal.show(player, false, (player, response)=>{
+                        if(response.canceled) return uiManager.open(player, versionData.uiNames.UIBuilderEditButton, id, index, buttonIndex)
+                        button.comment = response.formValues[0]
+                        // button.template.start = Math.max(0, parseInt(isNaN(response.formValues[3]) ? 0 : response.formValues[3]))
+                        // button.template.end = Math.max(0, parseInt(isNaN(response.formValues[4]) ? 0 : response.formValues[4]))
+                        ui.data.buttons[index] = button;
+                        uiBuilder.db.overwriteDataByID(ui.id, ui.data);
+    
+                        return uiManager.open(player, versionData.uiNames.UIBuilderEditButton, id, index, buttonIndex)
+    
+                    })
+                })
+                if(button.comment) {
+                    actionForm.label(`${emojis.orange_dot} §6${button.comment}`)
+                }
                 actionForm.button(`§bTemplate\n§7Mass duplicate+edit this button`, `textures/azalea_icons/other/voxel`, (player)=>{
                     let modal = new ModalForm();
                     if(!button.template) button.template = {};
@@ -308,6 +340,16 @@ uiManager.addUI(
                     actionForm.label(`Button Template, From §a${button.template.start} §fto §a${button.template.end}`)
                 }
             }
+        }
+        if(button.type == "label") {
+            actionForm.button(`${NUT_UI_HEADER_BUTTON}§r${button.raw ? "Set to normal mode" : "Set to raw mode"}`, `textures/azalea_icons/other/button_xbox_y`, player=>{
+                button.raw = !button.raw;
+                let form = uiBuilder.db.getByID(id);
+                form.data.buttons[index] = button;
+                uiBuilder.db.overwriteDataByID(form.id, form.data);
+                uiManager.open(player, config.uiNames.UIBuilderEditButton, id, index, buttonIndex)
+            })
+            if(button.raw) actionForm.label(`Raw Mode`)
         }
         if (button.type == "header" || button.type == "label") {
             actionForm.button(
@@ -399,9 +441,21 @@ uiManager.addUI(
             button.type != "poll" && !nonNormalTypes.includes(button.type)
         ) {
             actionForm.button(
-                `§dEdit Meta (Advanced)\n§7More features`,
+                `§dEdit Meta (Advanced)\n§7${button.meta ? button.meta : "Change functionality of this button"}`,
                 `textures/azalea_icons/ExtIcon`,
                 (player) => {
+                    uiManager.open(player, versionData.uiNames.UIBuilderEditButtonMeta, button.meta ? button.meta : "", (res)=>{
+                        if(typeof res === "string") {
+                            uiBuilder.editButtonMeta(
+                                id,
+                                button.id,
+                                res
+                            );
+                        }
+
+                        uiManager.open(player, versionData.uiNames.UIBuilderEditButton, id, index, buttonIndex)
+                    })
+                    return;
                     let form = new ModalForm();
                     form.title("Edit Meta");
                     form.textField(
@@ -433,8 +487,9 @@ uiManager.addUI(
                     );
                 }
             );
+            actionForm.divider();
             actionForm.button(
-                `§bEdit Icon Overrides\n§7Legacy Feature`,
+                `§bEdit Icon Overrides [DEPRECATED]\n§7Override icons based on a condition`,
                 `textures/azalea_icons/DevSettings2`,
                 (player) => {
                     uiManager.open(player, "edit_icon_overrides", id, index);

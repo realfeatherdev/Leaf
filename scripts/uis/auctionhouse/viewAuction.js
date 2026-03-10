@@ -56,7 +56,7 @@ uiManager.addUI(
     (player, auctionID) => {
         try {
             let form = new ActionForm();
-            form.title(`${NUT_UI_TAG}§rViewing Auction`);
+            form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rViewing Auction`);
             let auction = auctionhouse.db.getByID(auctionID);
             let item = itemdb.getItem(auction.data.stash, auction.data.slot);
             if (!item) return;

@@ -13,7 +13,7 @@ uiManager.addUI(
             "§cBack\n§7Go back to config ui",
             "textures/azalea_icons/2.png",
             (player) => {
-                uiManager.open(player, config.uiNames.Config.Misc);
+                uiManager.open(player, config.uiNames.ConfigMain, 3);
             }
         );
         for (const report of reports.getAll()) {

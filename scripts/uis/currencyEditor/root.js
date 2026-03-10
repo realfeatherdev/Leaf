@@ -7,13 +7,15 @@ import {
     NUT_UI_LEFT_HALF,
     NUT_UI_RIGHT_HALF,
     NUT_UI_DISABLE_VERTICAL_SIZE_KEY,
+    NUT_UI_THEMED,
 } from "../preset_browser/nutUIConsts";
 import { world } from "@minecraft/server";
 import { ActionForm } from "../../lib/form_func";
+import { themes } from "../uiBuilder/cherryThemes";
 uiManager.addUI(config.uiNames.CurrencyEditor, "Currency Editor", (player) => {
     let currencies = prismarineDb.economy.getCurrencies();
     let form = new ActionForm();
-    form.title(`${NUT_UI_TAG}§rCurrency Editor`);
+    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rCurrency Editor`);
     form.button(
         `§aNew Currency\n§r§7Adds a new curnc`,
         `textures/azalea_icons/1`,

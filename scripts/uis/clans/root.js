@@ -7,7 +7,14 @@ import playerStorage from "../../api/playerStorage";
 import configAPI from "../../api/config/configAPI";
 import "./extra.js";
 import { NUT_UI_TAG } from "../preset_browser/nutUIConsts.js";
-import { colors } from "../../lib/prismarinedb.js";
+import { colors, prismarineDb } from "../../lib/prismarinedb.js";
+import { system, world } from "@minecraft/server";
+system.afterEvents.scriptEventReceive.subscribe(e=>{
+    if(e.id == "leaf:add_money") {
+        if(e.message.split(' ')[1].startsWith('-')) prismarineDb.economy.removeMoney(e.sourceEntity, parseInt(e.message.split(' ')[1].substring(1)), e.message.split(' ')[0])
+        else prismarineDb.economy.addMoney(e.sourceEntity, parseInt(e.message.split(' ')[1]), e.message.split(' ')[0])
+    }
+})
 uiManager.addUI(config.uiNames.Clans.Root, "Clans Root", (player) => {
     if (!configAPI.getProperty("Clans"))
         return player.sendMessage("Clans are not enabled");
@@ -15,7 +22,7 @@ uiManager.addUI(config.uiNames.Clans.Root, "Clans Root", (player) => {
         return player.runCommand("scriptevent leaf:open leaf/clans")
     let clanBaseEnabled = configAPI.getProperty("clans:enable_clan_base");
     let form = new ActionForm();
-    form.title(`${NUT_UI_TAG}§rClans`);
+    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rClans`);
     let clan = OpenClanAPI.getClan(player);
     form.button(
         `§dClan Invites\n§7View invites to clans`,
@@ -38,7 +45,7 @@ uiManager.addUI(config.uiNames.Clans.Root, "Clans Root", (player) => {
             clanNameNew = clanNameNew.replaceAll(colorCode, "");
         }
         let isClanOwner = clan.data.owner == playerStorage.getID(player);
-        form.title(`${NUT_UI_TAG}§r${clanNameNew}`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r${clanNameNew}`);
         form.button(
             `§bEnter/leave clan chat\n§7${
                 player.hasTag("clan-chat") ? "Click to leave" : "Click to enter"

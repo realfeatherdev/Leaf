@@ -16,7 +16,7 @@ uiManager.addUI(
     "Basic Confirmation UI",
     (player, actionLabel, actionYes, actionNo) => {
         let form = new ActionForm();
-        form.title(`${NUT_UI_TAG}§rConfirmation`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rConfirmation`);
         form.body(actionLabel);
         form.button(
             `${NUT_UI_RIGHT_HALF}${NUT_UI_DISABLE_VERTICAL_SIZE_KEY}§r§aYes`,
@@ -25,7 +25,10 @@ uiManager.addUI(
                 if (typeof actionYes === "function") {
                     actionYes(player);
                 } else if (typeof actionYes === "string") {
-                    actionParser.runAction(player, actionYes);
+                    let actions = actionYes.split('\\\\+')
+                    for(const action of actions) {
+                        actionParser.runAction(player, action);
+                    }
                 }
             }
         );

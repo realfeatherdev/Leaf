@@ -9,7 +9,7 @@ uiManager.addUI(
     "",
     (player, eventType = 0, id) => {
         let form = new ActionForm();
-        form.title(`${NUT_UI_TAG}§rSelect action type`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rSelect action type`);
         for (const action of eventsData[eventType].actionTypes) {
             form.button(`${action.name}`, null, (player) => {
                 uiManager.open(

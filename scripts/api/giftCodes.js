@@ -23,11 +23,33 @@ a remnant from outside
 But why?
 */
 
+
+import './floopimorphyCore'
 import { prismarineDb } from "../lib/prismarinedb";
+import { updFlags } from './updateFlags';
+import { SegmentedStoragePrismarine } from '../prismarineDbStorages/segmented';
 
 class GiftCodes {
     constructor() {
-        this.db = prismarineDb.table("GiftCodes");
+        this.dbLegacy = prismarineDb.table("GiftCodes");
+        this.db = prismarineDb.customStorage("GiftCodesX", SegmentedStoragePrismarine);
+        updFlags.addFlag("ConvertGiftCodes", ()=>{
+            this.db.waitLoad().then(()=>{
+                this.dbLegacy.waitLoad().then(()=>{
+                    if(this.dbLegacy.data.length) {
+                        for(const code of this.dbLegacy.data) {
+                            let c = code.data.code
+                            if(!this.db.findFirst({code: c})) {
+                                this.db.insertDocument({
+                                    ...code.data,
+                                    actions: [code.data.action]
+                                });
+                            }
+                        }
+                    }
+                })
+            })
+        }, "Convert leafs gift codes to the modern format")
     }
     createCode(code, action, useOnce = false) {
         let doc = this.db.findFirst({
@@ -37,6 +59,7 @@ class GiftCodes {
         this.db.insertDocument({
             code,
             action,
+            actions: [action],
             useOnce,
         });
     }

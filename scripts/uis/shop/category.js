@@ -12,6 +12,7 @@ import {
     NUT_UI_HEADER_BUTTON,
     NUT_UI_TAG,
 } from "../preset_browser/nutUIConsts";
+import { formatStr } from "../../api/azaleaFormatting";
 function parseItemID(id) {
     let text = id.split(":")[1];
     return text
@@ -38,23 +39,26 @@ uiManager.addUI(
                 uiManager.open(player, config.uiNames.Shop.Root, shopID);
             }
         );
-        // // console.warn(JSON.stringify(shopAPI.shops.data).length)
+        // // // console.warn(JSON.stringify(shopAPI.shops.data).length)
         let category = shop.data.categories.find((_) => _.id == categoryID);
-        form.title(`${NUT_UI_TAG}§r${category.name}`);
+        if (shop.data.cherryTheme) {
+            form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[shop.data.cherryTheme][0]}§r§f${formatStr(category.name, player)}`);
+        } else {
+            form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§f${formatStr(category.name, player)}`);
+        }
         for (let i = 0; i < category.items.length; i++) {
             let item = category.items[i];
             if (item.type == "ITEMDB_ITEM") {
-                // console.warn("E");
+                // // console.warn("E");
                 let itemStack = itemdb.getItem(item.stash, item.slot);
                 if (!itemStack) continue;
                 let currency = prismarineDb.economy.getCurrency(item.currency)
                     ? prismarineDb.economy.getCurrency(item.currency)
                     : prismarineDb.economy.getCurrency("default");
                 form.button(
-                    `§e${
-                        item.displayName
-                            ? item.displayName
-                            : parseItemID(itemStack.typeId)
+                    `§e${item.displayName
+                        ? item.displayName
+                        : parseItemID(itemStack.typeId)
                     }\n§r§7${currency.symbol} ${item.price}`,
                     item.icon ? icons.resolve(item.icon) : undefined,
                     (player) => {
@@ -106,7 +110,7 @@ uiManager.addUI(
                                                     item.price
                                                 );
                                             }
-                                        } catch {}
+                                        } catch { }
                                         shopAPI.deleteItem(
                                             shopID,
                                             categoryID,
@@ -152,6 +156,6 @@ uiManager.addUI(
                 );
             }
         }
-        form.show(player, false, (player, response) => {});
+        form.show(player, false, (player, response) => { });
     }
 );

@@ -12,7 +12,7 @@ uiManager.addUI(
     (player, id) => {
         let lb = leaderboardHandler.db.getByID(id);
         let formSquared = new ActionForm();
-        formSquared.title(`${NUT_UI_TAG}§rEditing Leaderboard`);
+        formSquared.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rEditing Leaderboard`);
         formSquared.button(`${NUT_UI_HEADER_BUTTON}§r§cGo Back\n§7AAAAAAAAAAAAAAAAAAAAA`, `textures/azalea_icons/2`, (player)=>{
             uiManager.open(player, versionData.uiNames.Leaderboards.Root)
         })

@@ -14,3 +14,5 @@ export const NUT_UI_HEADER_BUTTON = "§p§4§0";
 export const NUT_UI_ALT = "§a§l§t§b§t§n";
 export const NUT_UI_DISABLE_VERTICAL_SIZE_KEY = "§p§0§0";
 export const NUT_UI_MODAL = "§c§h§e§r§r§y§r§f";
+globalThis.NUT_UI_THEMED = NUT_UI_THEMED
+globalThis.NUT_UI_TAG = NUT_UI_TAG

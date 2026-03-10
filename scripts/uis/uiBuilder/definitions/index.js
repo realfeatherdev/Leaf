@@ -2,6 +2,7 @@ import "./action/index.js";
 import "./script/index.js";
 import "./invites/index.js";
 import "./command/index.js";
+import "./function/index.js";
 import uiBuilder from "../../../api/uiBuilder.js";
 import { ModalForm } from "../../../lib/form_func.js";
 import { BlockComponentTypes, Dimension, StructureAnimationMode, StructureRotation, system, world } from "@minecraft/server";
@@ -9,6 +10,7 @@ import uiManager from "../../../uiManager.js";
 import versionData from "../../../versionData.js";
 import { isInCuboid } from "../../../api/zones.js";
 import configAPI from "../../../api/config/configAPI.js";
+import { minesAPI } from "../../../api/mines.js";
 function yes(str) {
     return `${str.split(":").length == 1 ? "mystructure:" : ""}${str}`
 }
@@ -291,17 +293,24 @@ function getFacingFromX(xRotation) {
     if (rot < 225)              return "South";   // 135‒225
     return "West";                                // 225‒315
 }
-system.runInterval(()=>{
-    if(!configAPI.getProperty("DevMode")) return;
-    for(const player of world.getPlayers()) {
-        if(!player.hasTag('debug-label')) continue;
-        player.onScreenDisplay.setActionBar([
-            `Rotation Y: ${Math.floor(player.getRotation().y)}°`,
-            `${Math.floor(player.getRotation().y)}° ➜ ${getFacingFromX(player.getRotation().y)}`
-        ].join('\n§r'))
-    }
+// system.runInterval(()=>{
+//     if(!configAPI.getProperty("DevMode")) return;
+//     for(const player of world.getPlayers()) {
+//         if(!player.hasTag('debug-label')) continue;
+//         player.onScreenDisplay.setActionBar([
+//             `Rotation Y: ${Math.floor(player.getRotation().y)}°`,
+//             `${Math.floor(player.getRotation().y)}° ➜ ${getFacingFromX(player.getRotation().y)}`
+//         ].join('\n§r'))
+//     }
+// })
+uiBuilder.definitions.push({
+    deftype: "ROOT",
+    type: minesAPI.CUSTOMIZER_TYPE,
+    getName(doc) {
+        return doc.data.uniqueID
+    },
+    defaultIcon: "textures/azalea_icons/icontextures/tile2_024"
 })
-
 uiBuilder.definitions.push({
     deftype: "ROOT",
     type: 15,
@@ -311,7 +320,7 @@ uiBuilder.definitions.push({
             generatePathways(doc.data, doc.data.maxOnX * 12)
         })
         actionForm.button(`test2`, null, (player)=>{
-            for(let i = 0;i < doc.data.maxOnX * 12;i++) {
+            for(let i = 0;i < doc.data.maxOnX * 50;i++) {
                 spawnIsland(doc.data, i)
             }
         })
@@ -563,12 +572,12 @@ uiBuilder.definitions.push({
                         z: originalLoc.z + doc.data.offZ,
                     };
                     if (!isInCuboid(spawnPos, {...originalLoc, y: 0}, {...cornerLoc, y:6000000})) {
-                        player.error("Spawn pos is outside of the structure");
-                        return uiManager.open(
-                            player,
-                            versionData.uiNames.UIBuilderEdit,
-                            doc.id
-                        );
+                        // player.error("Spawn pos is outside of the structure");
+                        // return uiManager.open(
+                        //     player,
+                        //     versionData.uiNames.UIBuilderEdit,
+                        //     doc.id
+                        // );
                     }
                     let blocks = [];
                     let dim = player.dimension;

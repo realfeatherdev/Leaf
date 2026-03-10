@@ -118,6 +118,12 @@ export default {
         MsgColor: "§u",
         BracketColor: "§8",
     },
+    DaFruitKitty: {
+        Ranks: [`§dGUH`],
+        NameColor: "§d",
+        MsgColor: "§7",
+        BracketColor: "§8"
+    }
     // "MassaHex": {
     // "Ranks": [`§aCatboy`],
     // "NameColor": "§a",

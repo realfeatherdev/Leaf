@@ -1,6 +1,6 @@
 import { world, system } from "@minecraft/server";
 
-function adjustTextLength(text = "", totalLength = 100) {
+export function adjustTextLength(text = "", totalLength = 100) {
     return text.slice(0, totalLength).padEnd(totalLength, "\t");
 }
 

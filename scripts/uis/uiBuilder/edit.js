@@ -24,6 +24,7 @@ import versionData from "../../versionData";
 import scripting from "../../api/scripting";
 import normalForm from "../../api/openers/normalForm";
 import commandManager from "../../api/commands/commandManager";
+import { minesAPI } from "../../api/mines";
 uiManager.addUI(
     config.uiNames.UIBuilderEdit,
     "UI Builder Edit",
@@ -55,7 +56,7 @@ uiManager.addUI(
                     ? `${NUT_UI_ALT}${themes[themID][0]}`
                     : `${NUT_UI_ALT}`;
             try {
-                if (doc.data.type != 10 && doc.data.type != 11) {
+                if (doc.data.type != 10 && doc.data.type != 11 && doc.data.type != minesAPI.CUSTOMIZER_TYPE) {
                     actionForm.title(
                         `${
                             doc.data.layout == 4 && doc.data.paperdoll
@@ -72,13 +73,16 @@ uiManager.addUI(
                             .replace(/§./g, "")}§r"`
                     );
                 } else if (doc.data.type == 11) {
-                    actionForm.title(`${NUT_UI_TAG}§rEditing Invite`);
+                    actionForm.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rEditing Invite`);
+                } else if(doc.data.type == minesAPI.CUSTOMIZER_TYPE) {
+                    actionForm.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rEditing Mine`);
                 } else {
-                    actionForm.title(`${NUT_UI_TAG}§rEditing Event`);
+                    actionForm.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rEditing Event`);
                 }
     
-            } catch {
-                actionForm.title(`${NUT_UI_TAG}§r§fUnknown`)
+            } catch(e) {
+                player.error(e)
+                actionForm.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§fUnknown`)
             }
             actionForm.button(
                 `${NUT_UI_HEADER_BUTTON}§6Back\n§7Go back`,
@@ -100,6 +104,15 @@ uiManager.addUI(
                 if(def.extendEditButtons) {
                     def.extendEditButtons(actionForm, doc)
                 }
+            }
+            if(doc.data.type == minesAPI.CUSTOMIZER_TYPE) {
+                actionForm.button(`Edit`, null, (player)=>{
+                    uiManager.open(player, versionData.uiNames.MinesAdd, doc.id)
+                })
+                actionForm.button(`Refill`, null, (player)=>{
+                    minesAPI.refill(doc)
+                    uiManager.open(player, versionData.uiNames.UIBuilderEdit, doc.id)
+                })
             }
             if (doc.data.type == 10) {
                 actionForm.button(
@@ -154,7 +167,7 @@ uiManager.addUI(
             }
             if (doc.data.type == 7) {
                 actionForm.button(
-                    `§cEdit Lines\n§7Edit the lines of this UI`,
+                    `§cEdit Lines\n§7Edit the lines of this sidebar`,
                     null,
                     (player) => {
                         uiManager.open(
@@ -287,6 +300,25 @@ uiManager.addUI(
                         return uiManager.open(player, versionData.uiNames.UIBuilderEdit, doc.id)
                     })
                 })
+                if(doc.data.toggles && doc.data.toggles.modui_t) {
+                    actionForm.button(`§vUI Modifier Condition\n§7Edit da condition! :3`, `textures/azalea_icons/other/item`, (player)=>{
+                        let modal = new ModalForm();
+                        modal.title("Edit UI Modifier Condition");
+                        modal.dropdown("Checking Method", uiBuilder.modifierUIConditionTypes.map(_=>{
+                            return {
+                                option: _[0],
+                                callback() {}
+                            }
+                        }), doc.data.mConditionType ? doc.data.mConditionType : 0, ()=>{}, "the flingle mabob");
+                        modal.textField("Text to check", " ", doc.data.mSubstring ? doc.data.mSubstring : "", ()=>{}, "Text to match for to inject this into the UIs")
+                        modal.show(player, false, (player, response)=>{
+                            if(response.canceled) return uiManager.open(player, versionData.uiNames.UIBuilderEdit, doc.id)
+                            doc.data.mConditionType = response.formValues[0]
+                            doc.data.mSubstring = response.formValues[1]
+                            return uiManager.open(player, versionData.uiNames.UIBuilderEdit, doc.id)
+                        })
+                    })
+                }
                 actionForm.button(`§bPreview\n§7Get a full preview of this UI`, `textures/azalea_icons/other/eye`, (player)=>{
                     normalForm.open(player, {...JSON.parse(JSON.stringify(doc.data)), cancel: `/scriptevent leafgui:ui_builder_edit_ui ${doc.id}`, body: `You are in §bpreview mode (BETA)§f. Please §creport §fany issues to the §aleaf discord§f. §cClose this UI §fto go back to §eediting!`})
                 })
@@ -440,6 +472,19 @@ uiManager.addUI(
                         );
                     }
                 );
+                actionForm.button(`Select Theme\nCurrent: ${uiBuilder.toasts[doc.data.theme ? doc.data.theme : 0][1]}`, uiBuilder.toasts[doc.data.theme ? doc.data.theme : 0][2], (player)=>{
+                    let form = new ActionForm();
+                    form.title("Select Toast Theme")
+                    for(const toast of uiBuilder.toasts) {
+                        form.button(`${toast[1]}`, toast[2], (player)=>{
+                            doc.data.theme = toast[0];
+                            uiBuilder.db.overwriteDataByID(doc.id, doc.data);
+                        })
+                    }
+                    form.show(player, false, (player, response)=>{
+                        return uiManager.open(player, versionData.uiNames.UIBuilderEdit, doc.id)
+                    })
+                })
                 actionForm.button(
                     `§6Set Body\n§7Set body text of this notification`,
                     `textures/azalea_icons/other/message`,
@@ -509,6 +554,73 @@ uiManager.addUI(
                         );
                     }
                 );
+            }
+            if(doc.data.type == 16) {
+                actionForm.label("§dFunction Settings") // dog (sequel of the sequel)
+                            actionForm.button(
+                                `§bEdit Unique ID\n§7Edit this scripts identifier`,
+                                `textures/azalea_icons/other/tag_id`,
+                                (player) => {
+                                    let modal = new ModalForm();
+                                    modal.textField(
+                                        "New Unique ID",
+                                        doc.data.uniqueID,
+                                        doc.data.uniqueID
+                                    );
+                                    modal.show(player, false, (player, response) => {
+                                        if (response.canceled)
+                                            return uiManager.open(
+                                                player,
+                                                config.uiNames.UIBuilderEdit,
+                                                id
+                                            );
+                                        // scripting.unregisterScript(doc.data.uniqueID);
+                                        doc.data.uniqueID = response.formValues[0];
+                                        uiBuilder.db.overwriteDataByID(doc.id, doc.data);
+                                        // scripting.registerScript(
+                                            // doc.data.uniqueID,
+                                            // uiBuilder.base64Decode(doc.data.code)
+                                        // );
+                                        return uiManager.open(
+                                            player,
+                                            config.uiNames.UIBuilderEdit,
+                                            id
+                                        );
+                                    });
+                                }
+                            );
+
+                                        actionForm.button(
+                                            `§eEdit Code\n§7Edit this scripts code`,
+                                            `textures/azalea_icons/other/script_edit`,
+                                            (player) => {
+                                                let modal = new ModalForm();
+                                                modal.title("Code Editor");
+                                                modal.textField(
+                                                    "Write your code here",
+                                                    "Write your code here",
+                                                    uiBuilder.base64Decode(doc.data.code)
+                                                );
+                                                modal.show(player, false, (player, response) => {
+                                                    doc.data.code = uiBuilder.base64Encode(
+                                                        response.formValues[0]
+                                                    );
+                                                    // if (!doc.data.disabled)
+                                                        // scripting.unregisterScript(doc.data.uniqueID);
+                                                    uiBuilder.db.overwriteDataByID(doc.id, doc.data);
+                                                    // if (!doc.data.disabled)
+                                                    //     scripting.registerScript(
+                                                    //         doc.data.uniqueID,
+                                                    //         response.formValues[0]
+                                                    //     );
+                                                    uiManager.open(
+                                                        player,
+                                                        config.uiNames.UIBuilderEdit,
+                                                        id
+                                                    );
+                                                });
+                                            }
+                                        );
             }
             if(doc.data.type == 0) {
                 actionForm.label("§bDeployment options")

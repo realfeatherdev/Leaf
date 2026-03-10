@@ -12,8 +12,8 @@ export default {
         chatformat: `{{has_tag clan-chat "<nc>:small_diamond: " "<bl>"}}{{is_afk "§7AFK "}}{{clan "<bc>[§r§7<nc>[@CLAN]§r<bc>] "}}{{has_tag staffchat "<bc>[<nc> StaffChat §r<bc>] " "<bl>"}}§r<bc>[ <rc>{{rank_joiner "<drj>"}}§r<bc> ] §r<nc><name> §r§l<bc><dra> §r<mc><msg>`,
     },
     versionInfo: {
-        versionName: "3.1",
-        versionInternalID: 10, // 1 starts with october 2024 update
+        versionName: "4.3",
+        versionInternalID: 15, // 1 starts with october 2024 update
         versionData: new Map([
             [
                 1,
@@ -72,6 +72,13 @@ export default {
                     versionInternalID: 8,
                 },
             ],
+            [
+                15,
+                {
+                    versionName: "Update v4.3",
+                    versionInternalID: 15
+                }
+            ]
         ]),
     },
     tableNames: {
@@ -81,13 +88,22 @@ export default {
         open: "leaf:open",
         openDefaultLegacy: "leaf:open_default",
         openDefault: "leafgui:",
+        openInternal: "leaf:open_command_internal"
     },
     uiNames: {
+        MinesAdd: "add_mine",
         LandClaims: {
             Root: "land_claims",
             Manage: "land_claims_manage",
             ManageClaim: "manage_land_claim",
             Configure: "land_claims_config",
+        },
+        Channels: {
+            Add: "create_channel | Leaf/Channels/Create",
+            Overrides: "channel_overrides_edit_roles | Leaf/Channels/Overrides/Roles",
+            ChannelOverrides: "channel_overrides_edit_channels | Leaf/Channels/Overrides/Channels",
+            Visibility: "channel_visibility_edit | Leaf/Channels/Visibility",
+            Joinability: "channel_joinability_edit | Leaf/Channels/Joinability",
         },
         ServerInfo: "server_info | Leaf/ServerInfoo",
         CombatLogConfig: "combat_log",
@@ -95,6 +111,8 @@ export default {
         PresetBrowser: {
             Root: "preset_browser",
         },
+        Worldborder: "worldborder | Leaf/WorldBorder/Config",
+        Afk: "afk | Leaf/Afk",
         Zones: {
             Root: "zones | Leaf/Zones/Root",
             Add: "zones_add | Leaf/Zones/Add",
@@ -116,6 +134,7 @@ export default {
             Create: "bounty_create | Leaf/Bounty/Create",
             Config: "bounty_config | Leaf/Bounty/Config",
         },
+        BasicInfo: "basic_info | Leaf/Properties/BasicServerInfo",
         PlatformSettings: {
             Root: "platformsettings | Leaf/PlatformSettings",
             Desktop: "platformsettings_desktop | Leaf/PlatformSettings/Desktop",
@@ -138,6 +157,7 @@ export default {
             ConfigAPIRawEditor:
                 "configapi_editor | Leaf/MiscTools/ConfigAPIEditor",
         },
+        PVP: "PVP | Leaf/PVP/Settings",
         DevSettings: {
             Root: "dev | Leaf/Dev",
             DebugTools: "dev_debugtools | Leaf/DevDebugTools",
@@ -148,6 +168,7 @@ export default {
         ImportUI: "ui_import | Leaf/Import/UI",
         Lock: "lock | Leaf/ChestLocking/Lock",
         UIBuilderRoot: "ui_builder_main_page",
+        UIBuilderEditButtonMeta: "ui_builder_edit_button_meta | Leaf/UIBuilder/Buttons/Edit/Meta/Edit",
         UIBuilderTodo: {
             Root: "ui_builder_todo_root | Leaf/UIBuilder/ToDo/Root",
             Add: "ui_builder_todo_add | Leaf/UIBuilder/ToDo/Root/Add/Stop/Using/This/Fucking/Format",
@@ -162,8 +183,11 @@ export default {
         UIBuilderAddSubmenu: "ui_builder_create_ui_selector",
         UIBuilderSearch: "ui_builder_search_uis | Leaf/UIBuilder/Search",
         UIBuilderEdit: "ui_builder_edit_ui | Leaf/UIBuilder/Edit",
+        UIBuilderEditButtonsLegacy:
+            "ui_builder_edit_buttons_legacy | LeafLegacy/UIBuilder/EditButtons",
         UIBuilderEditButtons:
             "ui_builder_edit_buttons | Leaf/UIBuilder/EditButtons",
+
         UIBuilderAddPoll: "ui_builder_add_poll | Leaf/UIBuilder/AddPoll",
         UIBuilderAddButton: "ui_builder_add_button | Leaf/UIBuilder/AddButton",
         UIBuilderEditButton:
@@ -392,7 +416,7 @@ export default {
             BanModal: "ban_modal | Leaf/Basic/BanModal",
             Confirmation: "confirmation | Leaf/Basic/Confirmation",
             ItemSelect: "item_select | Leaf/Basic/ItemSelect",
-            NumberSelector: "number_select | Leaf/Basic/Number",
+            NumberSelector: "number_select | Leaf/Basic/Number"
         },
         Warps: {
             Wizard: {
@@ -415,6 +439,8 @@ export default {
             ViewShared: "homes_viewshared | Leaf/Homes/ViewShared",
             Shared: "homes_shared | Leaf/Homes/Shared",
             Config: "homes_config | Leaf/Homes/Config",
+            ConfigBasic: "homes_config_basic | Leaf/Homes/Config/Basic",
+            ConfigLimitOverrides: "homes_config_limit_overrides | Leaf/Homes/Config/LimitOverrides",
         },
         Reports: {
             Dashboard: "reports_dashboard | Leaf/Reports/Dashboard",
@@ -433,7 +459,7 @@ export default {
             "https://i.ibb.co/Sx1cF3h/c9268706406510b05e280005280a86ef.png",
         Username: "Leaf Essentials",
     },
-    HTTPEnabled: false,
+    HTTPEnabled: true,
     Endpoint: "https://mcbetools.com/api/leaf",
     items: {
         LeafConfig: "leaf:config_ui",

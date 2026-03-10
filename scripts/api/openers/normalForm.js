@@ -29,6 +29,8 @@ import { chunk } from "../iconViewer/underscore";
 import { worldTags } from "../../worldTags";
 import { handleActions } from "../../uis/CustomCommandsV2/handler";
 
+// normalform rewrite??? (coming 20301231)
+
 function replacePlaceholders(obj, i) {
     if (typeof obj === "string") {
         return obj.replace(/<#>/g, i); // ✨ Replace all!
@@ -40,7 +42,7 @@ function replacePlaceholders(obj, i) {
             newObj[key] = replacePlaceholders(obj[key], i); // 💫 Recurse in objects!
         }
         return newObj;
-    } else {
+    } else {//hi
         return obj; // 💤 Leave other types alone~
     }
 }
@@ -136,9 +138,22 @@ class MetaHandler {
             "#PDB_FIND_ALL:",
             this.handlePdbFindAll.bind(this)
         );
+        this.registerHandler("#INTERNAL_REGISTRY:", this.handleInternalRegistry.bind(this))
         this.registerHandler("#HOMES", this.handleHomes.bind(this));
     }
-
+    handleInternalRegistry(meta, context) {
+        const { player, button, data, args, currView, unprocessedButtonText } =
+            context;
+        return uiBuilder.reg1.filter(_=>_.t == 0 && _.cat == meta.substring("#INTERNAL_REGISTRY:".length)).map(_=>{
+            return {
+                text: _.text,
+                icon: icons.resolve(_.texture),
+                action() {
+                    actionParser.runAction(player, _.cmd)
+                }
+            }
+        })
+    }
     handleHomes(meta, context) {
         const { player, button, data, args, currView, unprocessedButtonText } =
             context;
@@ -235,7 +250,10 @@ class MetaHandler {
     async handleWarpGroup(meta, context) {
         const { player, button, data, args, currView, unprocessedButtonText } =
             context;
-        const warps = uiBuilder.db.findDocuments({ type: 12 });
+        const warps = uiBuilder.db.findDocuments({ type: 12 }).filter(_=>{
+            if(configAPI.getProperty("AFKWarp") && configAPI.getProperty("AFKSystem") && _.data.name == configAPI.getProperty("AFKWarp")) return false;
+            return true;
+        });
         return warps.map((warp) => ({
             text: context.parseArgs(
                 formatStr(unprocessedButtonText, player, {
@@ -460,8 +478,8 @@ class MetaHandler {
                 if (
                     config.playerFilter &&
                     !context.playerIsAllowed(
-                        player,
-                        formatStr(config.playerFilter, player2)
+                        player2,
+                        formatStr(config.playerFilter, player)
                     )
                 )
                     return false;
@@ -661,7 +679,7 @@ class MetaHandler {
 
     handlePlayerListAction(player, player2, button, data, args) {
         if (button.disabled) return;
-        handleActions(player2, button.actions, false, {}, {player2: player, swap: true})
+        handleActions(player, button.actions, false, {}, {player2: player2, swap: true})
         // for (const action of button.actions) {
         //     const action2 = action
         //         .replaceAll("<playername>", player2.name)
@@ -710,7 +728,7 @@ class MetaHandler {
     handlePdbAction(player, button, data, args, extra) {
         if (button.disabled) return;
         for (const action of button.actions) {
-            const action2 = action.replaceAll("<this>", data.name);
+            let action2 = action.replaceAll("<this>", data.name);
             for (let i = 0; i < args.length; i++) {
                 action2 = action2.replaceAll(`<$${i + 1}>`, args[i]);
             }
@@ -736,6 +754,136 @@ class ButtonProcessor {
         this.metaHandler = new MetaHandler();
     }
 
+    processButtonSync(button, context) {
+        const { player, data, args, currView } = context;
+        if (button.type == "separator") return null;
+        if (button.type == "pagstart") return null;
+        if (button.type == "pagend") return null;
+        if (
+            !button.meta &&
+            button.requiredTag &&
+            !context.playerIsAllowed(
+                player,
+                formatStr(
+                    context.parseArgs(button.requiredTag, ...args),
+                    player
+                ),
+                data
+            )
+        )
+            return;
+
+        // Handle special button types
+        if (button.type === "header" || button.type === "label") {
+            return {
+                type: button.type == "label" && button.raw ? "label_raw" : button.type,
+                text: button.text,
+                currView,
+            };
+        }
+
+        if (button.type === "divider") {
+            return { type: "divider" };
+        }
+
+        // Handle button groups
+        if (button.type === "group") {
+            return this.processButtonGroup(button, context);
+        }
+
+        scripting.callHooks(player, `btnDataInterceptor`, {
+            player,
+            button,
+            data,
+        });
+
+        // Handle meta buttons
+
+        if (button.type == "poll") {
+            let pollData = uiBuilder.altdb.findFirst({
+                type: "PLAYER_VOTE_DATA",
+                player: playerStorage.getID(player),
+                pollID: button.pollID,
+            });
+            let pollText = [`Poll: ${button.title}`];
+            if (button.disabled) {
+                pollText[0] = `§c[ENDED] Poll: ${button.title}`;
+                for (let i = 0; i < button.options.length; i++) {
+                    let option = button.options[i];
+                    let votes = uiBuilder.altdb.findDocuments({
+                        type: "PLAYER_VOTE_DATA",
+                        option: i,
+                        pollID: button.pollID,
+                    });
+                    pollText.push(
+                        `§b${option} §7>> §r${votes.length} vote${
+                            votes.length != 1 ? "s" : ""
+                        }`
+                    );
+                }
+            }
+            let btns2 = [
+                {
+                    type: "label",
+                    text: pollText.join("\n§r"),
+                    currView,
+                },
+            ];
+            if (!button.disabled) {
+                if (pollData) {
+                    for (let i = 0; i < button.options.length; i++) {
+                        let option = button.options[i];
+                        let votes = uiBuilder.altdb.findDocuments({
+                            type: "PLAYER_VOTE_DATA",
+                            option: i,
+                            pollID: button.pollID,
+                        });
+                        btns2.push({
+                            type: "button",
+                            text: `§e${option}\n§r§7${votes.length} vote${
+                                votes.length != 1 ? "s" : ""
+                            }`,
+                            action() {
+                                player.error(
+                                    `You already voted for this poll!`
+                                );
+                                normalForm.open(player, data, ...args);
+                            },
+                            currView,
+                        });
+                    }
+                } else {
+                    for (let i = 0; i < button.options.length; i++) {
+                        let option = button.options[i];
+                        btns2.push({
+                            type: "button",
+                            text: `§b${option}${
+                                button.optionSubtext
+                                    ? `\n§r§7${button.optionSubtext}`
+                                    : ``
+                            }`,
+                            action() {
+                                player.success(`Voted!`);
+                                uiBuilder.altdb.insertDocument({
+                                    type: "PLAYER_VOTE_DATA",
+                                    player: playerStorage.getID(player),
+                                    option: i,
+                                    pollID: button.pollID,
+                                });
+                                normalForm.open(player, data, ...args);
+                            },
+                            currView,
+                        });
+                    }
+                }
+            }
+            return btns2;
+        }
+
+        // Handle regular buttons
+        return this.createRegularButton(button, context);
+    }
+
     async processButton(button, context) {
         const { player, data, args, currView } = context;
         if (button.type == "separator") return null;
@@ -758,7 +906,7 @@ class ButtonProcessor {
         // Handle special button types
         if (button.type === "header" || button.type === "label") {
             return {
-                type: button.type,
+                type: button.type == "label" && button.raw ? "label_raw" : button.type,
                 text: button.text,
                 currView,
             };
@@ -937,7 +1085,7 @@ class ButtonProcessor {
                         : `${NUT_UI_ALT}`;
 
                 // Base NUT UI formatting
-                nutUIText = `${groupButton.disabled ? "§p§3§0" : ""}${
+                nutUIText = `${groupButton.disabled || (groupButton.requiredTagD && !context.playerIsAllowed(player, groupButton.requiredTagD)) ? "§p§3§0" : ""}${
                     groupButton.nutUIAlt ||
                     (groupButton.nutUIColorCondition
                         ? context.playerIsAllowed(
@@ -946,7 +1094,7 @@ class ButtonProcessor {
                               data
                           )
                         : false)
-                        ? nutUIAlt
+                        ? typeof groupButton.altBtnColorOverride === "number" && groupButton.altBtnColorOverride != -1 ? `${NUT_UI_ALT}${themes[groupButton.altBtnColorOverride][0]}` : nutUIAlt
                         : ""
                 }`;
 
@@ -1063,8 +1211,8 @@ class ButtonProcessor {
                     ? `${NUT_UI_ALT}${themes[themID]?.[0] || ""}`
                     : `${NUT_UI_ALT}`;
 
-            nutUIText = `${button.disabled ? "§p§3§0" : ""}${
-                nutUIAltCondition ? nutUIAlt : ""
+            nutUIText = `${button.disabled || (button.requiredTagD && !context.playerIsAllowed(player, button.requiredTagD)) ? "§p§3§0" : ""}${
+                nutUIAltCondition ? typeof button.altBtnColorOverride === "number" && button.altBtnColorOverride != -1 ? `${NUT_UI_ALT}${themes[button.altBtnColorOverride][0]}` : nutUIAlt : ""
             }${
                 button.nutUIHalf == 2
                     ? "§p§1§2"
@@ -1324,9 +1472,13 @@ class ButtonProcessor {
                     button.sellButtonScoreboard || "money"
                 );
             }
-            scoreboard.addScore(player, moneyCount);
+            try {
+                scoreboard.addScore(player, moneyCount);
+            } catch {}
             clear(inventory, item, amt);
-        } catch {}
+        } catch(e) {
+            world.sendMessage(`${e}`)
+        }
 
         player.playSound("note.pling");
         player.success(
@@ -1366,7 +1518,7 @@ class ButtonProcessor {
                 // }
             }
         } catch (e) {
-            // console.warn(e);
+            // // console.warn(e);
         }
 
         normalForm.open(player, data, ...args);
@@ -1377,6 +1529,15 @@ class ButtonProcessor {
 class NormalFormOpener {
     constructor() {
         this.buttonProcessor = new ButtonProcessor();
+        this.ctx = {
+            playerIsAllowed: this.playerIsAllowed.bind(this),
+            parseArgs: this.parseArgs.bind(this),
+            getIcon: this.getIcon.bind(this),
+            getDisplayOverride: this.getDisplayOverride.bind(this),
+            convertJSONIntoFormattingExtraVars:
+                this.convertJSONIntoFormattingExtraVars.bind(this),
+            open: this.open.bind(this),
+        }
     }
 
     parseArgs(str, ...args) {
@@ -1390,6 +1551,14 @@ class NormalFormOpener {
     async open(player, data2, ...args) {
         try {
             let data = JSON.parse(JSON.stringify(data2));
+            if(data && data.toggles && data.toggles.modui_t) {
+                let form = new ActionForm();
+                form.title("Unsupported Action");
+                form.label("Sorry, but Leaf Essentials does not support opening Modifier UIs directly, they are used to modify UIs. Check https://leaf.trashdev.org for more info");
+                // form.button("Ok")
+                form.show(player, false, (player)=>{})
+                return;
+            }
             if (
                 isJuneOrEarlyJuly() &&
                 data.scriptevent &&
@@ -1515,7 +1684,7 @@ class NormalFormOpener {
             data.buttons.findIndex((_) => _.type == "pagstart")
         );
         if (startIndex == -1) startIndex = 0;
-        // console.warn(`${endIndex > startIndex ? endIndex : items.length - 1}`)
+        // // console.warn(`${endIndex > startIndex ? endIndex : items.length - 1}`)
         // world.sendMessage(`Start/End Index: ${startIndex}-${endIndex}`)
         let includeLeft =
             data.buttons.findIndex((_) => _.type == "pagstart") > -1
@@ -1548,8 +1717,8 @@ class NormalFormOpener {
         const pb2 = pb3.chunks.filter(
             (_) => _.type != "pagstart" && _.type != "pagend"
         );
-        // console.warn(pb2)
-        console.warn(JSON.stringify(pb2.map((_) => Array.isArray(_))));
+        // // console.warn(pb2)
+        // console.warn(JSON.stringify(pb2.map((_) => Array.isArray(_))));
         // if(data.pagpb) data.buttons =
         let newChunk = [];
         let skip = data.buttons.find((_) => _.type == "pagstart")
@@ -1591,18 +1760,22 @@ class NormalFormOpener {
         let after = [];
         function add(button, fnoverride = null) {
             if (button.type === "header") {
-                form.header(formatStr(button.text, player));
+                form.header(`§r§f${formatStr(button.text, player)}`);
                 return;
             }
             if (button.type === "label") {
-                form.label(formatStr(button.text, player));
+                form.label(`§r§f${formatStr(button.text, player)}`);
+                return;
+            }
+            if (button.type === "label_raw") {
+                form.label(`${button.text}`);
                 return;
             }
             if (button.type === "divider") {
                 form.divider();
                 return;
             }
-            // console.warn(JSON.stringify(button))
+            // // console.warn(JSON.stringify(button))
             form.button(
                 button.text,
                 button.icon,
@@ -1646,7 +1819,7 @@ class NormalFormOpener {
         }
 
         for (const button of buttons) {
-            console.warn(JSON.stringify(button));
+            // console.warn(JSON.stringify(button));
             add(button);
         }
         function back(player) {
@@ -1767,7 +1940,7 @@ class NormalFormOpener {
                 }
             }
         }
-        // console.warn(`${pb3.after && pb3.after.length ? pb3.after.length : 0}`)
+        // // console.warn(`${pb3.after && pb3.after.length ? pb3.after.length : 0}`)
         if (data.pag) {
             for (const button of pb3.after && pb3.after.length
                 ? pb3.after
@@ -1778,7 +1951,7 @@ class NormalFormOpener {
                     isNextButton(button)
                 )
                     continue;
-                console.warn(button);
+                // console.warn(button);
                 let curr = await this.buttonProcessor.processButton(
                     button,
                     this.getContext2(...ctxargs)
@@ -1798,7 +1971,7 @@ class NormalFormOpener {
     }
 
     async openActionForm2(player, render_as, data, ...args) {
-        console.warn("AAA");
+        // console.warn("AAA");
         const form = new ActionForm();
         const pre = this.getFormPrefix(data);
         const themID = data.theme || 0;
@@ -1891,7 +2064,8 @@ class NormalFormOpener {
                             (_) => !button.clearViewIDs.includes(_.currView)
                         );
                     } else if (button.clearMode == 3) {
-                        buttons = buttons.filter((_) => _.currView != -1);
+                        // world.sendMessage("meow")
+                        buttons = buttons.filter((_) => _.currView == -1);
                     }
                 }
                 continue;
@@ -1913,13 +2087,7 @@ class NormalFormOpener {
                     args,
                     currView,
                     buttons,
-                    playerIsAllowed: this.playerIsAllowed.bind(this),
-                    parseArgs: this.parseArgs.bind(this),
-                    getIcon: this.getIcon.bind(this),
-                    getDisplayOverride: this.getDisplayOverride.bind(this),
-                    convertJSONIntoFormattingExtraVars:
-                        this.convertJSONIntoFormattingExtraVars.bind(this),
-                    open: this.open.bind(this),
+                    ...this.ctx
                 }
             );
 
@@ -1954,6 +2122,7 @@ class NormalFormOpener {
     }
     getScore(player, objective) {
         let score = 0;
+        if(objective == "vleaf:cc") return prismarineDb.economy.getMoney(player, configAPI.getProperty("clans:clan_price_currency"));
         try {
             const objective2 = world.scoreboard.getObjective(objective);
             score = objective2.getScore(player);
@@ -1985,6 +2154,9 @@ class NormalFormOpener {
                 clan.data.applicationQuestions &&
                 clan.data.applicationQuestions.length
             );
+        }
+        if(tag.startsWith("$REG1_INC/")) {
+            return uiBuilder.reg1.find(_=>_.t == 0 && _.cat == tag.substring("$REG1_INC/".length));
         }
         if (tag == "$HAS_CLAN_BASE") {
             try {
@@ -2042,28 +2214,51 @@ class NormalFormOpener {
 
         try {
             if (tag.startsWith(">=")) {
-                const [objective, value] = tag.substring(2).split(" ");
-                return this.getScore(player, objective) >= parseInt(value);
+                const [objective, value, fakePlayer] = tag.substring(2).split(" ");
+                const compare = value.startsWith("$N/")
+                    ? configAPI.getProperty(value.slice(3))
+                    : parseInt(value, 10);
+
+                return this.getScore(fakePlayer ? fakePlayer : player, objective) >= compare;
             }
 
             if (tag.startsWith("<=")) {
-                const [objective, value] = tag.substring(2).split(" ");
-                return this.getScore(player, objective) <= parseInt(value);
+                const [objective, value, fakePlayer] = tag.substring(2).split(" ");
+                const compare = value.startsWith("$N/")
+                    ? configAPI.getProperty(value.slice(3))
+                    : parseInt(value, 10);
+
+                return this.getScore(fakePlayer ? fakePlayer : player, objective) <= compare;
             }
 
             if (tag.startsWith(">")) {
-                const [objective, value] = tag.substring(1).split(" ");
-                return this.getScore(player, objective) > parseInt(value);
+                const [objective, value, fakePlayer] = tag.substring(1).split(" ");
+                const compare = value.startsWith("$N/")
+                    ? configAPI.getProperty(value.slice(3))
+                    : parseInt(value, 10);
+
+                return this.getScore(fakePlayer ? fakePlayer  : player, objective) > compare;
             }
+
             if (tag.startsWith("<")) {
-                const [objective, value] = tag.substring(1).split(" ");
-                return this.getScore(player, objective) < parseInt(value);
+                const [objective, value, fakePlayer] = tag.substring(1).split(" ");
+                const compare = value.startsWith("$N/")
+                    ? configAPI.getProperty(value.slice(3))
+                    : parseInt(value, 10);
+
+                return this.getScore(fakePlayer ? fakePlayer  : player, objective) < compare;
             }
+
             if (tag.startsWith("==")) {
-                const [objective, value] = tag.substring(2).split(" ");
-                return this.getScore(player, objective) == parseInt(value);
+                const [objective, value, fakePlayer] = tag.substring(2).split(" ");
+                const compare = value.startsWith("$N/")
+                    ? configAPI.getProperty(value.slice(3))
+                    : parseInt(value, 10);
+
+                return this.getScore(fakePlayer ? fakePlayer : player, objective) === compare;
             }
-        } catch {
+
+        } catch(e) {
             return false;
         }
 

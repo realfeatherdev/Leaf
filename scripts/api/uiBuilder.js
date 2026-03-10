@@ -6,14 +6,17 @@
 "IM GONNA KILL YOU IF YOU BREAK THIS"
 - Trashy
 
+"too bad"
+- FruitKitty
 */
 
 import config from "../versionData";
 import { ActionForm } from "../lib/form_func";
-import { colors, prismarineDb } from "../lib/prismarinedb";
+import { colors, isVec3, prismarineDb } from "../lib/prismarinedb";
 import actionParser from "./actionParser";
+import '../ext/pluginHandler'
 import normalForm from "./openers/normalForm";
-import { system, ScriptEventSource, world } from "@minecraft/server";
+import { system, ScriptEventSource, world, BlockTypes } from "@minecraft/server";
 import { array_move } from "./utils/array_move";
 import modalForm from "./openers/modalForm";
 import { SegmentedStoragePrismarine } from "../prismarineDbStorages/segmented";
@@ -32,13 +35,20 @@ import scripting from "./scripting";
 import { array, bool, boolean, number, object, string } from "../lib/yup.esm";
 import configAPI from "./config/configAPI";
 import zones from "./zones";
+import { Router } from "../ipc/router";
+import { handleActions } from "../uis/CustomCommandsV2/handler";
+import { unique } from "./iconViewer/underscore";
+import uiManager from "../uiManager";
+import { minesAPI } from "./mines";
 
 configAPI.registerProperty("MaxRootCustomizerCreations", configAPI.Types.Number, 32);
 configAPI.registerProperty("CustomizerMaxCreationsHardLimit", configAPI.Types.Number, 4096);
 configAPI.registerProperty("CustomizerPlugins", configAPI.Types.Boolean, true);
-
-class UIBuilder {
+configAPI.registerProperty("CustomizerSafeMode", configAPI.Types.Boolean, false);
+// world.sendMessage("MEOW")
+class UIBuilder extends Router {
     constructor() {
+        super("leaf:ipc1");
         this.validRows = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         this.internalUIs = [];
         this.leafEpoch = 1741909421689;
@@ -54,7 +64,13 @@ class UIBuilder {
         this.actionFormToggles = [
             ["Sell Button: Force Allow Sell All", "t1"],
             ["Legacy Toggle: Disable Buy+Sell Hybrid Buttons", "lt1"],
-            ["Enable Template Mode", "t2"]
+            ["Enable Template Mode", "t2"],
+            ["Modifier UI", "modui_t"],
+            ["Insert After", "modui_ia"],
+            ["Insert Before", "modui_ib"],
+            ["Override Title", "modui_oti"],
+            ["Override Theme", "modui_oth"],
+            ["Override Body", "modui_obo"],
         ];
         this.initializeInvites();
         this.initializeDatabases();
@@ -68,6 +84,43 @@ class UIBuilder {
         this.migrateChestGUIs();
         this.createSnippetBook();
         this.initializeEvents();
+        this.#setupScriptevents2();
+        this.toasts = [
+            [0, "Default", "textures/ui/greyBorder"],
+            [1, "1", "textures/toasts/box_1"],
+            [2, "2", "textures/toasts/box_2"],
+            [3, "3", "textures/toasts/box_3"],
+            [4, "4", "textures/toasts/box_4"],
+            [5, "5", "textures/toasts/box_5"],
+            [6, "6", "textures/toasts/box_6"],
+            [7, "7", "textures/toasts/box_7"],
+            [8, "8", "textures/toasts/box_8"],
+            [9, "9", "textures/toasts/box_9"],
+            [10, "10", "textures/toasts/box_10"],
+            [11, "Alec 1", "textures/example/alec/1"],
+            [12, "Alec 2", "textures/example/alec/2"],
+            [13, "Alec 3", "textures/example/alec/3"],
+            [14, "Alec 4", "textures/example/alec/4"],
+            [15, "Alec 5", "textures/example/alec/5"],
+            [16, "Alec 6", "textures/example/alec/6"],
+            [17, "Alec 7", "textures/example/alec/7"],
+            [18, "Alec 8", "textures/example/alec/8"],
+            [19, "Pink Border", "textures/toasts/pinkBorder"],
+        ]
+        this.modifierUIConditionTypes = [
+            ["Title Includes", (str, title)=>{
+                return title.includes(str)
+            }],
+            ["Title Includes (Case Insensitive)", (str, title)=>{
+                return title.toLowerCase().includes(str.toLowerCase())
+            }],
+            ["Title Equals (Case Sensitive)", (str, title)=>{
+                return str.trim() == title.trim()
+            }],
+            ["Title Equals (Case Insensitive", (str, title)=>{
+                return str.trim().toLowerCase() == title.trim().toLowerCase();
+            }]
+        ]
         this.patternIDs = [
             {
                 name: "NONE",
@@ -135,6 +188,7 @@ class UIBuilder {
                 texture: "textures/blocks/glass_purple",
             },
         ];
+        this.fuckThisShitBroLemmeJustShoveThisSomewhereLmao()
         this.db.waitLoad().then(() => {
             this.transitionSidebars();
             this.fixBtnIds();
@@ -142,6 +196,8 @@ class UIBuilder {
             this.initializeScripts();
             this.transitionZones();
         });
+
+        // everyn't many schemas
         this.schemas = new Map();
         this.ui_type_meta = new Map();
         this.registerSchema(
@@ -149,6 +205,7 @@ class UIBuilder {
             object({
                 type: number().required(),
                 name: string().required(),
+                copies: object().optional(),
                 buttons: array()
                     .of(
                         object({
@@ -189,6 +246,7 @@ class UIBuilder {
             })
         );
         this.registerMeta(0, {
+            // dog
             name: "Action Form",
             handleWarnings: (data) => {
                 let logs = [];
@@ -201,14 +259,223 @@ class UIBuilder {
             },
         });
     }
+    validateUniqueID(str) {
+        if(typeof str !== "string") return null;
+
+        if(!/^[a-zA-Z0-9_\/\-,.]+$/.test(str)) return null;
+
+        return str.replace('/scriptevent leaf:open ', '').replace('scriptevent leaf:open ', '')
+    }
+    async fuckThisShitBroLemmeJustShoveThisSomewhereLmao() {
+        this.reg1 = [];
+        system.afterEvents.scriptEventReceive.subscribe(e=>{
+            if(e.id == "leaf:reg1") {
+                try {
+                    // console.warn(`Loaded conf UI module: ${JSON.parse(e.message).text}`)
+                    this.reg1.push(JSON.parse(e.message))
+                } catch {}
+            }
+        })
+        await system.waitTicks(1)
+        configAPI.db.waitLoad().then(()=>{
+            system.sendScriptEvent("leaf_ess_api:recv1", ""); // LEAF IS LOADED! LEAF IS LOADED! LEAF IS LOADED! LEAF IS LOADED! LEAF IS LOADED! LEAF IS LOADED! LEAF IS LOADED! LEAF IS LOADED!
+            this.send({
+                event: "leaf:ipc_ready",
+                payload: JSON.stringify({t: Date.now()}),
+                force: true
+            })
+        })
+    }
     registerMeta(type, meta) {
         this.ui_type_meta.set(type, meta);
+    }
+    createFunction(uniqueID) {
+        this.db.insertDocument({
+            type: 16,
+            uniqueID,
+            code: this.base64Encode("// write code here mommy")
+        })
+    }
+    createChatChannel(uniqueID, label, prefixFMT, showPrefix, color) {
+        this.db.insertDocument({
+            type: 18,
+            uniqueID,
+            name: label,
+            prefixFMT,
+            showPrefix,
+            color,
+            showToOtherChannels: {
+                all: false,
+                others: [],
+                roleDependent: [
+                    {
+                        role: "admin",
+                        all: true,
+                        others: []
+                    }
+                ]
+            },
+            joinable: ["default"]
+        })
+    }
+    getPref(tags, prefix, def) {
+        let tag = tags.find(_=>_.startsWith(prefix))
+        if(tag) return tag.replace(prefix, '')
+        return def;
+    }
+    getChannel(player) {
+        let channel = this.getPref(player.getTags(), 'channel:', 'general')
+        let channelData = this.db.findFirst({type: 18, uniqueID: channel})
+        if(!channelData) channelData = this.db.findFirst({type: 18});
+        return channelData;
+    }
+    getPlayerRoles(player) {
+        let roles = [];
+        for(const role of prismarineDb.permissions.getRoles()) {
+            if(player.hasTag(role.tag) || role.tag == "default") roles.push(role.tag)
+        }
+        return roles;
+    }
+    hasPermissionToJoinChannel(player, channelData) {
+        if(prismarineDb.permissions.hasPermission(player, "channels.bypassjoinability")) return true;
+        let joinable = channelData.data.joinable && channelData.data.joinable.length ? channelData.data.joinable : [];
+        let isJoinable = false;
+        let roles = this.getPlayerRoles(player);
+        for(const role of roles) {
+            if(joinable.includes(role)) {
+                isJoinable = true;
+                break;
+            }
+        }
+        return isJoinable
+    }
+    joinChannel(player, channel) {
+        let channelData = this.db.findFirst({type: 18, uniqueID: channel})
+        if(!channelData) throw new Error("Channel not found");
+        let isJoinable = this.hasPermissionToJoinChannel(player, channelData);
+        if(!isJoinable) throw new Error("You do not have permission to join this channel")
+        let tags = player.getTags().filter(_=>_.startsWith('channel:'))
+        for(const tag of tags) {
+            player.removeTag(tag)
+        }
+        player.addTag(`channel:${channelData.data.uniqueID}`);
+    }
+    isInRadius(point, center, radius) {
+        const dx = point.x - center.x;
+        const dy = point.y - center.y;
+        const dz = point.z - center.z;
+        const distanceSquared = dx*dx + dy*dy + dz*dz;
+        return distanceSquared <= radius * radius;
+    }
+    canViewChannel(player, channelData, origin_pos, receiver_pos) {
+        let current = this.getChannel(player)
+        let roles = this.getPlayerRoles(player);
+        let all = false;
+        let others = [];
+        let localMode = false;
+        let localModeRadius = 20;
+        if(channelData.data.showToOtherChannels.all) all = true;
+        localMode = channelData.data.showToOtherChannels.localMode ? true : false;
+        localModeRadius = Math.min(Math.max((channelData.data.showToOtherChannels.localModeRadius ? channelData.data.showToOtherChannels.localModeRadius : 25), 10), 125);
+        if(channelData.data.showToOtherChannels.others && channelData.data.showToOtherChannels.others.length) others = channelData.data.showToOtherChannels.others;
+
+        for(const role of channelData.data.showToOtherChannels.roleDependent) {
+            if(roles.includes(role)) {
+                if(role.all) all = true;
+                if(role.others && role.others.length) others = [...others, ...role.others]
+                localMode = role.localMode ? true : false;
+                localModeRadius = Math.min(Math.max((role.localModeRadius ? role.localModeRadius : 25), 10), 125);
+            }
+        }
+
+        if(origin_pos) {
+            // world.sendMessage(`Local mode ${localMode ? "enabled" : "disabled"}! Radius: ${localModeRadius}`)
+            if(localMode) {
+                if(!this.isInRadius(receiver_pos, origin_pos, localModeRadius)) return false;
+            }
+        }
+        if(current.id == channelData.id) return true;
+
+        if(all) return true;
+        if(others.includes(current.id)) return true;
+        return false;
+    }
+    broadcastToChannel(channel, message, exclude = [], rootPlayer = null, fmt = false, origin_pos) {
+        let channelData = this.db.findFirst({type: 18, uniqueID: channel})
+        if(!channelData) throw new Error("Channel not found");
+        for(const player of world.getPlayers()) {
+            if(exclude.includes(player.id)) continue;
+            if(this.canViewChannel(player, channelData, origin_pos, player.location)) player.sendMessage(`${channelData.data.showPrefix ? formatStr(channelData.data.prefixFMT+" ", rootPlayer ? rootPlayer : player, {cc: channelData.data.color, cn: channelData.data.name ? channelData.data.name : channelData.data.uniqueID}) : ""}§r§f${fmt ? formatStr(message, player, {}, {player2: rootPlayer}) : message}`)
+        }
+    }
+    channelCmd(origin, channel_action_type, channel_name) {
+        system.run(()=>{
+            let player = origin.sourceEntity
+            switch(channel_action_type) {
+                case "list":
+                    let channels = this.db.findDocuments({type: 18})
+                    let msg = [];
+                    msg.push(`§a-=-=- Channels -=-=-`)
+                    for(const channel of channels) {
+                        if(!this.hasPermissionToJoinChannel(player, channel)) continue;
+                        msg.push(`§7${channel.data.uniqueID} §f- ${channel.data.color}#${channel.data.name ? channel.data.name : channel.data.uniqueID}`)
+                    }
+                    msg.push(` `)
+                    msg.push(`Use §e/channel join <id> §fto join. The ID is on the left side, and the display name is on the right.`)
+                    player.sendMessage(msg.join('\n§r§f'))
+                    break;
+                case "join":
+                    if(!channel_name) return player.error("Please include a channel name")
+                    try {
+                        this.joinChannel(player, channel_name)
+                        player.success(`Joined channel!`)
+                    } catch(e) {
+                        player.error(`${e}`)
+                    }
+                    break;
+                case "info":
+                    player.error("This subcommand is not currently finished.");
+                    break;
+            }
+
+        })
+    }
+    playerBroadcast(player, message, exclude = [], fmt = false) {
+        let channelData = this.getChannel(player)
+        this.broadcastToChannel(channelData.data.uniqueID, message, exclude, player, fmt, player.location);
+    }
+    //channels.bypassjoinability
+    createTimer(uniqueID, interval, random, intervalMin, intervalMax, alwaysRunning) {
+        this.db.insertDocument({
+            type: 17,
+            uniqueID,
+            interval,
+            random,
+            intervalMin,
+            intervalMax,
+            alwaysRunning,
+            actionsEnd: [],
+            actionsStart: [],
+            actionsMid: {}
+        })
     }
     createIsland(uniqueID) {
         if(this.db.findFirst({type: 15, uniqueID})) return;
         this.db.insertDocument({
             type: 15,
             uniqueID
+        })
+    }
+    createMine(uniqueID, refillTimeMS, zoneID, blockTypeIDs, chances) {
+        let mine = this.db.findFirst({type: minesAPI.CUSTOMIZER_TYPE, uniqueID})
+        if(mine) return mine.id;
+        return this.db.insertDocument({
+            type: minesAPI.CUSTOMIZER_TYPE,
+            uniqueID,
+            refillTimeMS,
+            zoneID,
+            blockTypeIDs,
+            chances
         })
     }
     transitionZones() {
@@ -277,87 +544,86 @@ class UIBuilder {
     initializeInvites() {
         this.invites = {};
     }
-    inviteCMD(origin, invite_type, invite_name, sender, receiver) {
+    inviteCMD(origin, invite_type, invite_name2, sender, receiver) {
         system.run(() => {
-            let doc = this.db.findFirst({ identifier: invite_name, type: 11 });
-            if (!doc) return;
+            let invite_name3 = invite_name2.split('|');
+            let doc = this.db.findFirst({ identifier: invite_name3[0], type: 11 });
+            let invite_name = invite_name3[0]
+            if (!doc) {
+                if(invite_name3.length > 1) {
+                    this.inviteCMD(origin, invite_type, invite_name3.slice(1).join('|'), sender, receiver)
+                }
+                return;
+            };
             let key = `${invite_name}_${sender.id}_${receiver.id}`;
             if (invite_type == "deny") {
                 if (this.invites[key]) {
-                    for (const action of doc.data.denyActions) {
-                        actionParser.runAction(
-                            this.invites[key].receiver,
-                            formatStr(
-                                action,
-                                this.invites[key].receiver,
-                                {},
-                                {
-                                    player2: this.invites[key].sender,
-                                }
-                            )
-                        );
-                    }
+                    handleActions(this.invites[key].receiver, doc.data.denyActions, false, {}, {player2: this.invites[key].sender})
                     delete this.invites[key];
+                } else {
+                    if(invite_name3.length > 1) {
+                        return this.inviteCMD(origin, invite_type, invite_name3.slice(1).join('|'), sender, receiver);
+                    } else {
+                        return receiver.error(`You do not have an invite from ${sender.name}`)
+                    }
                 }
             }
             if (invite_type == "accept") {
                 if (this.invites[key]) {
-                    for (const action of doc.data.acceptActions) {
-                        actionParser.runAction(
-                            this.invites[key].receiver,
-                            formatStr(
-                                action,
-                                this.invites[key].receiver,
-                                {},
-                                {
-                                    player2: this.invites[key].sender,
-                                }
-                            )
-                        );
-                    }
+                    handleActions(this.invites[key].receiver, doc.data.acceptActions, false, {}, {player2: this.invites[key].sender})
                     delete this.invites[key];
+                } else {
+                    if(invite_name3.length > 1) {
+                        return this.inviteCMD(origin, invite_type, invite_name3.slice(1).join('|'), sender, receiver);
+                    } else {
+                        return receiver.error(`You do not have an invite from ${sender.name}`)
+                    }
                 }
             }
-
+            if(invite_type == "cancel") {
+                let done = false;
+                for(let i = 0;i < invite_name3.length;i++) {
+                    let key2 = `${invite_name3[i]}_${sender.id}_${receiver.id}`
+                    if(this.invites[key2]) {
+                        this.invites[key2].waiting = false;
+                        if (this.invites[key2]) {
+                            handleActions(this.invites[key2].receiver, doc.data.expireActions, false, {}, {player2: this.invites[key2].sender})
+                            delete this.invites[key2];
+                        }
+                        done = true;
+                    }
+                }                
+                if(!done) return sender.error(`There was no invite to ${receiver.name}`)
+            }
             if (invite_type == "send") {
-                this.invites[key] = {
-                    sender,
-                    receiver,
-                    invite_name,
-                };
-                if (this.invites[key]) {
-                    for (const action of doc.data.sendActions) {
-                        actionParser.runAction(
-                            this.invites[key].receiver,
-                            formatStr(
-                                action,
-                                this.invites[key].receiver,
-                                {},
-                                {
-                                    player2: this.invites[key].sender,
-                                }
-                            )
-                        );
+                let thing = null;
+                if(invite_name3.length > 1) {
+                    for(let i = 1; i < invite_name3.length;i++) {
+                        if(this.invites[`${invite_name3[i]}_${sender.id}_${receiver.id}`]) thing = this.invites[`${invite_name3[i]}_${sender.id}_${receiver.id}`];
                     }
                 }
-                system.runTimeout(() => {
-                    if (this.invites[key]) {
-                        for (const action of doc.data.expireActions) {
-                            actionParser.runAction(
-                                this.invites[key].receiver,
-                                formatStr(
-                                    action,
-                                    this.invites[key].receiver,
-                                    {},
-                                    {
-                                        player2: this.invites[key].sender,
-                                    }
-                                )
-                            );
-                        }
-                        delete this.invites[key];
+                if (this.invites[key] || thing) {
+                    let act34 = doc.data.alreadyOutgoingActions ? doc.data.alreadyOutgoingActions : []
+                    handleActions((thing || this.invites[key]).receiver, act34, false, {}, {player2: (thing || this.invites[key]).sender})
+                    if(!act34.length) {
+                        sender.error("You already have an invite going to this player")
                     }
-                }, doc.data.expirationTime);
+                } else {
+                    this.invites[key] = {
+                        sender,
+                        receiver,
+                        invite_name,
+                        waiting: true
+                    };
+                    handleActions(this.invites[key].receiver, doc.data.sendActions, false, {}, {player2: this.invites[key].sender})
+                    system.runTimeout(() => {
+                        this.invites[key].waiting = false;
+                        if (this.invites[key]) {
+                            handleActions(this.invites[key].receiver, doc.data.expireActions, false, {}, {player2: this.invites[key].sender})
+                            delete this.invites[key];
+                        }
+                    }, doc.data.expirationTime);
+                }
             }
         });
     }
@@ -384,7 +650,7 @@ class UIBuilder {
     transitionSidebars() {
         sidebarEditor.db.waitLoad().then(() => {
             let sidebars = sidebarEditor.db.findDocuments({ _type: "SIDEBAR" });
-            // console.warn(sidebars.length);
+            // // console.warn(sidebars.length);
             let i = 0;
             for (const sidebar of sidebars) {
                 if (sidebar.data.transition1) continue;
@@ -853,6 +1119,25 @@ class UIBuilder {
     }
 
     setupScriptEventListener() {
+        system.afterEvents.scriptEventReceive.subscribe((e)=>{
+            if(e.sourceType == ScriptEventSource.Entity && e.sourceEntity.typeId == 'minecraft:player' && e.id == config.scripteventNames.openInternal) {
+                let id = e.message;
+                let args2 = e.message.split(' ')
+                let UIINTERNAL = args2[0];
+                if(uiManager.hasUI(UIINTERNAL)) return uiManager.open(e.sourceEntity, UIINTERNAL, ...args2.slice(1));
+                let ui = this.db.findFirst({scriptevent: e.message.replace(/\[.*?\]/g, "").trim()});
+                if(ui) {
+                    let args = [];
+                    let argsRaw = [...e.message.matchAll(/\[(.*?)\]/g)].map(
+                        (_) => _[1]
+                    );
+                    for (const arg of argsRaw) {
+                        args.push(arg);
+                    }
+                    this.open(ui, e.sourceEntity, ...args)
+                }
+            }
+        })
         system.afterEvents.scriptEventReceive.subscribe((e) => {
             if (
                 e.sourceType === ScriptEventSource.Entity &&
@@ -1101,7 +1386,7 @@ class UIBuilder {
         let index = doc.data.buttons.findIndex((button) => button.id == btnID);
         if (index == -1) return;
         doc.data.buttons[index].conditionalActions = bool;
-        // console.warn(JSON.stringify(doc.data));
+        // // console.warn(JSON.stringify(doc.data));
         this.db.overwriteDataByID(id, doc.data);
         this.db.save();
     }
@@ -1228,7 +1513,8 @@ class UIBuilder {
                         player,
                         extraVars
                     ),
-                    doc.data.icon ? icons.resolve(doc.data.icon) : null
+                    doc.data.icon ? icons.resolve(doc.data.icon) : null,
+                    this.toasts[doc.data.theme ? doc.data.theme : 0][2]
                 )
             );
         }
@@ -1240,7 +1526,9 @@ class UIBuilder {
         description = "",
         category = "",
         requiredTag = "",
-        ensureChatClosed = false
+        ensureChatClosed = false,
+        execother = false,
+        noself = false
     ) {
         if (
             this.db.findFirst({ command: commandName.replace(/[^a-z_-]/g, "") })
@@ -1256,6 +1544,8 @@ class UIBuilder {
             ensureChatClosed,
             actions: [], // lets hope this does not end up like azalea
             subcommands: [],
+            execother,
+            noself
         });
     }
 
@@ -1353,7 +1643,7 @@ class UIBuilder {
     getAllUIs() {
         let uis = [];
         for (const ui of this.db.data) {
-            if ([0, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].includes(ui.data.type))
+            if (!([1, 2, 5].includes(ui.data.type)) && ui.data.type < 50)
                 uis.push(ui);
         }
         return uis;
@@ -1455,9 +1745,10 @@ class UIBuilder {
                 original: doc,
                 internal: true,
                 internalID: versionData.versionInfo.versionInternalID,
+                theme: doc.layout == 4 ? 68 : doc.theme ? doc.theme : 0
             };
-            console.warn(data.scriptevent)
-            // console.warn(doc2 ? "Yes" : "No")
+            // console.warn(data.scriptevent)
+            // // console.warn(doc2 ? "Yes" : "No")
             if (doc2) {
                 // if(doc.type == 0) {
                 //     data.buttons = this.mixArrays(doc.buttons, doc2.data.buttons)
@@ -1466,8 +1757,8 @@ class UIBuilder {
                 if(!doc2.data.locked)
                     this.db.overwriteDataByID(doc2.id, data);
             } else {
-                console.warn(data.scriptevent)
-                // console.warn("INSERTING")
+                // console.warn(data.scriptevent)
+                // // console.warn("INSERTING")
                 this.db.insertDocument(data);
             }
     
@@ -1806,17 +2097,17 @@ class UIBuilder {
     addButtonToGroup(id, groupIndex, buttonData) {
         const doc = this.getByID(id);
         if (!doc) {
-            // console.warn(`No document found with ID ${id}`);
+            // // console.warn(`No document found with ID ${id}`);
             return;
         }
 
         // Debug log the buttons array
-        // console.warn(`Total buttons: ${doc.data.buttons.length}`);
-        // console.warn(`Attempting to add to group at index ${groupIndex}`);
+        // // console.warn(`Total buttons: ${doc.data.buttons.length}`);
+        // // console.warn(`Attempting to add to group at index ${groupIndex}`);
 
         const group = doc.data.buttons[groupIndex];
         if (!group || group.type !== "group") {
-            // console.warn(
+            // // console.warn(
                 // `Invalid group at index ${groupIndex}. Found: ${JSON.stringify(
                 //     group
                 // )}`
@@ -1842,7 +2133,7 @@ class UIBuilder {
         group.buttons.push(newButton);
 
         // Debug log
-        // console.warn(
+        // // console.warn(
             // `Added button to group ${groupIndex}, now has ${group.buttons.length} buttons`
 // ?        );
 
@@ -1924,6 +2215,19 @@ class UIBuilder {
         });
     }
 
+    createCox(name) {
+        // folders but 💦 freaky 👅
+        let doc = this.db.findFirst({ name, type: 2 });
+        if (doc) return doc.id;
+        return this.db.insertDocument({
+            type: 2,
+            name,
+            isCocks: true, // very freaky 💦🍆
+            color: "",
+        });
+    }
+
+
     createFolder(name, folder = null) {
         let doc = this.db.data.find(_=>{
             if(_.data.type != 2) return false;
@@ -1939,6 +2243,9 @@ class UIBuilder {
             color: "",
             folder: this.db.getByID(folder) ? folder : null
         });
+    }
+    #setupScriptevents2() {
+
     }
 }
 

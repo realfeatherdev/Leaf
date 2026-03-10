@@ -5,9 +5,15 @@ import versionData from "../../../versionData";
 import { NUT_UI_TAG, NUT_UI_THEMED } from "../../preset_browser/nutUIConsts";
 import { themes } from "../../uiBuilder/cherryThemes";
 
+function nan0(number) {
+    let num = parseInt(number);
+    if(isNaN(num)) return 0;
+    return num;
+}
+
 uiManager.addUI(versionData.uiNames.CustomCommandsV2.editActions, "A", (player, actions = [], save=()=>{}, rootAction = false)=>{
     let form = new ActionForm();
-    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[25][0]}§r§fEdit Actions`)
+    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§fEdit Actions`)
     function reopen() {
         return uiManager.open(player, versionData.uiNames.CustomCommandsV2.editActions, actions, save, rootAction)
     }
@@ -25,8 +31,10 @@ uiManager.addUI(versionData.uiNames.CustomCommandsV2.editActions, "A", (player, 
         let modalForm = new ModalForm();
         modalForm.title("Add Action Group")
         modalForm.textField("Label", "Display name", "", ()=>{}, "A display name for your group")
-        modalForm.textField("Condition", "A tag", "", ()=>{}, "Same as action form button required conditions. Is required to run anything in here")
+        modalForm.textField("Condition (optional)", "A tag", "", ()=>{}, "Same as action form button required conditions. If set, will be required to run anything in here")
         modalForm.toggle("Stop Execution", false, ()=>{}, "Stop execution of actions of the group this group is inside of if condition is met.")
+        modalForm.textField("Wait time (optional)", "A number", "", ()=>{}, "Optional wait time. The player will have to wait without moving for this to run. Set to zero to disable")
+        modalForm.textField("Wait time format", "Some text", "", ()=>{}, "If wait time is enabled, use this text. Leave blank to use default. <r> = time left")
         modalForm.show(player, false, (player, response)=>{
             if(response.canceled || !response.formValues[0] || !response.formValues[1]) return reopen()
             actions.push({
@@ -34,6 +42,8 @@ uiManager.addUI(versionData.uiNames.CustomCommandsV2.editActions, "A", (player, 
                 label: response.formValues[0],
                 condition: response.formValues[1],
                 stopExec: response.formValues[2],
+                waitTime: nan0(response.formValues[3]),
+                waitFormat: response.formValues[4],
                 actions: []
             })
             return reopen();
@@ -60,7 +70,7 @@ uiManager.addUI(versionData.uiNames.CustomCommandsV2.editActions, "A", (player, 
                 form2.button(`§dEdit Action`, `textures/azalea_icons/other/blip_orange`, (player)=>{
                     let modalForm = new ModalForm();
                     modalForm.title("Code Editor")
-                    modalForm.textField("Add an action here...", "Add an action here...", action.action)
+                    modalForm.textField("Add an action here...", "Add an action here...", typeof action === "string" ? action : action.action)
                     modalForm.show(player, false, (player, response)=>{
                         if(response.canceled || !response.formValues[0]) return reopen()
                         if(isLegacyAction) {
@@ -108,6 +118,8 @@ uiManager.addUI(versionData.uiNames.CustomCommandsV2.editActions, "A", (player, 
                     modalForm.textField("Label", "Display name", actions[actionIndex].label, ()=>{}, "A display name for your group")
                     modalForm.textField("Condition", "A tag", actions[actionIndex].condition, ()=>{}, "Same as action form button required conditions. Is required to run anything in here")
                     modalForm.toggle("Stop Execution", actions[actionIndex].stopExec, ()=>{}, "Stop execution of actions of the group this group is inside of if condition is met.")
+                    modalForm.textField("Wait time (optional)", "A number", typeof actions[actionIndex].waitTime === "number" ? actions[actionIndex].waitTime.toString() : "0", ()=>{}, "Optional wait time. The player will have to wait without moving for this to run")
+                    modalForm.textField("Wait time format", "Some text", actions[actionIndex].waitFormat ? actions[actionIndex].waitFormat : "", ()=>{}, "If wait time is enabled, use this text. Leave blank to use default. <r> = time left")
                     modalForm.show(player, false, (player, response)=>{
                         if(response.canceled || !response.formValues[0] || !response.formValues[1]) return reopen()
                         let data = {
@@ -115,7 +127,9 @@ uiManager.addUI(versionData.uiNames.CustomCommandsV2.editActions, "A", (player, 
                             type: 1,
                             label: response.formValues[0],
                             condition: response.formValues[1],
-                            stopExec: response.formValues[2]
+                            stopExec: response.formValues[2],
+                            waitTime: nan0(response.formValues[3]),
+                            waitFormat: response.formValues[4],
                         }
                         actions[actionIndex] = data;
                         return reopen();

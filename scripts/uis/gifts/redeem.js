@@ -3,6 +3,7 @@ import giftCodes from "../../api/giftCodes";
 import config from "../../versionData";
 import { ModalForm } from "../../lib/form_func";
 import uiManager from "../../uiManager";
+import { handleActions } from "../CustomCommandsV2/handler";
 
 uiManager.addUI(config.uiNames.Gifts.Redeem, "Redeem", (player, error) => {
     let form = new ModalForm();
@@ -30,7 +31,11 @@ uiManager.addUI(config.uiNames.Gifts.Redeem, "Redeem", (player, error) => {
                 config.uiNames.Gifts.Redeem,
                 "You already redeemed this"
             );
-        actionParser.runAction(player, code.action);
+        if(code.actions && code.actions.length) {
+            handleActions(player, code.actions, false)
+        } else {
+            if(code.action) actionParser.runAction(player, code.action); // fallback!
+        }
         player.addTag(`used:${code.code}`);
         player.success(`Successfully redeemed code!`);
     });

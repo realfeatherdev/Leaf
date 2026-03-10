@@ -96,7 +96,7 @@ uiManager.addUI(
     "Add an item to a Chest GUI",
     (player, id, r, c, i = -1, data2, initial = true) => {
         let form = new ActionForm();
-        form.title(`${NUT_UI_TAG}§r${i > -1 ? "Editing" : "Creating"} Item`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r${i > -1 ? "Editing" : "Creating"} Item`);
         if (i >= -1) {
             let chest = uiBuilder.db.getByID(id);
             if (!chest)

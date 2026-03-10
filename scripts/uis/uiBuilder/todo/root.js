@@ -19,7 +19,7 @@ uiBuilder.db.waitLoad().then(()=>{
 
 uiManager.addUI(versionData.uiNames.UIBuilderTodo.Root, "DOTOROO", (player, completedFilter = false)=>{
     let form = new ActionForm();
-    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[25][0]}§rTodo`)
+    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rTodo`)
     form.button(`${NUT_UI_HEADER_BUTTON}§r§cBack\n§7Go back to customizer :3`, `textures/azalea_icons/2`, player=>{
         uiManager.open(player, versionData.uiNames.UIBuilderRoot);
     })

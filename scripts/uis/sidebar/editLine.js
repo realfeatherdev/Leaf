@@ -21,7 +21,7 @@ uiManager.addUI(
         if (!sidebarEditor.getLineByID(sidebarName, lineID)) return;
         let actionForm = new ActionForm();
         actionForm.title(
-            `${NUT_UI_TAG}§r` +
+            `${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r` +
                 formatStr(
                     sidebarEditor.getLineByID(sidebarName, lineID).text,
                     player

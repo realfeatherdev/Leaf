@@ -2,6 +2,12 @@ import { prismarineDb } from "../lib/prismarinedb";
 import { SegmentedStoragePrismarine } from "../prismarineDbStorages/segmented";
 import playerStorage from "./playerStorage";
 
+// (birds chirping)
+
+// where's the code
+
+// i have no FUCKING idea
+
 class ShopAPI {
     constructor() {
         this.db = prismarineDb.customStorage(

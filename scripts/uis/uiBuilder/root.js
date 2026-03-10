@@ -9,8 +9,10 @@ import moment from "../../lib/moment";
 import emojis from "../../api/emojis";
 import tabUI from "../../api/tabUI";
 import './addSubmenu.js'
+import './timer/edit.js'
 import "./settings/root.js";
 import './todo/root.js'
+import './meta.js'
 import { ActionForm, MessageForm, ModalForm } from "../../lib/form_func";
 import "./snippetBook";
 import "./trash";
@@ -44,7 +46,19 @@ import { ChestFormData } from "../../lib/chestUI.js";
 import playerStorage from "../../api/playerStorage.js";
 // Create a tab UI for the builder
 const builderTabUI = tabUI.create("uiBuilder");
+
+uiManager.addUI(versionData.uiNames.BasicInfo, "FREFER", (player)=>{
+    let modal = new ModalForm();
+    modal.title("Basic Server Info");
+    modal.textField("Server Name", "Edit your servers name...", configAPI.getProperty("ServerName2") == "Unknown Server" ? "" : configAPI.getProperty("ServerName2"), ()=>{})
+    modal.show(player, false, (player, response)=>{
+        if(response.canceled) return uiManager.open(player, versionData.uiNames.ConfigRoot)
+        configAPI.setProperty("ServerName2", response.formValues[0])
+        return uiManager.open(player, versionData.uiNames.ConfigRoot)
+    })
+})
 // only god knows what ancient remnants you are going to find in here. take this bucket for emotional support 🪣
+
 let folderColors = [
     {
         name: "Normal",
@@ -77,7 +91,7 @@ uiManager.addUI(
     "UI Builder Folders",
     (player) => {
         let form = new ActionForm();
-        form.title(`${NUT_UI_TAG}§rFolders`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rFolders`);
         form.button(
             `§aNew Folder\n§7Create a new folder`,
             `textures/azalea_icons/1`,
@@ -210,17 +224,19 @@ uiManager.addUI(
     }
 );
 function getIcon(ui) {
+    let definition = uiBuilder.definitions.find(_=>_.deftype == "ROOT" && _.type == ui.data.type)
     try {
         return ui.data.type == 15 ? `textures/azalea_icons/other/terrain` : ui.data.type == 13 ? `textures/azalea_icons/other/book` :
-        ui.data.type ==14 ? `textures/items/zones` : ui.data.type == 11
+        ui.data.type ==14 ? ui.data.disabled ? `textures/items/zones_disabled` :  ui.data.isRef ? `textures/items/zones_ref` : `textures/items/zones` : ui.data.type == 11
         ? `textures/azalea_icons/send_req`
         : ui.id == 1719775088275
-        ? `textures/azalea_icons/icontextures/uwu`
+        ? `textures/ui/boykisser`
         : ui.data.icon
         ? icons.resolve(ui.data.icon)
         : ui.data.type == 2
         ? ui.data.isBox
             ? `textures/azalea_icons/other/package`
+            : ui.data.isCocks ? `textures/coxes`
             : `textures/azalea_icons/other/folder`
         : ui.data.type == 12
         ? `textures/azalea_icons/other/location`
@@ -244,6 +260,7 @@ function getIcon(ui) {
         ? `textures/azalea_icons/other/inventory`
         : ui.data.type == 3
         ? `textures/azalea_icons/other/keyboard`
+        : definition && definition.defaultIcon ? definition.defaultIcon
         : `textures/azalea_icons/other/node`;
     } catch {
         return `textures/azalea_icons/other/linux`
@@ -281,6 +298,7 @@ function getBtnText(ui, hideSubtext = false) {
                     : `Event: ${eventsData[ui.data.eventType].name}`
                 : ui.data.type == 4
                 ? ui.data.title
+                : definition && definition.getName ? definition.getName(ui)
                 : ui.data.name
         }${ui.data.type == 6 ? " §r§7[§fTOAST§7] " : ui.data.type == 14 ? " §r§e[§6ZONE§e] " : ""}${
             ui.data.pinned && !ui.data.internal ? ` \uE174` : ""
@@ -594,7 +612,7 @@ uiManager.addUI(
                     }
                 );
             }
-            // console.warn(`meow meow meow!`);
+            // // console.warn(`meow meow meow!`);
 
             chest.button(
                 2 * 9,
@@ -605,7 +623,7 @@ uiManager.addUI(
                 false,
                 () => {
                     // page =
-                    // console.warn(`Page Count: ${pageCount}, Page: ${page}`);
+                    // // console.warn(`Page Count: ${pageCount}, Page: ${page}`);
                     uiManager.open(
                         player,
                         config.uiNames.UIBuilderFolder,
@@ -623,7 +641,7 @@ uiManager.addUI(
                 false,
                 () => {
                     // page =
-                    // console.warn(`Page Count: ${pageCount}, Page: ${page}`);
+                    // // console.warn(`Page Count: ${pageCount}, Page: ${page}`);
                     uiManager.open(
                         player,
                         config.uiNames.UIBuilderFolder,
@@ -672,7 +690,7 @@ uiManager.addUI(
                 false,
                 () => {
                     let newForm = new ActionForm();
-                    newForm.title(`${NUT_UI_TAG}§rAdd UI To Folder`);
+                    newForm.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rAdd UI To Folder`);
                     newForm.button(
                         `${NUT_UI_HEADER_BUTTON}§r§cGo back`,
                         `textures/azalea_icons/2`,
@@ -726,7 +744,7 @@ uiManager.addUI(
             chest.show(player).then(() => {});
             return;
         }
-        form.title(`${NUT_UI_TAG}§r${folderData.data.name}`);
+        form.title(`${!folderData.data.isCocks ? `${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r` : ``}${folderData.data.name}`);
         form.button(
             `${NUT_UI_HEADER_BUTTON}§r§cGo back`,
             `textures/azalea_icons/2`,
@@ -739,7 +757,7 @@ uiManager.addUI(
             null,
             (player) => {
                 let newForm = new ActionForm();
-                newForm.title(`${NUT_UI_TAG}§rAdd UI To Folder`);
+                newForm.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rAdd UI To Folder`);
                 newForm.button(
                     `${NUT_UI_HEADER_BUTTON}§r§cGo back`,
                     `textures/azalea_icons/2`,
@@ -944,7 +962,7 @@ uiManager.addUI(config.uiNames.UIBuilderLeaf, "a", (player) => {
         }
     );
     for (const ui of uis) {
-        console.warn(ui.data.scriptevent)
+        // console.warn(ui.data.scriptevent)
         root.button(getBtnText(ui), getIcon(ui), (player) => {
             uiManager.open(player, config.uiNames.UIBuilderEdit, ui.id);
         });
@@ -955,7 +973,7 @@ uiManager.addUI(config.uiNames.UIBuilderLeaf, "a", (player) => {
 uiManager.registerBuilder(config.uiNames.UIBuilderRoot, (player) => {
     const ui = new UI()
         .setCherryUI(true)
-        .setCherryUITheme(25)
+        .setCherryUITheme(68)
         .setTitle("Customizer");
 
     let doc = uiBuilder.db.findFirst({type: 2048});
@@ -973,23 +991,35 @@ uiManager.registerBuilder(config.uiNames.UIBuilderRoot, (player) => {
     ui.addButton(
         new Button()
             .setText(
-                `${NUT_UI_HEADER_BUTTON}§r§l§e§f§1§r§r§fNew creation\n§r§7Make a new creation`
+                `§r§l§e§f§1§r§r§aNew creation\n§r§7Make a new creation`
             )
             .setIcon("textures/azalea_icons/other/add")
             .setCallback((player) =>
                 uiManager.open(player, config.uiNames.UIBuilderAddSubmenu)
             )
     );
-
+    // furititty imma brb 30 mins luv u bye
     ui.addButton(
         new Button()
-            .setText(`${NUT_UI_HEADER_BUTTON}§r§vSettings\n§7Configure misc settings within customizer. Idk either tbqh`)
+            .setText(`§r§vSettings\n§7Configure misc settings within customizer.`)
             .setIcon("textures/items/config_ui")
             .setCallback((player) =>
                 uiManager.open(player, versionData.uiNames.CustomizerSettings)
             )
     );
+    
+    // ui.addDivider()
 
+    // THIS IS SO MUCH FUCKING BETTER
+    // mwhat
+    // move settings and new creation out of conrer
+    // it was an option to do that yk...
+    // couldve just enabled it by default
+    // too bad because who the fguck wants it in the corner
+    // i do
+    // sure
+    // bring back cherrycloud
+    
     // ui.addButton(
     //     new Button()
     //         .setText(`${NUT_UI_HEADER_BUTTON}§r§dZones\n§7Configure special zones on your server, along with permissions inside of them.`)
@@ -999,32 +1029,32 @@ uiManager.registerBuilder(config.uiNames.UIBuilderRoot, (player) => {
     //         )
     // );
 
-    ui.addButton(
-        new Button()
-            .setText(`${NUT_UI_HEADER_BUTTON}§r§eChat Ranks\n§7Edit this servers chat ranks configuration`)
-            .setIcon("textures/azalea_icons/other/dialogue")
-            .setCallback((player) =>
-                uiManager.open(player, versionData.uiNames.ChatRanks.Main)
-            )
-    );
+    // ui.addButton(
+    //     new Button()
+    //         .setText(`${NUT_UI_HEADER_BUTTON}§r§eChat Ranks\n§7Edit this servers chat ranks configuration`)
+    //         .setIcon("textures/azalea_icons/other/dialogue")
+    //         .setCallback((player) =>
+    //             uiManager.open(player, versionData.uiNames.ChatRanks.Main)
+    //         )
+    // );
 
-    ui.addButton(
-        new Button()
-            .setText(`${NUT_UI_HEADER_BUTTON}§r§cRole Editor\n§7Edit permissions on your server with ease`)
-            .setIcon("textures/items/lock")
-            .setCallback((player) =>
-                uiManager.open(player, versionData.uiNames.RoleEditor.Root)
-            )
-    );
+    // ui.addButton(
+    //     new Button()
+    //         .setText(`${NUT_UI_HEADER_BUTTON}§r§cRole Editor\n§7Edit permissions on your server with ease`)
+    //         .setIcon("textures/items/lock")
+    //         .setCallback((player) =>
+    //             uiManager.open(player, versionData.uiNames.RoleEditor.Root)
+    //         )
+    // );
 
-    ui.addButton(
-        new Button()
-            .setText(`${NUT_UI_HEADER_BUTTON}§r§nCommunity Hub\n§7View community presets and some official guides!\n§7Visit §ehttps://leaf.trashdev.org §7for full docs`)
-            .setIcon("textures/minidevs/gay")
-            .setCallback((player) =>
-                uiManager.open(player, versionData.uiNames.Help)
-            )
-    );
+    // ui.addButton(
+    //     new Button()
+    //         .setText(`${NUT_UI_HEADER_BUTTON}§r§nCommunity Hub\n§7View community presets and some official guides!\n§7Visit §ehttps://leaf.trashdev.org §7for full docs`)
+    //         .setIcon("textures/minidevs/gay")
+    //         .setCallback((player) =>
+    //             uiManager.open(player, versionData.uiNames.Help)
+    //         )
+    // );
 
     // ui.addButton(
     //     new Button()
@@ -1129,9 +1159,28 @@ uiManager.registerBuilder(config.uiNames.UIBuilderRoot, (player) => {
         );
     }
 
-    if (folders.filter((_) => !_.data.isBox).length) ui.addLabel("§6Folders:");
+    if (folders.filter((_) => _.data.isCocks).length) ui.addLabel("§6Car§erot§as");
+    for (const folder of folders) {
+        if (!folder.data.isCocks) continue;
+        ui.addButton(
+            new Button()
+                .setText(`§3${folder.data.name}\n§7Click to open carrot`)
+                .setIcon(getIcon(folder))
+                .setCallback((player) => {
+                    uiManager.open(
+                        player,
+                        config.uiNames.UIBuilderFolder,
+                        folder.id
+                    );
+                })
+        );
+    }
+
+
+    if (folders.filter((_) => !_.data.isBox && !_.data.isCocks).length) ui.addLabel("§6Folders:");
     for (const folder of folders) {
         if (folder.data.isBox) continue;
+        if (folder.data.isCocks) continue;
         if (folder.data.folder && uiBuilder.db.getByID(folder.data.folder)) continue;
         let itemCount = uiBuilder.db.findDocuments({folder: folder.id}).filter(_=>_.data.type != 2).length;
         let subfolderCount = uiBuilder.db.findDocuments({folder: folder.id, type: 2}).length;

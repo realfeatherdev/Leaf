@@ -34,7 +34,7 @@ system.runInterval(() => {
 
 uiManager.addUI("nametags_plus_config", "config", (player) => {
     let form = new ActionForm();
-    form.title(`${NUT_UI_TAG}§rNametags+`);
+    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rNametags+`);
     form.button(
         `${
             configAPI.getProperty("NametagPlusEnabled")

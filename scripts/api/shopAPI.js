@@ -54,6 +54,11 @@ class ShopAPI {
             description: "",
         });
     }
+    setCherryTheme(shopID, cherryTheme) {
+        let shop = this.shops.getByID(shopID)
+        shop.data.cherryTheme = cherryTheme
+        return this.shops.overwriteDataByID(shop.id,shop.data)
+    }
     createAdminShop(title) {
         return this.shops.insertDocument({
             type: "ADMIN_SHOP",

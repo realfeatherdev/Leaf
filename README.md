@@ -17,16 +17,16 @@ We think customization is very important. You can customize many things in leaf.
 ![Divider](./readme_assets/divider.png)
 
 # Features
-- 🎨 Custom UIs
-- 📃 Events that you can customize. Run commands whenever players kill another player.
-- 💼 Chest GUIs
-- 💻 Tab UIs
-- 🔗 Bind commands to blocks, items, and entities
-- 🏝️ Land claims
-- 📊 Leaderboards
-- 🔨 Reports
-- 💬 Good Community
-- ➕ And more!
+- Custom UIs
+- Events that you can customize. Run commands whenever players kill another player.
+- Chest GUIs
+- Tab UIs
+- Bind commands to blocks, items, and entities
+- Land claims
+- Leaderboards
+- Reports
+- Good Community
+- And more!
 
 # Installation
 Go to the [MCBETools](https://mcbetools.com/s/leaf) page or the [MCPEDL](https://mcpedl.com/leaf) page
@@ -41,4 +41,4 @@ Join the [Discord Server](https://discord.gg/EU7dcxUr2F) for support and to get 
 
 ![Divider](./readme_assets/divider.png)
 
-✨ Addon made by TrashyKitty! :3 ✨
+Addon made by TrashyKitty! :3

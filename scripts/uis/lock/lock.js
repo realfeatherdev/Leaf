@@ -14,7 +14,7 @@ uiManager.addUI(config.uiNames.Lock, "defc", (player, selectedSlot) => {
         {
             option: "Password",
             callback() {},
-        },
+        }
     ]);
     modalForm.textField("Password", "Passcode (if mode is set to password)");
     modalForm.submitButton("Create/Update Lock");

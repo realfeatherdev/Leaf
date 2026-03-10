@@ -16,7 +16,8 @@
                             "leaf:block_editor",
                             "leaf:customizer",
                             "leaf:admin_menu",
-                            "leaf:chunk_border"
+                            "leaf:chunk_border",
+                            "leaf:zone_border"
                         ]
                     },
                     {

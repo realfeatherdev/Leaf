@@ -8,7 +8,9 @@ import {
 } from "@minecraft/server";
 import * as mc from "@minecraft/server";
 import * as ui from "@minecraft/server-ui";
-import { transferPlayer } from "@minecraft/server-admin";
+// import { transferPlayer } from "@minecraft/server-admin";
+// meow
+// let a = false;
 // import * as diag from '@minecraft/diagnostics';
 // diag.sentry.init({
 //     dsn: "https://5732d97ad811d7a6d412be73c7b3f45f@o4509489467359232.ingest.us.sentry.io/4509489474437120"
@@ -16,7 +18,7 @@ import { transferPlayer } from "@minecraft/server-admin";
 let events = {};
 let stasherID = "leaf:item_stasher";
 // if (system.beforeEvents.startup) {
-// // console.warn("A")
+// // // console.warn("A")
 system.beforeEvents.startup.subscribe(async (init) => {
     init.blockComponentRegistry.registerCustomComponent("leaf:code_block", {
         onTick(arg0, arg1) {
@@ -25,8 +27,8 @@ system.beforeEvents.startup.subscribe(async (init) => {
                 let db = libPDB.positionalDb.getPosition(arg0.block.location);
                 // if(db.has("code")) {
                 //     let code = db.get("code")
-                //     // console.warn(arg0.block.location)
-                //     // console.warn(code)
+                //     // // console.warn(arg0.block.location)
+                //     // // console.warn(code)
                 // }
                 let redstone = arg0.block.getRedstonePower() || 0;
                 if (redstone > 0) {
@@ -119,10 +121,46 @@ system.beforeEvents.startup.subscribe(async (init) => {
             if(origin.sourceEntity) origin.sourceEntity.sendMessage(status ? "§aDeleted zone!" : "§cZone doesnt exist")
         })
     })
+    init.customCommandRegistry.registerCommand({
+        permissionLevel: CommandPermissionLevel.GameDirectors,
+        description: "Disable a zone",
+        name: "leaf:disablezone",
+        mandatoryParameters: [
+            {
+                name: "name",
+                type: CustomCommandParamType.String
+            },
+        ]
+    }, (origin, name)=>{
+        system.run(async ()=>{
+            let zonesModule = await import("./api/zones");
+            let status = zonesModule.default.disableZone(name);
+            if(origin.sourceEntity) origin.sourceEntity.sendMessage(status ? "§aDeleted zone!" : "§cZone doesnt exist")
+        })
+    })
+    init.customCommandRegistry.registerCommand({
+        permissionLevel: CommandPermissionLevel.GameDirectors,
+        description: "Enable a zone",
+        name: "leaf:enablezone",
+        mandatoryParameters: [
+            {
+                name: "name",
+                type: CustomCommandParamType.String
+            },
+        ]
+    }, (origin, name)=>{
+        system.run(async ()=>{
+            let zonesModule = await import("./api/zones");
+            let status = zonesModule.default.enableZone(name);
+            if(origin.sourceEntity) origin.sourceEntity.sendMessage(status ? "§aDeleted zone!" : "§cZone doesnt exist")
+        })
+    })
+
     init.customCommandRegistry.registerEnum("leaf:invite_type", [
         "send",
         "accept",
         "deny",
+        "cancel"
     ]);
 
     init.customCommandRegistry.registerCommand(
@@ -154,30 +192,40 @@ system.beforeEvents.startup.subscribe(async (init) => {
                 origin,
                 invite_type,
                 invite_name,
-                sender,
-                receiver
+                sender[0],
+                receiver[0]
             );
         }
     );
+    init.customCommandRegistry.registerEnum("leaf:channel_action_type", [
+        "list",
+        "info",
+        "join"
+    ]);
+    init.customCommandRegistry.registerCommand(
+        {
+            name: "leaf:channel",
+            description: "Manage your current channel.",
+            permissionLevel: CommandPermissionLevel.Any,
+            mandatoryParameters: [
+                {
+                    type: CustomCommandParamType.Enum,
+                    name: "leaf:channel_action_type",
+                }
+            ],
+            optionalParameters: [
+                {
+                    type: CustomCommandParamType.String,
+                    name: "channel_name",
+                }
+            ]
+        },
+        (origin, channel_action_type, channel_name) => {
+            uiBuilder.default.channelCmd(origin, channel_action_type, channel_name)
+        }
+    );
 
-    // init.customCommandRegistry.registerCommand(
-    //     {
-    //         name: "leaf:femboy",
-    //         description: "UwU",
-    //         permissionLevel: CommandPermissionLevel.Any,
-    //         mandatoryParameters: [
-    //             {
-    //                 type: CustomCommandParamType.Enum,
-    //                 name: "leaf:femboy_type",
-    //             },
-    //         ],
-    //     },
-    //     (origin) => {
-    //         if (origin.sourceType == "Entity") {
-    //             origin.sourceEntity.sendMessage("MEOWWW");
-    //         }
-    //     }
-    // );
+
     init.customCommandRegistry.registerCommand(
         {
             name: "leaf:tell_formatted",
@@ -220,6 +268,37 @@ system.beforeEvents.startup.subscribe(async (init) => {
             main();
         }
     );
+
+    init.customCommandRegistry.registerCommand(
+        {
+            name: "leaf:tell_formatted_channel",
+            description: "Send a leaf formatted message to any channel",
+            permissionLevel: CommandPermissionLevel.GameDirectors,
+            mandatoryParameters: [
+                {
+                    name: "channel",
+                    type: CustomCommandParamType.String,
+                },
+                {
+                    name: "message",
+                    type: CustomCommandParamType.String,
+                },
+            ],
+            optionalParameters: [
+                {
+                    name: "origin_pos",
+                    type: CustomCommandParamType.Location
+                }
+            ]
+        },
+        (origin, channel, str, origin_pos) => {
+            async function main() {
+                uiBuilder.default.broadcastToChannel(channel, str, [], origin && origin.sourceEntity && origin.sourceEntity.typeId == "minecraft:player" ? origin.sourceEntity : null, true, origin_pos)
+            }
+            main();
+        }
+    );
+
 
     init.customCommandRegistry.registerCommand(
         {
@@ -284,6 +363,36 @@ system.beforeEvents.startup.subscribe(async (init) => {
 
     init.customCommandRegistry.registerCommand(
         {
+            name: "leaf:pers_point_del",
+            description: "Persistently store a point",
+            permissionLevel: CommandPermissionLevel.GameDirectors,
+            mandatoryParameters: [
+                {
+                    type: CustomCommandParamType.EntitySelector,
+                    name: "entities",
+                },
+                {
+                    type: CustomCommandParamType.String,
+                    name: "name",
+                },
+            ],
+        },
+        (origin, entities, position, name) => {
+            system.run(() => {
+                for (const entity of entities) {
+                    entity.setDynamicProperty(`perspointloc:${name}`, undefined);
+                    entity.setDynamicProperty(
+                        `perspointdim:${name}`,
+                        undefined
+                    );
+                }
+            });
+        }
+    );
+
+
+    init.customCommandRegistry.registerCommand(
+        {
             name: "leaf:pers_point_tp",
             description: "Teleport to persistent point",
             permissionLevel: CommandPermissionLevel.GameDirectors,
@@ -317,6 +426,98 @@ system.beforeEvents.startup.subscribe(async (init) => {
             });
         }
     );
+
+    init.customCommandRegistry.registerCommand(
+        {
+            name: "leaf:g_pers_point_set",
+            description: "Persistently store a point",
+            permissionLevel: CommandPermissionLevel.GameDirectors,
+            mandatoryParameters: [
+                {
+                    type: CustomCommandParamType.Location,
+                    name: "position",
+                },
+                {
+                    type: CustomCommandParamType.String,
+                    name: "name",
+                },
+            ],
+        },
+        (origin, entities, position, name) => {
+            system.run(() => {
+                world.setDynamicProperty(`perspointloc:${name}`, position);
+                world.setDynamicProperty(
+                    `perspointdim:${name}`,
+                    origin && origin.sourceEntity ? origin.sourceEntity.dimension.id : "minecraft:overworld"
+                );
+            });
+        }
+    );
+
+    init.customCommandRegistry.registerCommand(
+        {
+            name: "leaf:g_pers_point_del",
+            description: "Persistently store a point",
+            permissionLevel: CommandPermissionLevel.GameDirectors,
+            mandatoryParameters: [
+                {
+                    type: CustomCommandParamType.EntitySelector,
+                    name: "entities",
+                },
+                {
+                    type: CustomCommandParamType.String,
+                    name: "name",
+                },
+            ],
+        },
+        (origin, entities, position, name) => {
+            system.run(() => {
+                world.setDynamicProperty(`perspointloc:${name}`, undefined);
+                world.setDynamicProperty(
+                    `perspointdim:${name}`,
+                    undefined
+                );
+            });
+        }
+    );
+
+
+    init.customCommandRegistry.registerCommand(
+        {
+            name: "leaf:g_pers_point_tp",
+            description: "Teleport to persistent point",
+            permissionLevel: CommandPermissionLevel.GameDirectors,
+            mandatoryParameters: [
+                {
+                    type: CustomCommandParamType.EntitySelector,
+                    name: "entities",
+                },
+                {
+                    type: CustomCommandParamType.String,
+                    name: "name",
+                },
+            ],
+        },
+        (origin, entities, name) => {
+            system.run(() => {
+                for (const entity of entities) {
+                    if (entity.getDynamicProperty(`perspointloc:${name}`)) {
+                        entity.teleport(
+                            world.getDynamicProperty(`perspointloc:${name}`),
+                            {
+                                dimension: world.getDimension(
+                                    world.getDynamicProperty(
+                                        `perspointdim:${name}`
+                                    )
+                                ),
+                            }
+                        );
+                    }
+                }
+            });
+        }
+    );
+
 
     init.customCommandRegistry.registerCommand(
         {
@@ -390,34 +591,34 @@ system.beforeEvents.startup.subscribe(async (init) => {
         }
     );
 
-    init.customCommandRegistry.registerCommand(
-        {
-            name: "leaf:transferserver",
-            description: "Transfer player to another server",
-            permissionLevel: CommandPermissionLevel.GameDirectors,
-            mandatoryParameters: [
-                {
-                    type: CustomCommandParamType.PlayerSelector,
-                    name: "players",
-                },
-                {
-                    type: CustomCommandParamType.String,
-                    name: "host",
-                },
-                {
-                    type: CustomCommandParamType.Integer,
-                    name: "port",
-                },
-            ],
-        },
-        (origin, players, host, port) => {
-            system.run(() => {
-                for (const player of players) {
-                    transferPlayer(player, { hostname: host, port });
-                }
-            });
-        }
-    );
+    // init.customCommandRegistry.registerCommand(
+    //     {
+    //         name: "leaf:transferserver",
+    //         description: "Transfer player to another server",
+    //         permissionLevel: CommandPermissionLevel.GameDirectors,
+    //         mandatoryParameters: [
+    //             {
+    //                 type: CustomCommandParamType.PlayerSelector,
+    //                 name: "players",
+    //             },
+    //             {
+    //                 type: CustomCommandParamType.String,
+    //                 name: "host",
+    //             },
+    //             {
+    //                 type: CustomCommandParamType.Integer,
+    //                 name: "port",
+    //             },
+    //         ],
+    //     },
+    //     (origin, players, host, port) => {
+    //         system.run(() => {
+    //             for (const player of players) {
+    //                 transferPlayer(player, { hostname: host, port });
+    //             }
+    //         });
+    //     }
+    // );
 
     init.customCommandRegistry.registerCommand(
         {
@@ -457,15 +658,24 @@ system.beforeEvents.startup.subscribe(async (init) => {
             ],
         },
         (origin, players, inventory_name) => {
-            system.run(async () => {
-                for (const player of players) {
-                    await itemdb.saveInventory(
-                        player,
-                        `PLAYER_${player.id}_${inventory_name}`
-                    );
-                    return;
-                }
-            });
+            (async ()=>{
+                let itemdb = await import("./api/itemdb.js");
+
+                // // console.warn(itemdb)
+                system.run(() => {
+                    let thing = async() =>{
+                    for (const player of players) {
+                        await itemdb.saveInventory(
+                            player,
+                            `PLAYER_${player.id}_${inventory_name}`
+                        );
+                    }
+
+                    }
+                    thing()
+                });
+    
+            })()
         }
     );
 
@@ -486,15 +696,19 @@ system.beforeEvents.startup.subscribe(async (init) => {
             ],
         },
         (origin, players, inventory_name) => {
-            system.run(async () => {
-                for (const player of players) {
-                    await itemdb.deleteInventory(
-                        player,
-                        `PLAYER_${player.id}_${inventory_name}`
-                    );
-                    return;
-                }
-            });
+            (async ()=>{
+                let itemdb = await import("./api/itemdb.js");
+
+                system.run(async () => {
+                    for (const player of players) {
+                        await itemdb.deleteInventory(
+                            player,
+                            `PLAYER_${player.id}_${inventory_name}`
+                        );
+                        return;
+                    }
+                });
+            })()
         }
     );
 
@@ -511,13 +725,16 @@ system.beforeEvents.startup.subscribe(async (init) => {
             ],
         },
         (origin, inventory_name) => {
-            system.run(async () => {
-                await itemdb.deleteInventory(
-                    player,
-                    `GLOBAL_${inventory_name}`
-                );
-                return;
-            });
+            (async ()=>{
+                let itemdb = await import("./api/itemdb.js");
+                system.run(async () => {
+                    await itemdb.deleteInventory(
+                        player,
+                        `GLOBAL_${inventory_name}`
+                    );
+                    return;
+                });
+            })()
         }
     );
 
@@ -538,23 +755,26 @@ system.beforeEvents.startup.subscribe(async (init) => {
             ],
         },
         (origin, players, inventory_name) => {
-            system.run(async () => {
-                for (const player of players) {
-                    try {
-                        await itemdb.loadInventory(
-                            player,
-                            `PLAYER_${player.id}_${inventory_name}`
-                        );
-    
-                    } catch {
-                        let container = players[0].getComponent('inventory').container;
-                        // if(!(container instanceof mc.Container)) return;
-                        for(let i = 0;i < container.size;i++) {
-                            container.setItem(i);
+            (async ()=>{
+                let itemdb = await import("./api/itemdb.js");
+                system.run(async () => {
+                    for (const player of players) {
+                        try {
+                            await itemdb.loadInventory(
+                                player,
+                                `PLAYER_${player.id}_${inventory_name}`
+                            );
+        
+                        } catch(e) {
+                            let container = players[0].getComponent('inventory').container;
+                            // if(!(container instanceof mc.Container)) return;
+                            for(let i = 0;i < container.size;i++) {
+                                container.setItem(i);
+                            }
                         }
                     }
-                }
-            });
+                });
+            })()
         }
     );
 
@@ -576,15 +796,18 @@ system.beforeEvents.startup.subscribe(async (init) => {
             ],
         },
         (origin, players, inventory_name) => {
-            system.run(async () => {
-                for (const player of players) {
-                    await itemdb.saveInventory(
-                        player,
-                        `GLOBAL_${inventory_name}`
-                    );
-                    return;
-                }
-            });
+            (async ()=>{
+                let itemdb = await import("./api/itemdb.js");
+                system.run(async () => {
+                    for (const player of players) {
+                        await itemdb.saveInventory(
+                            player,
+                            `GLOBAL_${inventory_name}`
+                        );
+                        return;
+                    }
+                });
+            })()
         }
     );
 
@@ -809,7 +1032,7 @@ system.beforeEvents.startup.subscribe(async (init) => {
     init.customCommandRegistry.registerCommand(
         {
             name: "leaf:open",
-            description: "Open custom UIs",
+            description: "Open UIs",
             permissionLevel: CommandPermissionLevel.GameDirectors,
             mandatoryParameters: [
                 {
@@ -825,7 +1048,7 @@ system.beforeEvents.startup.subscribe(async (init) => {
         (origin, players, scriptevent) => {
             system.run(() => {
                 for (const player of players) {
-                    player.runCommand(`scriptevent leaf:open ${scriptevent}`);
+                    player.runCommand(`scriptevent leaf:open_command_internal ${scriptevent}`);
                 }
             });
         }
@@ -857,7 +1080,7 @@ system.beforeEvents.startup.subscribe(async (init) => {
                 if (!render_as || !render_as.length) return;
 
                 for (const player of show_to) {
-                    // console.warn("TEST")
+                    // // console.warn("TEST")
                     let ui = uiBuilder.default.db.findFirst({
                         type: 0,
                         scriptevent,
@@ -957,22 +1180,30 @@ system.beforeEvents.startup.subscribe(async (init) => {
 
     // })
     // }
-    // const formatting = await import("./api/azaleaFormatting.js");
+    const formatting = await import("./api/azaleaFormatting.js");
 
-    let config = await import("./api/config/configAPI.js");
     // config.default.registerProperty(
     //     "Activated",
     //     config.default.Types.Boolean,
     //     false
     // );
+    // let config;
+    // let worldTags;
+    // let normalForm;
+    // let itemdb;
+    // let libPDB;
+    // let uiBuilder;
+    // system.runTimeout(async () => {
+    let config = await import("./api/config/configAPI.js");
     let worldTags = await import("./worldTags.js");
     let normalForm = await import("./api/openers/normalForm.js");
     let itemdb = await import("./api/itemdb.js");
     let libPDB = await import("./lib/prismarinedb.js");
+    let uiBuilder = await import("./api/uiBuilder.js");
+
     // let SegmentedStoragePrismarine = await import(
     //     "./prismarineDbStorages/segmented.js"
     // );
-    let uiBuilder = await import("./api/uiBuilder.js");
 
     // uiBuilder.scriptEnvTypes
     // let {fuck} = await import("./randomAssStorageDumps.js");
@@ -985,7 +1216,7 @@ system.beforeEvents.startup.subscribe(async (init) => {
     // }
 });
 // }
-await system.waitTicks(1);
+await system.waitTicks(0);
 
 let NUT_UI_TAG = "§f§0§0";
 let NUT_UI_LEFT_HALF = "§p§1§2";
@@ -1034,12 +1265,12 @@ export function showSetupUI(player, backCmd = null) {
             player.runCommand(backCmd)
             return;
         }
-        if (res.canceled) return form.show(player).then(yes);
-        if (res.selection == 0) {
-            player.success("Thank you for using leaf!");
-            player.playSound("random.levelup");
-            config.default.setProperty("Activated2", true);
-        }
+        // if (res.canceled) return form.show(player).then(yes);
+        // if (res.selection == 0) {
+        player.success("Thank you for using leaf!");
+        player.playSound("random.levelup");
+        // config.default.setProperty("Activated2", true);
+        // }
     }
     form.show(player).then(yes);
 }
@@ -1048,55 +1279,58 @@ system.afterEvents.scriptEventReceive.subscribe(e=>{
         showSetupUI(e.sourceEntity, e.message ? e.message : null)
     }
 })
-let config = await import("./api/config/configAPI.js");
-config.default.registerProperty(
-    "Activated2",
-    config.default.Types.Boolean,
-    false
-);
+// config.default.registerProperty(
+//     "Activated2",
+//     config.default.Types.Boolean,
+//     false
+// );
 
-config.default.registerProperty(
-    "ConfigAPI:ExperimentalEnums",
-    config.default.Types.Boolean,
-    false
-);
-config.default.registerProperty(
-    "ConfigAPI:EnableDevTools",
-    config.default.Types.Boolean,
-    false
-);
-config.default.registerProperty(
-    "Leaf:GenericRulebookUI",
-    config.default.Types.Boolean,
-    false
-)
-config.default.registerProperty(
-    "Leaf:GenericRulebookUILines",
-    config.default.Types.List,
-    [],
-    {
-        editor: "leafgui/generic_string_list_editor"
-    }
-);
+// config.default.registerProperty(
+//     "ConfigAPI:ExperimentalEnums",
+//     config.default.Types.Boolean,
+//     false
+// );
+// config.default.registerProperty(
+//     "ConfigAPI:EnableDevTools",
+//     config.default.Types.Boolean,
+//     false
+// );
+// config.default.registerProperty(
+//     "Leaf:GenericRulebookUI",
+//     config.default.Types.Boolean,
+//     false
+// )
+// config.default.registerProperty(
+//     "Leaf:GenericRulebookUILines",
+//     config.default.Types.List,
+//     [],
+//     {
+//         editor: "leafgui/generic_string_list_editor"
+//     }
+// );
 
-config.default.db.waitLoad().then(() => {
-    system.runTimeout(() => {
-        if (
-            world.getPlayers().length > 0 &&
-            (!config.default.getProperty("Activated2"))
-        ) {
-            showSetupUI(world.getPlayers()[0]);
-        }
-    }, 100);
+// config.default.db.waitLoad().then(() => {
+    // system.runTimeout(() => {
+        // if (
+            // world.getPlayers().length > 0 &&
+            // (!config.default.getProperty("Activated2"))
+        // ) {
+            // showSetupUI(world.getPlayers()[0]);
+        // }
+    // }, 100);
 
-    world.afterEvents.playerSpawn.subscribe((e) => {
-        if (config.default.getProperty("Activated2")) return;
-        if(e.player.playerPermissionLevel < 2) return;
-        showSetupUI(e.player);
-    });
-});
+    // world.afterEvents.playerSpawn.subscribe((e) => {
+        // if (config.default.getProperty("Activated2")) return;
+        // if(e.player.playerPermissionLevel < 2) return;
+        // showSetupUI(e.player);
+    // });
+// });
 
 function setup() {}
-
-// await system.waitTicks(1)
+//aaaaaaaa
+//aaaa
+await system.waitTicks(0)
+// system.runTimeout(()=>{
 await import("./main.js");
+// },10)
+// test

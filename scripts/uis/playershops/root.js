@@ -17,7 +17,7 @@ uiManager.addUI(
             : featuredOnly
             ? `Featured Player Shops`
             : `All Player Shops`;
-        form.title(`${NUT_UI_TAG}§r§f${myTitle}`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§f${myTitle}`);
         insertBackButton(form, backButton);
         let pshops = shopAPI.shops.findDocuments({ type: "PLAYER_SHOP" });
         form.button(
@@ -85,7 +85,7 @@ uiManager.addUI(
     "Player Shops",
     (player, backButton) => {
         let form = new ActionForm();
-        form.title(`${NUT_UI_TAG}§r§fPlayer Shops`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§r§fPlayer Shops`);
         insertBackButton(form, backButton);
 
         //let pshops = shopAPI.shops.findDocuments({type:"PLAYER_SHOP"});

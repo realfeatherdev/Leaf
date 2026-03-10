@@ -85,7 +85,7 @@ uiManager.addUI(
 
         if (!data.type) {
             let form = new ActionForm();
-            form.title(NUT_UI_TAG+NUT_UI_THEMED+themes[25][0]+"§rSelect control type");
+            form.title(NUT_UI_TAG+NUT_UI_THEMED+themes[68][0]+"§rSelect control type");
             form.button(
                 `§6Divider\n§7Separator line`,
                 `textures/azalea_icons/other/door`,
@@ -222,7 +222,7 @@ uiManager.addUI(
                 }
             );
             form.button(
-                `§cSlider\n§c(Using score)`,
+                `§cSlider\n§7(Using score)`,
                 `textures/azalea_icons/GUIMaker/ModalsV2/Slider score`,
                 (player) => {
                     data.type = `slider-using-score`;
@@ -238,7 +238,7 @@ uiManager.addUI(
                 }
             );
             form.button(
-                `§cSlider\n§c(Using command)`,
+                `§cSlider\n§7(Using command)`,
                 `textures/azalea_icons/GUIMaker/ModalsV2/Slider command`,
                 (player) => {
                     data.type = `slider-using-command`;
@@ -316,7 +316,20 @@ uiManager.addUI(
                     );
                 });
             });
-            form.button(`Set Action`, null, (player) => {
+            form.button(`Set Actions`, null, (player) => {
+                let newActions = data.action ? Array.isArray(data.action) ? data.action : [data.action] : [];
+                uiManager.open(player, versionData.uiNames.CustomCommandsV2.editActions, newActions, (res)=>{
+                    data.action = res;
+                    return uiManager.open(
+                        player,
+                        versionData.uiNames.Modal.AddControl,
+                        id,
+                        controlIndex,
+                        data,
+                        tempData
+                    );
+                })
+                return;
                 let modal = new ModalForm();
                 modal.title("Code Editor")
                 modal.textField(
@@ -458,6 +471,19 @@ uiManager.addUI(
                 });
             });
             form.button(`Set Action`, null, (player) => {
+                let newActions = data.action ? Array.isArray(data.action) ? data.action : [data.action] : [];
+                uiManager.open(player, versionData.uiNames.CustomCommandsV2.editActions, newActions, (res)=>{
+                    data.action = res;
+                    return uiManager.open(
+                        player,
+                        versionData.uiNames.Modal.AddControl,
+                        id,
+                        controlIndex,
+                        data,
+                        tempData
+                    );
+                })
+                return;
                 let modal = new ModalForm();
                 modal.textField(
                     "Action",
@@ -656,6 +682,19 @@ uiManager.addUI(
                 });
             }
             form.button(`Set Base Command`, null, (player) => {
+                let newActions = data.action ? Array.isArray(data.action) ? data.action : [data.action] : [];
+                uiManager.open(player, versionData.uiNames.CustomCommandsV2.editActions, newActions, (res)=>{
+                    data.action = res;
+                    return uiManager.open(
+                        player,
+                        versionData.uiNames.Modal.AddControl,
+                        id,
+                        controlIndex,
+                        data,
+                        tempData
+                    );
+                })
+                return;
                 let modal = new ModalForm();
                 modal.textField(
                     "Base Command",
@@ -1106,6 +1145,19 @@ uiManager.addUI(
                 });
             });
             form.button(`Set Action`, null, (player) => {
+                let newActions = data.action ? Array.isArray(data.action) ? data.action : [data.action] : [];
+                uiManager.open(player, versionData.uiNames.CustomCommandsV2.editActions, newActions, (res)=>{
+                    data.action = res;
+                    return uiManager.open(
+                        player,
+                        versionData.uiNames.Modal.AddControl,
+                        id,
+                        controlIndex,
+                        data,
+                        tempData
+                    );
+                })
+                return;
                 let modal = new ModalForm();
                 modal.textField(
                     "Action",

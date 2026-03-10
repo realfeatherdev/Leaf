@@ -35,22 +35,19 @@
 //     }
 // }
 
+import configAPI from "../../api/config/configAPI";
 export let themes = [
-    ["", "Default", "textures/example/header"],
+    ["", "Sunrise", "textures/example/header"], // Default is now Sunrise!
     ["§o§c§e§a§n", "Ocean", "textures/example/headerocean"],
     ["§b§t§0§8", "Batch 08", "textures/example/headerbatch08"],
     ["§u§w§u§1", "UwU", "textures/example/headeruwu1"],
-    [
-        "§b§l§o§s§1",
-        "Blossom Essentials",
-        "textures/example/headerblossomessentials",
-    ],
+    ["§b§l§o§s§1", "Blossom Essentials", "textures/example/headerblossomessentials"],
     ["§g§r§1", "Grass", "textures/example/headergrass"],
     ["§p§o§1", "Pink Orchid", "textures/example/headerpinkorchid"],
     ["§c§s§1", "Cotton Sky", "textures/example/headercottonsky"],
     ["§f§p§1", "Frosted Petals", "textures/example/headerfrostedpetals"],
     ["§v§b§1", "Verdant Bloom", "textures/example/headerverdantbloom"],
-    ["§d§s§1", "Reasonable", "textures/example/dogshit"], // NOT DOGSHIT ANYMORE. JUST REPLACED DOGSHIT THEME CUZ ITS ASS!
+    ["§d§s§1", "Reasonable", "textures/example/dogshit", "disbready"], // NOT DOGSHIT ANYMORE. JUST REPLACED DOGSHIT THEME CUZ ITS ASS!
     ["§b§l§1", "Blue 1", "textures/example/headerblue1"],
     ["§c§d§1", "Candy", "textures/example/headercandy"],
     ["§p§r§1", "Purple 1", "textures/example/headerpurple1"],
@@ -62,7 +59,7 @@ export let themes = [
     ["§b§g§1", "Blue Green", "textures/example/headerbluegreen"],
     ["§p§b§1", "Pink Blue", "textures/example/headerpinkblue"],
     ["§p§r§2", "Purple 2", "textures/example/headerpurple2"],
-    ["§a§l§1", "Alec's Theme :3", "textures/example/headeralec"],
+    ["§a§l§1", "Alec's Theme :3", "textures/example/headeralec", "alec.kwke"],
     ["§l§l§o§1", "Lemon Lime", "textures/example/headerlemonlime"],
     ["§u§w§u§2", "UwU #2", "textures/example/headeruwu2"],
     ["§l§f§3§0", "Leaf Essentials V3.0", "textures/example/leafess3"],
@@ -95,6 +92,77 @@ export let themes = [
     ["§b§s§0§1", "Basic", "textures/example/button"],
     ["§g§a§1", "Pride", "textures/example/headerpride"],
     ["§g§a§2", "Pride - Trans", "textures/example/headerpride2"],
-];
+    ["§a§l§0§2",":V","textures/example/alec/1", "alec.kwke"],
+    ["§a§l§0§3",":B","textures/example/alec/2", "alec.kwke"],
+    ["§a§l§0§4",":3","textures/example/alec/3", "alec.kwke"],
+    ["§a§l§0§5","OwO","textures/example/alec/4", "alec.kwke"],
+    ["§a§l§0§6","^-^","textures/example/alec/5", "alec.kwke"],
+    ["§a§l§0§7",":/","textures/example/alec/6", "alec.kwke"],
+    ["§a§l§0§8","UwO","textures/example/alec/7", "alec.kwke"],
+    ["§a§l§0§9","OwU","textures/example/alec/8", "alec.kwke"],
+    ["§s§k§0§1","Spooky blue","textures/example/spookyblue"],
+    ["§s§k§0§2","Spooky goop","textures/example/spookygoop"],
+    ["§s§k§0§3","Spooky SQUARED","textures/example/spookysquared"],
+    ["§s§k§0§4","Spooky Spooky","textures/example/spookyspooky"],
+    ["§v§i§s§0§1","WindOwOs Vista","textures/example/headervista"],
+    ["a", "a", "a"],
+    ["§r§e§0§3§1","elbanosaeR","textures/example/elbanosaer", "disbready"], // 69!
+    ["§s§k§0§1","Skobeloff","textures/example/skobeloff_green", "sillyfoxdev"],
+    ["§o§u§r§0§1","Ourple","textures/example/ourple"],
+    ["§o§u§r§0§2","Ourple Ext.","textures/example/ourple", "", "textures/example/night/border", "textures/example/night/button", "textures/example/night/button", "textures/example/night/button_disabled", "textures/example/night/button_hover", "textures/example/night/paperdoll", "textures/example/night/button_outline"],
+    ["§l§e§g§0§1","Legacy","textures/example/header2"],
+    ["§p§1§k","Pink 1000","textures/example/headerpink1000"],
+    ["§p§2§k","Pink 2000","textures/example/headerpink2000"],
+    ["§p§3§k","Pink 3000","textures/example/headerpink3000"],
+    ["§k§1§k","Kelli","textures/example/headerkelli", "", "textures/example/night/border", "textures/example/night/button", "textures/example/night/button", "textures/example/night/button_disabled", "textures/example/night/button_hover", "textures/example/night/paperdoll", "textures/example/night/button_outline"],
+    ["§k§2§k","Charcoal","textures/example/headercharcoal"],
+    ["§k§3§k","Amethyst","textures/example/amethyst"],
+    ["§k§6§k","Amethyst Ext.","textures/example/amethyst", "", "textures/example/night/border", "textures/example/night/button", "textures/example/night/button", "textures/example/night/button_disabled", "textures/example/night/button_hover", "textures/example/night/paperdoll", "textures/example/night/button_outline"],
+    ["§k§4§k","Mint","textures/example/headermint"],
+    ["§k§5§k","Aquamarine","textures/example/aquamarine"],
+    ["§k§7§k","Azalea Legacy","textures/example/al/h", "", "textures/example/al/border", "textures/example/al/button", "textures/example/al/button", "textures/example/al/button_disabled", "textures/example/al/button_outline"],
+    [
+        "§k§8§k",
+        "Vanilla",
+        "textures/ui/button_borderless_light",
+        "",
+        "textures/ui/dbg4",
+        "textures/ui/button_borderless_light",
+        "textures/ui/button_borderless_light",
+        "textures/ui/disabledButton",
+        "textures/ui/button_borderless_lighthover",
+        "textures/example/paperdoll",
+        "textures/ui/button_borderless_darkpressed",
 
+    ],
+    ["§k§a§k","Bloodlust","textures/example/bl/bloodlust", "banriot", "textures/example/bl/border", "textures/example/bl/button", "textures/example/bl/button", "textures/example/bl/button_disabled", "textures/example/bl/button_hover", "textures/example/bl/paperdoll", "textures/example/bl/button_outline"],
+    ["§k§b§k","Bloodbath","textures/example/bl/bloodlust", "banriot"], // no one makes em like trashy, down with banriot (JOKE)
+    ["§k§c§k","Rainbow","textures/example/2/gay"],
+    ["§k§d§k","Pride - Bi","textures/example/2/bi"],
+    ["§k§e§k","Pride - Pan","textures/example/2/pan"],
+    ["§k§f§k","Pissgirl","textures/example/2/pissgirl"],
+    ["§k§g§k","Pissboy","textures/example/2/pissboy"],
+    ["§k§h§k","Cherry Milkshake","textures/example/2/cherry"],
+    ["§k§i§k","Blossoming","textures/example/2/blossom"],
+    ["§k§l§k","Not so reasonable.","textures/example/2/reasonable"],
+    ["§k§m§k","Sunrise again","textures/example/2/sunrise"],
+    ["§k§j§k","Simple Essentials","textures/example/2/simple"],
+    ["§k§n§k","Cherry Syrup","textures/example/2/cherry", "", "textures/example/bordercn", "textures/example/buttoncn", "textures/example/button", "textures/example/button_disabled", "textures/example/hovercn", "textures/example/paperdollcn", "textures/example/outlinecn"],
+    ["§k§o§k","No","textures/example/headerno", ""],
+    ["§a§a§k","Blue Raspberry Syrup","textures/example/bluerasp", "", "textures/example/borderbr", "textures/example/buttonbr", "textures/example/button", "textures/example/button_disabled", "textures/example/hoverbr", "textures/example/paperdollbr", "textures/example/outlinebr"],
+
+
+];
+// TAG, NAME, TEXTURE, AUTHOR, BORDER, HEADER BUTTON, DEFAULT BUTTON, DISABLED BUTTON, HOVER BUTTON, PAPERDOLL, OUTLINE
+configAPI.registerProperty("LeafTheme", configAPI.Types.Number, 38)
+Object.defineProperty(themes, 68, {
+    get() {
+        let t = configAPI.getProperty("LeafTheme");
+        if(t == 68) t = (66 + 1); // no
+        return [t == 0 ? "§d§w§d§0§1" : themes[t][0], "Leaf Default", themes[t][2], "leaf", ...(themes[t].slice(4))]
+    }
+})
 export let leafThemeCurr = 25;
+// §s§k§0§4
+
+globalThis.themes = themes;

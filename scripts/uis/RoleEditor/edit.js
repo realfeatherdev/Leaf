@@ -9,7 +9,7 @@ import { NUT_UI_TAG } from "../preset_browser/nutUIConsts";
 uiManager.addUI(config.uiNames.RoleEditor.Edit, "edit roles OwO", (player, role) => {
     // what am i even supposed to add
     let form = new ActionForm();
-    form.title(`${NUT_UI_TAG}§rEdit role: ${role}`)
+    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rEdit role: ${role}`)
     let role2 = prismarineDb.permissions.getRole(role).data;
     if((!role2.default && !role2.defaultAdmin)) {
         form.button(

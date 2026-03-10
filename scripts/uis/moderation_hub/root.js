@@ -10,6 +10,7 @@ import {
 import { themes } from "../uiBuilder/cherryThemes";
 
 uiManager.addUI(versionData.uiNames.ModerationHub.Root, "", (player) => {
+    return uiManager.open(player, versionData.uiNames.ConfigMain, 3)
     let form = new ActionForm();
     form.title(
         `${NUT_UI_TAG}${NUT_UI_THEMED}${themes[8][0]}§r§f§lModeration Hub`

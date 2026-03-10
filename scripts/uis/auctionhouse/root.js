@@ -13,7 +13,7 @@ uiManager.addUI(
         uiManager.open(player, versionData.uiNames.AuctionHouse.ViewAuctions);
         return;
         let form = new ActionForm();
-        form.title(`${NUT_UI_TAG}§rAuction House`);
+        form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rAuction House`);
         form.button(`View Auctions`, null, (player) => {
             uiManager.open(
                 player,

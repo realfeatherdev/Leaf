@@ -73,7 +73,7 @@ import { themes } from "../uiBuilder/cherryThemes";
 uiManager.addUI(versionData.uiNames.Modal.EditControls, "", (player, id) => {
     let ui = uiBuilder.getByID(id);
     let form = new ActionForm();
-    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[25][0]}§rEdit Controls`)
+    form.title(`${NUT_UI_TAG}${NUT_UI_THEMED}${themes[68][0]}§rEdit Controls`)
     form.button(
         `§aAdd control\n§7Adds a control`,
         `textures/azalea_icons/other/add`,

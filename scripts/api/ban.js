@@ -28,3 +28,9 @@ class BanSystem {
         }
     }
 }
+
+// (birds chirping)
+
+// where's the code
+
+// i have no FUCKING idea furititty where are u
