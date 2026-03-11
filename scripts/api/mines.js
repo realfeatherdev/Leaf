@@ -13,17 +13,23 @@ class Mines {
     startHandler() {
         system.runInterval(()=>{
             for(const mine of uiBuilder.db.findDocuments({type: this.CUSTOMIZER_TYPE})) {
-                if(!mine.data.nextRefill) {
-                    mine.data.nextRefill = Date.now() + mine.data.refillTimeMS;
-                    let mine2 = uiBuilder.db.data.find(_=>_.id == mine.id);
-                    mine2.data = mine.data;
-                    uiBuilder.db.save();
-                }
-                if(Date.now() >= mine.data.nextRefill) {
-                    mine.data.nextRefill = Date.now() + mine.data.refillTimeMS;
-                    uiBuilder.db.overwriteDataByID(mine.id, mine.data);
-                    this.refill(mine);
-                }
+                try {
+                    if(!mine.data.nextRefill) {
+                        mine.data.nextRefill = Date.now() + mine.data.refillTimeMS;
+                        let mine2 = uiBuilder.db.data.find(_=>_.id == mine.id);
+                        mine2.data = mine.data;
+                        uiBuilder.db.save();
+                    }
+                    if(Date.now() >= mine.data.nextRefill) {
+                        // mine.data.nextRefill = Date.now() + mine.data.refillTimeMS;
+                        // uiBuilder.db.overwriteDataByID(mine.id, mine.data);
+                        mine.data.nextRefill = Date.now() + mine.data.refillTimeMS;
+                        let mine2 = uiBuilder.db.data.find(_=>_.id == mine.id);
+                        mine2.data = mine.data;
+                        uiBuilder.db.save();
+                        this.refill(mine);
+                    }
+                } catch {}
             }
         },20);
     }
@@ -58,7 +64,7 @@ class Mines {
                         let random = weightedRandomIndex(normalized);
                         let block = mine.data.blockTypeIDs[random];
                         let existingBlock = dim.getBlock({x, y, z});
-                        if(existingBlock.typeId != "minecraft:air") dim.setBlockType({x, y, z}, block);
+                        if(existingBlock.typeId == "minecraft:air") dim.setBlockType({x, y, z}, block);
                         yield; // yield balls
                     }
                 }
