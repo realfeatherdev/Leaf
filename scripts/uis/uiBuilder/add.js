@@ -219,7 +219,7 @@ uiManager.addUI(versionData.uiNames.MinesAdd, "add a mine", (player, id = -1)=>{
             callback() {}
         }
     }), mine ? mine.data.zoneID ? Math.max(zonesList.findIndex(_=>_.id == mine.data.zoneID), 0) : 0 : 0)
-    modal.textField("Block Types", "e.x. minecraft:stone,minecraft:dirt", mine ? mine.data.blockTypeIDs.join(',') : "")
+    modal.textField("Block Types", "e.x. minecraft:stone,minecraft:dirt", mine ? mine.data.blockTypeIDs.map(_=>_.startsWith('minecraft:') ? _.replace('minecraft:', '') : _).join(',') : "")
     modal.textField("Chances", "e.x. 90,10", mine ? mine.data.chances.map(_=>_.toString()).join(',') : "")
     modal.show(player, false, (player, response)=>{
         if(response.canceled) return;

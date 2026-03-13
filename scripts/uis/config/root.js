@@ -394,6 +394,13 @@ let options = [
                     }, configAPI.getProperty("LeafTheme"), false);
                 }
             },
+            {
+                text: `§aLeaf §2Credits\n§7See who helped with Leaf`,
+                icon: `textures/minidevs/Otf5shotzz`,
+                callback(player) {
+                    uiManager.open(player, versionData.uiNames.ConfigCredits)
+                }
+            }
         ]
     },
     {

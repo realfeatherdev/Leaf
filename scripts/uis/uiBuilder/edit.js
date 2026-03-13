@@ -25,6 +25,7 @@ import scripting from "../../api/scripting";
 import normalForm from "../../api/openers/normalForm";
 import commandManager from "../../api/commands/commandManager";
 import { minesAPI } from "../../api/mines";
+import warpAPI from "../../api/warpAPI";
 uiManager.addUI(
     config.uiNames.UIBuilderEdit,
     "UI Builder Edit",
@@ -112,6 +113,28 @@ uiManager.addUI(
                 actionForm.button(`Refill`, null, (player)=>{
                     minesAPI.refill(doc)
                     uiManager.open(player, versionData.uiNames.UIBuilderEdit, doc.id)
+                })
+                actionForm.button(`TP Out`, null, (player)=>{
+                    let modal = new ModalForm();
+                    let warps = uiBuilder.db.findDocuments({type: 12});
+                    modal.label("This dropdown requires warps. Set a warp using !warp set")
+                    modal.dropdown("Warp", ["None", ...warps.map(_=>{
+                        return {
+                            option: _.data.name,
+                        }
+                    })], Math.max(warps.findIndex(_=>doc.data.tpOutWarp && doc.data.tpOutWarp != "none" ? _.data.name == doc.data.tpOutWarp : false), 0))
+                    modal.show(player, false, (player, response)=>{
+                        try {
+                            if(response.canceled) return uiManager.open(player, versionData.uiNames.UIBuilderEdit, doc.id)
+                            let warp = response.formValues[1] == 0 ? "none" : warps[response.formValues[1] - 1].data.name;
+                            doc.data.tpOutWarp = warp;
+                            uiBuilder.db.overwriteDataByID(doc.id, doc.data);
+                            return uiManager.open(player, versionData.uiNames.UIBuilderEdit, doc.id);
+
+                        } catch(e) {
+                            player.error(e)
+                        }
+                    })
                 })
             }
             if (doc.data.type == 10) {

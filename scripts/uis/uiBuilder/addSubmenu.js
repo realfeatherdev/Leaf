@@ -256,10 +256,11 @@ uiManager.registerBuilder(config.uiNames.UIBuilderAddSubmenu, () => {
         )
         .addButton(
             new Button()
-                .setText(`${NUT_UI_DISBALE_BTN}§r§qIsland\n§7Delayed to v3.2`)
+                .setText(`${NUT_UI_DISBALE_BTN}§r§qIsland\n§7Delayed!`)
                 .setIcon(`textures/azalea_icons/other/terrain`)
                 .setCallback((player)=>{
                     return;
+                    // return;
                     let modalForm = new ModalForm();
                     modalForm.title("Create an Island")
                     modalForm.label("§bUnique ID §fis the unique id of the island you use to integrate this into custom UIs. §cThis island wont work until you fully configure it. §aCheck §ehttps://leaf.trashdev.org §afor guideds")

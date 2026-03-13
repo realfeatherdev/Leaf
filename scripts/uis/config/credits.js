@@ -14,10 +14,10 @@ let creditsList = [
         NUT_UI_THEME: 15,
         role: `Main Developer and Founder`,
         // message: `leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf leaf, azalea?!\n\nchronic strawberry eater\n(she/her btw)`,
-        message: `Ye ol' §epeaf lessentials§f! Do §cnot §feat toenail clippings, §vI know from §bexperience§r§f...\n\nchronic strawberry eater\n(she/her btw)`,
+        message: `§fDo §cnot §feat toenail clippings, §vI know from §bexperience§r§f...\n\nchronic strawberry eater\n(she/her btw)`,
         socials: {
-            bsky: "trashdev.org",
-            discord: "trashydafox",
+            bsky: "ashyis.gay",
+            discord: "ashyleafie",
         },
         icon: `textures/minidevs/gay`,
     },
@@ -49,6 +49,12 @@ let creditsList = [
             discord: "fruitkitty",
         },
         icon: `textures/minidevs/TrashyKitty`,
+    },
+    {
+        name: `§6Fluxic`,
+        role: `leaf_icons namer`,
+        message: `.`,
+        icon: `textures/minidevs/fluxic`
     },
     {
         name: `§nAlex`,

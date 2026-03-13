@@ -1,8 +1,9 @@
 import { system, world } from "@minecraft/server";
 import { normalizePercentages, weightedRandomIndex } from "./commonFunctions";
 import uiBuilder from "./uiBuilder";
-import zones from "./zones";
+import zones, { isPointInCube } from "./zones";
 import configAPI from "./config/configAPI";
+import warpAPI from "./warpAPI";
 configAPI.registerProperty("MineZonesMaxVolume", configAPI.Types.Number, 2 ** 16)
 
 class Mines {
@@ -37,6 +38,14 @@ class Mines {
         let zone = uiBuilder.db.getByID(mine.data.zoneID);
         if(!zone) return; // no zone
         let zoneVolume = zones.zoneDataToVolume(zone);
+        for(const player of world.getPlayers()) {
+            if(isPointInCube(player.location.x, player.location.y, player.location.z, zone.data.x1, zone.data.y1, zone.data.z1, zone.data.x2, zone.data.y2, zone.data.z2)) {
+                if(mine.data.tpOutWarp && mine.data.tpOutWarp != "none" && warpAPI.getWarp(mine.data.tpOutWarp)) {
+                    warpAPI.tpToWarp(player, mine.data.tpOutWarp, true);
+                }
+                player.info("Mine refilled!")
+            }
+        }
         let normalized = normalizePercentages(mine.data.chances)
         let dim = world.getDimension('overworld');
         try {
