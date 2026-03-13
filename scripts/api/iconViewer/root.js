@@ -74,7 +74,7 @@ uiManager.addUI(
                 keys = keys.filter(_=>{
                     let meta = icons.iconData.get(_);
                     let name = meta && meta.name ? meta.name : _;
-                    return name.toLowerCase().replaceAll(' ', '').includes(searchTerm)
+                    return name.toLowerCase().replaceAll(' ', '').replaceAll('_', '').includes(searchTerm.toLowerCase().replaceAll(' ', '').replaceAll('_', ''))
                 })
             }
             if (favoritedOnly == true)
@@ -343,7 +343,12 @@ uiManager.addUI(
                         config.uiNames.IconViewer,
                         prevPage,
                         callbackFn,
-                        favoritedOnly
+                        favoritedOnly,
+                        iconIDSearch,
+                        iconIDSearchError,
+                        defaultIconID,
+                        searchTerm,
+                        allowedIconPacks
                     );
                 }
             );

@@ -341,21 +341,6 @@ uiBuilder.definitions.push({
                     "yes",
                     doc.data.structure ? doc.data.structure : ""
                 );
-                modalForm.textField(
-                    "Path Edge West Structure ID",
-                    "yes",
-                    doc.data.structureWest ? doc.data.structureWest : ""
-                );
-                modalForm.textField(
-                    "Path Edge Center Structure ID",
-                    "yes",
-                    doc.data.structureCenter ? doc.data.structureCenter : ""
-                );
-                modalForm.textField(
-                    "Path Edge walk Structure ID",
-                    "yes",
-                    doc.data.structureWalk ? doc.data.structureWalk : ""
-                );
 
                 modalForm.show(player, false, (player, response) => {
                     if (response.canceled)
@@ -590,6 +575,7 @@ uiBuilder.definitions.push({
                             player.sendMessage(
                                 "§b§lINFO §r§7>> §bGoing out of test mode"
                             );
+                            function* doShit() {
                             for(const block of blocks) {
                                 let block2 = dim.getBlock(block.loc)
                                 block2.setPermutation(block.blockPermutation)
@@ -611,7 +597,11 @@ uiBuilder.definitions.push({
                                         }
                                     } catch {}
                                 }
+                                yield;
                             }
+
+                            }
+                            system.runJob(doShit())
                             uiManager.open(
                                 player,
                                 versionData.uiNames.UIBuilderEdit,
